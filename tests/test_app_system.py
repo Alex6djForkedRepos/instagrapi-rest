@@ -217,17 +217,25 @@ async def test_openapi_uses_sessionid_authorize_button_for_protected_routes():
 async def test_openapi_uses_rest_http_methods():
     expected_methods = {
         "/account": {"get", "patch"},
+        "/account/bio-links": {"delete"},
+        "/account/biography": {"patch"},
         "/account/collection": {"get"},
         "/account/collection/media": {"get"},
         "/account/collections": {"get"},
+        "/account/email/confirm": {"post"},
+        "/account/external-url": {"delete", "patch"},
         "/account/feed/timeline": {"get"},
         "/account/feed/new": {"get"},
         "/account/follow/request": {"delete"},
         "/account/follow/request/approve": {"post"},
         "/account/follow/requests/approve": {"post"},
         "/account/follow/requests": {"delete", "get"},
+        "/account/password": {"patch"},
+        "/account/password/reset": {"post"},
+        "/account/phone/confirm": {"post"},
         "/account/picture": {"patch"},
         "/account/privacy": {"patch"},
+        "/account/security": {"get"},
         "/album/download": {"get"},
         "/album/download/by/urls": {"get"},
         "/album/upload": {"post"},
@@ -597,6 +605,15 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/account/follow/request"]["delete"]["summary"] == "Decline a pending follow request"
     assert paths["/account/follow/requests/approve"]["post"]["summary"] == "Approve pending follow requests"
     assert paths["/account/follow/requests"]["delete"]["summary"] == "Decline pending follow requests"
+    assert paths["/account/security"]["get"]["summary"] == "Get authenticated account security info"
+    assert paths["/account/biography"]["patch"]["summary"] == "Update authenticated account biography"
+    assert paths["/account/external-url"]["patch"]["summary"] == "Update authenticated account external URL"
+    assert paths["/account/external-url"]["delete"]["summary"] == "Clear authenticated account external URL"
+    assert paths["/account/bio-links"]["delete"]["summary"] == "Remove authenticated account bio links"
+    assert paths["/account/password"]["patch"]["summary"] == "Change authenticated account password"
+    assert paths["/account/password/reset"]["post"]["summary"] == "Send account password reset"
+    assert paths["/account/email/confirm"]["post"]["summary"] == "Send account email confirmation"
+    assert paths["/account/phone/confirm"]["post"]["summary"] == "Send account phone confirmation"
     assert paths["/direct/thread"]["patch"]["summary"] == "Update direct thread state"
     assert paths["/direct/thread/user"]["post"]["summary"] == "Add users to a direct thread"
     assert paths["/direct/thread/seen"]["patch"]["summary"] == "Mark a direct thread as seen"

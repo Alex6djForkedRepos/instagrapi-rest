@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **221**
-- Methods not exposed as REST routes: **279**
-- Candidate REST backlog: **78**
+- Methods reached by REST routes: **229**
+- Methods not exposed as REST routes: **271**
+- Candidate REST backlog: **70**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 221 | Already used by public REST routes. |
-| `candidate` | 78 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 229 | Already used by public REST routes. |
+| `candidate` | 70 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 99 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -26,7 +26,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 
 | Area | Exposed | Candidates | Duplicates | Internal | Total |
 |---|---:|---:|---:|---:|---:|
-| `account` | 6 | 8 | 0 | 0 | 14 |
+| `account` | 14 | 0 | 0 | 0 | 14 |
 | `aiograpi` | 1 | 0 | 0 | 0 | 1 |
 | `album` | 3 | 1 | 0 | 2 | 6 |
 | `auth` | 7 | 0 | 0 | 27 | 34 |
@@ -66,7 +66,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 
 | Area | Candidate methods |
 |---|---|
-| `account` | `account_security_info`, `account_set_biography`, `change_password`, `remove_bio_links`, `reset_password`, `send_confirm_email`, `send_confirm_phone_number`, `set_external_url` |
 | `album` | `album_upload_with_music` |
 | `clip` | `clip_info_for_creation`, `clip_pin`, `clip_share_to_fb_config`, `clip_trial_eligible`, `clip_unpin`, `clip_upload_as_reel_with_music` |
 | `explore` | `report_explore_media` |
@@ -89,9 +88,14 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 |---|---|
 | `GET /account` | `account_info` |
 | `PATCH /account` | `account_edit` |
+| `DELETE /account/bio-links` | `remove_bio_links` |
+| `PATCH /account/biography` | `account_set_biography` |
 | `GET /account/collection` | `collection_pk_by_name`, `collections` |
 | `GET /account/collection/media` | `collection_medias`, `collection_medias_by_name` |
 | `GET /account/collections` | `collections` |
+| `POST /account/email/confirm` | `send_confirm_email` |
+| `DELETE /account/external-url` | `set_external_url` |
+| `PATCH /account/external-url` | `set_external_url` |
 | `GET /account/feed/new` | `new_feed_exist` |
 | `GET /account/feed/timeline` | `get_timeline_feed` |
 | `DELETE /account/follow/request` | `user_follow_request_decline` |
@@ -100,8 +104,12 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /account/follow/requests` | `user_follow_requests_chunk` |
 | `POST /account/follow/requests/approve` | `user_follow_requests_approve` |
 | `GET /account/liked/media` | `liked_medias` |
+| `PATCH /account/password` | `change_password` |
+| `POST /account/password/reset` | `reset_password` |
+| `POST /account/phone/confirm` | `send_confirm_phone_number` |
 | `PATCH /account/picture` | `account_change_picture` |
 | `PATCH /account/privacy` | `account_set_private`, `account_set_public` |
+| `GET /account/security` | `account_security_info` |
 | `GET /album/download` | `album_download` |
 | `GET /album/download/by/urls` | `album_download_by_urls` |
 | `POST /album/upload` | `album_upload` |
@@ -307,8 +315,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `account_change_picture(self, path: pathlib._local.Path) -> aiograpi.types.UserShort` | `account` | `PATCH /account/picture` | `exposed` | used by at least one public REST route |
 | `account_edit(self, **data: Dict) -> aiograpi.types.Account` | `account` | `PATCH /account` | `exposed` | used by at least one public REST route |
 | `account_info(self) -> aiograpi.types.Account` | `account` | `GET /account` | `exposed` | used by at least one public REST route |
-| `account_security_info(self) -> dict` | `account` | - | `candidate` | potential user-facing REST endpoint |
-| `account_set_biography(self, biography: str) -> bool` | `account` | - | `candidate` | potential user-facing REST endpoint |
+| `account_security_info(self) -> dict` | `account` | `GET /account/security` | `exposed` | used by at least one public REST route |
+| `account_set_biography(self, biography: str) -> bool` | `account` | `PATCH /account/biography` | `exposed` | used by at least one public REST route |
 | `account_set_private(self) -> bool` | `account` | `PATCH /account/privacy` | `exposed` | used by at least one public REST route |
 | `account_set_public(self) -> bool` | `account` | `PATCH /account/privacy` | `exposed` | used by at least one public REST route |
 | `accounts_create(self, username: str, password: str, email: str = '', email_code: str = '', phone_number: str = '', phone_code: str = '', full_name: str = '', year: int = None, month: int = None, day: int = None, **kwargs) -> dict` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
@@ -340,7 +348,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `challenge_resolve_simple(self, challenge_url: str) -> bool` | `challenge` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `challenge_submit_phone_number(self, data, phone_number)` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `challenge_verify_sms_captcha(self, data, security_code)` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `change_password(self, old_password: str, new_password: str) -> bool` | `account` | - | `candidate` | potential user-facing REST endpoint |
+| `change_password(self, old_password: str, new_password: str) -> bool` | `account` | `PATCH /account/password` | `exposed` | used by at least one public REST route |
 | `change_password_handler(self, username: str)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `check_age_eligibility(self, year, month, day)` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `check_confirmation_code(self, email, code) -> dict` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
@@ -650,10 +658,10 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `reels(self, amount: int = 10, last_media_pk: int = 0) -> List[aiograpi.types.Media]` | `timeline` | `GET /reels` | `exposed` | used by at least one public REST route |
 | `reels_timeline_media(self, collection_pk: str, amount: int = 10, last_media_pk: int = 0) -> List[aiograpi.types.Media]` | `timeline` | `GET /reels/timeline` | `exposed` | used by at least one public REST route |
 | `relogin(self) -> bool` | `auth` | `PATCH /auth/relogin` | `exposed` | used by at least one public REST route |
-| `remove_bio_links(self, link_ids: list) -> dict` | `account` | - | `candidate` | potential user-facing REST endpoint |
+| `remove_bio_links(self, link_ids: list) -> dict` | `account` | `DELETE /account/bio-links` | `exposed` | used by at least one public REST route |
 | `report_explore_media(self, media_pk: int)` | `explore` | - | `candidate` | potential user-facing REST endpoint |
 | `request_log(self, response)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `reset_password(self, username: str) -> Dict` | `account` | - | `candidate` | potential user-facing REST endpoint |
+| `reset_password(self, username: str) -> Dict` | `account` | `POST /account/password/reset` | `exposed` | used by at least one public REST route |
 | `search_followers(self, user_id: str, query: str) -> List[aiograpi.types.UserShort]` | `user` | - | `duplicate` | variant of already exposed `search_followers` route family |
 | `search_followers_v1(self, user_id: str, query: str) -> List[aiograpi.types.UserShort]` | `user` | `GET /search/followers` | `exposed` | used by at least one public REST route |
 | `search_following(self, user_id: str, query: str) -> List[aiograpi.types.UserShort]` | `user` | - | `duplicate` | variant of already exposed `search_following` route family |
@@ -662,8 +670,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `search_music(self, query: str) -> List[aiograpi.types.Track]` | `fbsearch` | `GET /search/music` | `exposed` | used by at least one public REST route |
 | `search_users(self, query: str) -> List[aiograpi.types.UserShort]` | `fbsearch` | `GET /search/users` | `exposed` | used by at least one public REST route |
 | `search_users_v1(self, query: str, count: int) -> List[aiograpi.types.UserShort]` | `user` | - | `duplicate` | variant of already exposed `search_users` route family |
-| `send_confirm_email(self, email: str) -> dict` | `account` | - | `candidate` | potential user-facing REST endpoint |
-| `send_confirm_phone_number(self, phone_number: str) -> dict` | `account` | - | `candidate` | potential user-facing REST endpoint |
+| `send_confirm_email(self, email: str) -> dict` | `account` | `POST /account/email/confirm` | `exposed` | used by at least one public REST route |
+| `send_confirm_phone_number(self, phone_number: str) -> dict` | `account` | `POST /account/phone/confirm` | `exposed` | used by at least one public REST route |
 | `send_signup_sms_code(self, phone_number: str)` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `send_verify_email(self, email) -> dict` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `set_app(self, app: Union[str, Dict] = None, seed: str = None) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
@@ -671,7 +679,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `set_country(self, country: str = 'US')` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `set_country_code(self, country_code: int = 1)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `set_device(self, device: Dict = None, reset: bool = False) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `set_external_url(self, external_url) -> dict` | `account` | - | `candidate` | potential user-facing REST endpoint |
+| `set_external_url(self, external_url) -> dict` | `account` | `DELETE /account/external-url`<br>`PATCH /account/external-url` | `exposed` | used by at least one public REST route |
 | `set_ig_u_rur(self, value)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `set_ig_www_claim(self, value)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `set_locale(self, locale: str = 'en_US')` | `private` | `POST /auth/login`<br>`POST /auth/login/by/sessionid`<br>`PATCH /auth/settings` | `exposed` | used by at least one public REST route |

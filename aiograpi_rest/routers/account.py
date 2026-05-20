@@ -76,6 +76,17 @@ async def account_feed_new(
     return await cl.new_feed_exist()
 
 
+@router.get("/security", response_model=Dict[str, Any])
+async def account_security(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get authenticated account security info
+    """
+    cl = await clients.get(sessionid)
+    return await cl.account_security_info()
+
+
 @router.get("/follow/requests", response_model=UserShortPage)
 async def account_follow_requests(
     sessionid: str = Depends(get_sessionid),
@@ -220,6 +231,105 @@ async def account_profile(
         if value is not None
     }
     return await cl.account_edit(**data)
+
+
+@router.patch("/biography", response_model=bool)
+async def account_biography(
+    sessionid: str = Depends(get_sessionid),
+    biography: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Update authenticated account biography
+    """
+    cl = await clients.get(sessionid)
+    return await cl.account_set_biography(biography)
+
+
+@router.patch("/external-url", response_model=Dict[str, Any])
+async def account_external_url(
+    sessionid: str = Depends(get_sessionid),
+    external_url: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Update authenticated account external URL
+    """
+    cl = await clients.get(sessionid)
+    return await cl.set_external_url(external_url)
+
+
+@router.delete("/external-url", response_model=Dict[str, Any])
+async def account_external_url_delete(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Clear authenticated account external URL
+    """
+    cl = await clients.get(sessionid)
+    return await cl.set_external_url("")
+
+
+@router.delete("/bio-links", response_model=Dict[str, Any])
+async def account_bio_links_delete(
+    sessionid: str = Depends(get_sessionid),
+    link_ids: List[str] = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Remove authenticated account bio links
+    """
+    cl = await clients.get(sessionid)
+    return await cl.remove_bio_links(link_ids)
+
+
+@router.patch("/password", response_model=bool)
+async def account_password(
+    sessionid: str = Depends(get_sessionid),
+    old_password: str = Form(...),
+    new_password: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Change authenticated account password
+    """
+    cl = await clients.get(sessionid)
+    result = await cl.change_password(old_password, new_password)
+    if isinstance(result, dict):
+        return result.get("status") == "ok"
+    return bool(result)
+
+
+@router.post("/password/reset", response_model=Dict[str, Any])
+async def account_password_reset(
+    sessionid: str = Depends(get_sessionid),
+    username: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Send account password reset
+    """
+    cl = await clients.get(sessionid)
+    return await cl.reset_password(username)
+
+
+@router.post("/email/confirm", response_model=Dict[str, Any])
+async def account_email_confirm(
+    sessionid: str = Depends(get_sessionid),
+    email: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Send account email confirmation
+    """
+    cl = await clients.get(sessionid)
+    return await cl.send_confirm_email(email)
+
+
+@router.post("/phone/confirm", response_model=Dict[str, Any])
+async def account_phone_confirm(
+    sessionid: str = Depends(get_sessionid),
+    phone_number: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Send account phone confirmation
+    """
+    cl = await clients.get(sessionid)
+    return await cl.send_confirm_phone_number(phone_number)
 
 
 @router.patch("/picture", response_model=UserShort)

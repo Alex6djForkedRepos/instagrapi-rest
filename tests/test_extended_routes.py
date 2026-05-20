@@ -196,6 +196,40 @@ class FakeExpandedClient:
         self.calls.append(("account_set_public",))
         return True
 
+    async def account_security_info(self):
+        self.calls.append(("account_security_info",))
+        return {"is_two_factor_enabled": True, "trusted_devices": []}
+
+    async def account_set_biography(self, biography):
+        self.calls.append(("account_set_biography", biography))
+        return True
+
+    async def set_external_url(self, external_url):
+        self.calls.append(("set_external_url", external_url))
+        return {"status": "ok", "url": external_url}
+
+    async def remove_bio_links(self, link_ids):
+        self.calls.append(("remove_bio_links", link_ids))
+        return {"status": "ok", "removed": link_ids}
+
+    async def change_password(self, old_password, new_password):
+        self.calls.append(("change_password", old_password, new_password))
+        if new_password == "bool":
+            return True
+        return {"status": "ok"}
+
+    async def reset_password(self, username):
+        self.calls.append(("reset_password", username))
+        return {"status": "ok", "username": username}
+
+    async def send_confirm_email(self, email):
+        self.calls.append(("send_confirm_email", email))
+        return {"status": "ok", "email": email}
+
+    async def send_confirm_phone_number(self, phone_number):
+        self.calls.append(("send_confirm_phone_number", phone_number))
+        return {"status": "ok", "phone_number": phone_number}
+
     async def media_comments_chunk(self, media_id, max_amount=20, min_id=None):
         self.calls.append(("media_comments_chunk", media_id, max_amount, min_id))
         return [_comment_payload()], "next-comments"
@@ -731,13 +765,61 @@ async def test_account_routes(storage):
         )
         private = await ac.patch("/account/privacy", data={"sessionid": "sid", "is_private": "true"})
         public = await ac.patch("/account/privacy", data={"sessionid": "sid", "is_private": "false"})
+        security = await ac.get("/account/security", params={"sessionid": "sid"})
+        biography = await ac.patch("/account/biography", data={"sessionid": "sid", "biography": "new bio"})
+        external_url = await ac.patch(
+            "/account/external-url",
+            data={"sessionid": "sid", "external_url": "https://example.com"},
+        )
+        delete_external_url = await ac.delete("/account/external-url", params={"sessionid": "sid"})
+        remove_links = await ac.delete(
+            "/account/bio-links",
+            params={"sessionid": "sid", "link_ids": ["1", "2"]},
+        )
+        password = await ac.patch(
+            "/account/password",
+            data={"sessionid": "sid", "old_password": "old", "new_password": "new"},
+        )
+        password_bool = await ac.patch(
+            "/account/password",
+            data={"sessionid": "sid", "old_password": "old", "new_password": "bool"},
+        )
+        reset_password = await ac.post("/account/password/reset", data={"sessionid": "sid", "username": "account"})
+        confirm_email = await ac.post(
+            "/account/email/confirm",
+            data={"sessionid": "sid", "email": "new@example.com"},
+        )
+        confirm_phone = await ac.post(
+            "/account/phone/confirm",
+            data={"sessionid": "sid", "phone_number": "+15550000000"},
+        )
 
     assert info.status_code == 200 and info.json()["username"] == "account"
     assert profile.status_code == 200 and profile.json()["full_name"] == "New Name"
     assert picture.status_code == 200 and picture.json()["pk"] == "1"
     assert private.status_code == 200 and public.status_code == 200
+    assert security.status_code == 200 and security.json()["is_two_factor_enabled"] is True
+    assert biography.status_code == 200 and biography.json() is True
+    assert external_url.status_code == 200 and external_url.json()["url"] == "https://example.com"
+    assert delete_external_url.status_code == 200 and delete_external_url.json()["url"] == ""
+    assert remove_links.status_code == 200 and remove_links.json()["removed"] == ["1", "2"]
+    assert password.status_code == 200 and password.json() is True
+    assert password_bool.status_code == 200 and password_bool.json() is True
+    assert reset_password.status_code == 200 and reset_password.json()["username"] == "account"
+    assert confirm_email.status_code == 200 and confirm_email.json()["email"] == "new@example.com"
+    assert confirm_phone.status_code == 200 and confirm_phone.json()["phone_number"] == "+15550000000"
     assert ("account_set_private",) in storage.client.calls
     assert ("account_set_public",) in storage.client.calls
+    assert ("account_security_info",) in storage.client.calls
+    assert ("account_set_biography", "new bio") in storage.client.calls
+    assert ("set_external_url", "https://example.com") in storage.client.calls
+    assert ("set_external_url", "") in storage.client.calls
+    assert ("remove_bio_links", ["1", "2"]) in storage.client.calls
+    assert ("change_password", "old", "new") in storage.client.calls
+    assert ("change_password", "old", "bool") in storage.client.calls
+    assert ("reset_password", "account") in storage.client.calls
+    assert ("send_confirm_email", "new@example.com") in storage.client.calls
+    assert ("send_confirm_phone_number", "+15550000000") in storage.client.calls
 
 
 @pytest.mark.asyncio

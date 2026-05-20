@@ -87,6 +87,23 @@ User relationship routes use `POST` to create or enable a relationship state and
 - `POST /user/notifications/videos` enables video notifications for a user.
 - `DELETE /user/notifications/videos` disables video notifications for a user.
 
+## Account Settings
+
+- `GET /account/security` returns security metadata for the authenticated
+  account.
+- `PATCH /account/biography` updates only the authenticated account biography.
+- `PATCH /account/external-url` replaces the authenticated account external
+  profile URL.
+- `DELETE /account/external-url` clears the authenticated account external URL
+  by asking Instagram to replace it with an empty URL. If Instagram rejects an
+  empty URL for the account, remove the concrete bio link via
+  `DELETE /account/bio-links`.
+- `DELETE /account/bio-links` removes one or more bio links by `link_ids`.
+- `PATCH /account/password` changes the authenticated account password.
+- `POST /account/password/reset` sends a password reset flow for a username.
+- `POST /account/email/confirm` sends an email confirmation code.
+- `POST /account/phone/confirm` sends a phone confirmation code.
+
 ## OpenAPI
 
 - Swagger UI: `/docs`
