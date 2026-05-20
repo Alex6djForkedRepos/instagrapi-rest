@@ -226,6 +226,7 @@ async def test_openapi_uses_rest_http_methods():
         "/account/external-url": {"delete", "patch"},
         "/account/feed/timeline": {"get"},
         "/account/feed/new": {"get"},
+        "/account/feed/user/stream-item": {"get"},
         "/account/follow/request": {"delete"},
         "/account/follow/request/approve": {"post"},
         "/account/follow/requests/approve": {"post"},
@@ -395,6 +396,7 @@ async def test_openapi_uses_rest_http_methods():
         "/user/reels": {"get"},
         "/user/recommendations": {"get"},
         "/user/stories": {"get"},
+        "/user/stream": {"get"},
         "/user/suggestions": {"get"},
         "/user/suggestions/details": {"get"},
         "/user/tagged/posts": {"get"},
@@ -605,6 +607,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/account/collection"]["get"]["summary"] == "Get a saved collection"
     assert paths["/account/collection/media"]["get"]["summary"] == "List saved collection media"
     assert paths["/account/feed/new"]["get"]["summary"] == "Check whether the account has new feed items"
+    assert paths["/account/feed/user/stream-item"]["get"]["summary"] == "Get user feed stream item"
     assert paths["/account/follow/requests"]["get"]["summary"] == "List paginated pending follow requests"
     assert paths["/account/follow/request/approve"]["post"]["summary"] == "Approve a pending follow request"
     assert paths["/account/follow/request"]["delete"]["summary"] == "Decline a pending follow request"
@@ -723,6 +726,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/user/reels"]["get"]["summary"] == "List paginated user Reels"
     assert paths["/user/recommendations"]["get"]["summary"] == "List recommended accounts for a user"
     assert paths["/user/stories"]["get"]["summary"] == "List user stories"
+    assert paths["/user/stream"]["get"]["summary"] == "Get user profile stream"
     assert paths["/user/suggestions"]["get"]["summary"] == "List suggested users for a user"
     assert paths["/user/suggestions/details"]["get"]["summary"] == "Get suggested user details"
     assert paths["/user/tagged/posts"]["get"]["summary"] == "List paginated tagged posts"

@@ -193,11 +193,16 @@ Instagram-shaped objects where `aiograpi` exposes variable discovery payloads:
   `{ "user": ..., "info": ... }`.
 - `GET /user/profile/web` returns Instagram's web-profile payload for a
   username.
+- `GET /user/stream` returns a profile stream by `user_id` or `username`.
+  `view=flat` returns the merged user payload; `view=raw` returns Instagram's
+  stream envelope.
 - `GET /user/friendships` returns relationship summaries for repeated
   `user_ids` query parameters.
 
 `GET /account/feed/new` belongs to the authenticated account context and returns
 whether Instagram says new timeline feed items are available.
+`GET /account/feed/user/stream-item` returns a feed stream item for the
+authenticated account.
 
 ## Reels
 

@@ -76,6 +76,19 @@ async def account_feed_new(
     return await cl.new_feed_exist()
 
 
+@router.get("/feed/user/stream-item", response_model=Dict[str, Any])
+async def account_feed_user_stream_item(
+    sessionid: str = Depends(get_sessionid),
+    item_id: str = Query(...),
+    is_pull_to_refresh: bool = Query(False),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get user feed stream item
+    """
+    cl = await clients.get(sessionid)
+    return await cl.feed_user_stream_item(item_id, is_pull_to_refresh)
+
+
 @router.get("/security", response_model=Dict[str, Any])
 async def account_security(
     sessionid: str = Depends(get_sessionid),

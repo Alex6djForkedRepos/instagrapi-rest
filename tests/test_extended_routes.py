@@ -191,6 +191,10 @@ class FakeExpandedClient:
         self.calls.append(("account_info",))
         return _account_payload()
 
+    async def feed_user_stream_item(self, item_id, is_pull_to_refresh=False):
+        self.calls.append(("feed_user_stream_item", item_id, is_pull_to_refresh))
+        return {"item_id": item_id, "is_pull_to_refresh": is_pull_to_refresh}
+
     async def account_edit(self, **data):
         self.calls.append(("account_edit", data))
         payload = _account_payload()
@@ -643,6 +647,22 @@ class FakeExpandedClient:
         self.calls.append(("user_web_profile_info_v1", username))
         return {"username": username, "profile_pic_url": "https://example.test/profile.jpg"}
 
+    async def user_stream_by_id_flat(self, user_id):
+        self.calls.append(("user_stream_by_id_flat", user_id))
+        return {"selector": "user_id", "view": "flat", "value": user_id}
+
+    async def user_stream_by_id_v1(self, user_id):
+        self.calls.append(("user_stream_by_id_v1", user_id))
+        return {"selector": "user_id", "view": "raw", "value": user_id}
+
+    async def user_stream_by_username_flat(self, username):
+        self.calls.append(("user_stream_by_username_flat", username))
+        return {"selector": "username", "view": "flat", "value": username}
+
+    async def user_stream_by_username_v1(self, username):
+        self.calls.append(("user_stream_by_username_v1", username))
+        return {"selector": "username", "view": "raw", "value": username}
+
     async def user_block(self, user_id, surface="profile"):
         self.calls.append(("user_block", user_id, surface))
         return True
@@ -837,6 +857,10 @@ async def test_account_routes(storage):
             "/account/phone/confirm",
             data={"sessionid": "sid", "phone_number": "+15550000000"},
         )
+        feed_user_stream_item = await ac.get(
+            "/account/feed/user/stream-item",
+            params={"sessionid": "sid", "item_id": "1", "is_pull_to_refresh": "true"},
+        )
 
     assert info.status_code == 200 and info.json()["username"] == "account"
     assert profile.status_code == 200 and profile.json()["full_name"] == "New Name"
@@ -852,6 +876,7 @@ async def test_account_routes(storage):
     assert reset_password.status_code == 200 and reset_password.json()["username"] == "account"
     assert confirm_email.status_code == 200 and confirm_email.json()["email"] == "new@example.com"
     assert confirm_phone.status_code == 200 and confirm_phone.json()["phone_number"] == "+15550000000"
+    assert feed_user_stream_item.status_code == 200 and feed_user_stream_item.json()["is_pull_to_refresh"] is True
     assert ("account_set_private",) in storage.client.calls
     assert ("account_set_public",) in storage.client.calls
     assert ("account_security_info",) in storage.client.calls
@@ -864,6 +889,7 @@ async def test_account_routes(storage):
     assert ("reset_password", "account") in storage.client.calls
     assert ("send_confirm_email", "new@example.com") in storage.client.calls
     assert ("send_confirm_phone_number", "+15550000000") in storage.client.calls
+    assert ("feed_user_stream_item", "1", True) in storage.client.calls
 
 
 @pytest.mark.asyncio
@@ -1192,6 +1218,20 @@ async def test_discovery_user_routes(storage):
         friendship = await ac.get("/user/friendship", params={"sessionid": "sid", "user_id": "1"})
         friendships = await ac.get("/user/friendships", params={"sessionid": "sid", "user_ids": ["1", "2"]})
         web_profile = await ac.get("/user/profile/web", params={"sessionid": "sid", "username": "@instagram"})
+        stream_id_flat = await ac.get("/user/stream", params={"sessionid": "sid", "user_id": "1"})
+        stream_id_raw = await ac.get("/user/stream", params={"sessionid": "sid", "user_id": "1", "view": "raw"})
+        stream_username_flat = await ac.get(
+            "/user/stream",
+            params={"sessionid": "sid", "username": "@instagram", "view": "flat"},
+        )
+        stream_username_raw = await ac.get(
+            "/user/stream",
+            params={"sessionid": "sid", "username": "@instagram", "view": "raw"},
+        )
+        stream_invalid_view = await ac.get(
+            "/user/stream",
+            params={"sessionid": "sid", "user_id": "1", "view": "summary"},
+        )
         block = await ac.post("/user/block", data={"sessionid": "sid", "user_id": "1"})
         unblock = await ac.delete("/user/block", params={"sessionid": "sid", "user_id": "1"})
         user_pinned = await ac.get("/user/pinned/posts", params={"sessionid": "sid", "user_id": "1"})
@@ -1216,6 +1256,10 @@ async def test_discovery_user_routes(storage):
         friendship,
         friendships,
         web_profile,
+        stream_id_flat,
+        stream_id_raw,
+        stream_username_flat,
+        stream_username_raw,
         block,
         unblock,
         user_pinned,
@@ -1225,6 +1269,7 @@ async def test_discovery_user_routes(storage):
         assert response.status_code == 200
     assert location_missing.status_code == 422
     assert location_partial.status_code == 422
+    assert stream_invalid_view.status_code == 422
     assert ("location_search_name", "Berlin") in storage.client.calls
     assert ("location_search", 1.0, 2.0) in storage.client.calls
     assert ("hashtag_related_hashtags", "python") in storage.client.calls
@@ -1232,6 +1277,10 @@ async def test_discovery_user_routes(storage):
     assert ("location_guides_v1", 1) in storage.client.calls
     assert ("user_friendships_v1", ["1", "2"]) in storage.client.calls
     assert ("user_web_profile_info_v1", "instagram") in storage.client.calls
+    assert ("user_stream_by_id_flat", "1") in storage.client.calls
+    assert ("user_stream_by_id_v1", "1") in storage.client.calls
+    assert ("user_stream_by_username_flat", "instagram") in storage.client.calls
+    assert ("user_stream_by_username_v1", "instagram") in storage.client.calls
     assert ("user_unblock", "1", "profile") in storage.client.calls
     assert ("user_pinned_medias", 1) in storage.client.calls
     assert ("user_guides_v1", 1) in storage.client.calls

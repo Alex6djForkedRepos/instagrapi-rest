@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from aiograpi.extractors import json_value
 from aiograpi.types import About, Guide, Highlight, Media, Relationship, RelationshipShort, User, UserShort
@@ -58,6 +58,21 @@ class CreatorInfoResponse(BaseModel):
     info: Dict[str, Any]
 
 
+def _clean_username(username: str) -> str:
+    return username.strip().lstrip("@")
+
+
+def _clean_user_id(user_id: str) -> str:
+    return user_id.strip()
+
+
+def _ensure_single_user_selector(user_id: Optional[str], username: Optional[str]) -> None:
+    if user_id and username:
+        raise HTTPException(status_code=422, detail="Provide either user_id or username, not both")
+    if not user_id and not username:
+        raise HTTPException(status_code=422, detail="Provide user_id or username")
+
+
 @router.get("/followers", response_model=UserShortPage)
 async def user_followers(sessionid: str = Depends(get_sessionid),
                          user_id: str = Query(...),
@@ -92,15 +107,14 @@ async def user(sessionid: str = Depends(get_sessionid),
                clients: ClientStorage = Depends(get_clients)) -> User:
     """Get user profile by user id or username
     """
-    if user_id and username:
-        raise HTTPException(status_code=422, detail="Provide either user_id or username, not both")
-    if not user_id and not username:
-        raise HTTPException(status_code=422, detail="Provide user_id or username")
+    _ensure_single_user_selector(user_id, username)
 
     cl = await clients.get(sessionid)
     if username:
-        return await cl.user_info_by_username(username.strip().lstrip("@"))
-    return await cl.user_info(user_id.strip())
+        return await cl.user_info_by_username(_clean_username(username))
+
+    assert user_id is not None
+    return await cl.user_info(_clean_user_id(user_id))
 
 
 @router.get("/about", response_model=About)
@@ -127,7 +141,30 @@ async def user_profile_web(sessionid: str = Depends(get_sessionid),
     """Get user web profile info
     """
     cl = await clients.get(sessionid)
-    return await cl.user_web_profile_info_v1(username.strip().lstrip("@"))
+    return await cl.user_web_profile_info_v1(_clean_username(username))
+
+
+@router.get("/stream", response_model=Dict[str, Any])
+async def user_stream(sessionid: str = Depends(get_sessionid),
+                      user_id: Optional[str] = Query(None),
+                      username: Optional[str] = Query(None),
+                      view: Literal["flat", "raw"] = Query("flat"),
+                      clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get user profile stream
+    """
+    _ensure_single_user_selector(user_id, username)
+    cl = await clients.get(sessionid)
+    if username:
+        clean_username = _clean_username(username)
+        if view == "raw":
+            return await cl.user_stream_by_username_v1(clean_username)
+        return await cl.user_stream_by_username_flat(clean_username)
+
+    assert user_id is not None
+    clean_user_id = _clean_user_id(user_id)
+    if view == "raw":
+        return await cl.user_stream_by_id_v1(clean_user_id)
+    return await cl.user_stream_by_id_flat(clean_user_id)
 
 
 @router.get("/suggestions", response_model=Dict[str, Any])
