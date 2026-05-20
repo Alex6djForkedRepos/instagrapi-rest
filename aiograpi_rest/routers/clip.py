@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests
-from aiograpi.types import Media
+from aiograpi.types import Media, Track
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 from fastapi.responses import FileResponse
 
@@ -11,6 +11,9 @@ from aiograpi_rest.helpers import (
     LOCATION_FORM_DESCRIPTION,
     USERTAGS_FORM_DESCRIPTION,
     clip_upload_post,
+    clip_upload_with_music_post,
+    parse_json_form_dict,
+    parse_json_form_model,
     parse_upload_location,
     parse_upload_usertags,
 )
@@ -20,6 +23,68 @@ router = APIRouter(
     tags=["Clip (Reels)"],
     responses={404: {"description": "Not found"}},
 )
+DEVICE_STATUS_QUERY_DESCRIPTION = "JSON-encoded device status object. Leave empty to let aiograpi use defaults."
+TRACK_FORM_DESCRIPTION = "JSON-encoded Track object returned by search or music browser endpoints."
+EXTRA_DATA_FORM_DESCRIPTION = "JSON-encoded extra configure data. Leave empty to omit."
+
+
+@router.get("/creation/info", response_model=Dict[str, Any])
+async def clip_creation_info(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get Reel creation info
+    """
+    cl = await clients.get(sessionid)
+    return await cl.clip_info_for_creation()
+
+
+@router.get("/trial-eligibility", response_model=bool)
+async def clip_trial_eligibility(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Check Trial Reels eligibility
+    """
+    cl = await clients.get(sessionid)
+    return await cl.clip_trial_eligible()
+
+
+@router.get("/share/facebook/config", response_model=Dict[str, Any])
+async def clip_share_facebook_config(
+    sessionid: str = Depends(get_sessionid),
+    device_status: Optional[str] = Query(None, description=DEVICE_STATUS_QUERY_DESCRIPTION),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get Reel Facebook sharing config
+    """
+    cl = await clients.get(sessionid)
+    parsed_device_status = parse_json_form_dict(device_status, "device_status", default=None)
+    return await cl.clip_share_to_fb_config(parsed_device_status)
+
+
+@router.post("/pin", response_model=bool)
+async def clip_pin(
+    sessionid: str = Depends(get_sessionid),
+    media_pk: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Pin a Reel
+    """
+    cl = await clients.get(sessionid)
+    return await cl.clip_pin(media_pk)
+
+
+@router.delete("/pin", response_model=bool)
+async def clip_unpin(
+    sessionid: str = Depends(get_sessionid),
+    media_pk: str = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Unpin a Reel
+    """
+    cl = await clients.get(sessionid)
+    return await cl.clip_unpin(media_pk)
 
 
 @router.get("/template", response_model=Dict[str, Any])
@@ -94,6 +159,29 @@ async def clip_upload(sessionid: str = Depends(get_sessionid),
             cl, content, caption=caption,
             usertags=usernames_tags,
             location=parsed_location)
+
+
+@router.post("/upload/with/music", response_model=Media)
+async def clip_upload_with_music(
+    sessionid: str = Depends(get_sessionid),
+    file: UploadFile = File(...),
+    caption: str = Form(...),
+    track: str = Form(..., description=TRACK_FORM_DESCRIPTION),
+    extra_data: Optional[str] = Form(None, description=EXTRA_DATA_FORM_DESCRIPTION),
+    clients: ClientStorage = Depends(get_clients)
+) -> Media:
+    """Upload a Reel with music
+    """
+    cl = await clients.get(sessionid)
+
+    content = await file.read()
+    parsed_track = parse_json_form_model(track, Track, "track")
+    parsed_extra_data = parse_json_form_dict(extra_data, "extra_data", default={})
+    return await clip_upload_with_music_post(
+            cl, content, caption=caption,
+            track=parsed_track,
+            extra_data=parsed_extra_data)
+
 
 @router.post("/upload/by/url", response_model=Media)
 async def clip_upload(sessionid: str = Depends(get_sessionid),

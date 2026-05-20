@@ -215,6 +215,22 @@ objects. They accept `amount` and `last_media_pk` where the underlying
 - `GET /reels/explore` returns Explore Reels media.
 - `GET /reels/timeline` returns Reels media for a `collection_pk`.
 
+Clip upload and utility routes live under the `Clip (Reels)` tag:
+
+- `GET /clip/creation/info` returns the raw Reel creation preflight config.
+- `GET /clip/trial-eligibility` checks whether Trial Reels are enabled for the
+  authenticated account.
+- `GET /clip/share/facebook/config` returns Facebook sharing config; pass
+  `device_status` as an optional JSON-encoded query parameter.
+- `GET /clip/template` returns the raw clip template payload for a source
+  `media_id`.
+- `POST /clip/upload` uploads a Reel from a video file.
+- `POST /clip/upload/by/url` uploads a Reel from a video URL.
+- `POST /clip/upload/with/music` uploads a Reel from a video file with a
+  JSON-encoded `track` payload and optional JSON-encoded `extra_data`.
+- `POST /clip/pin` pins a Reel by `media_pk`.
+- `DELETE /clip/pin` unpins a Reel by `media_pk`.
+
 ## Saved Collections
 
 Saved collection routes live under the authenticated account context because
@@ -245,7 +261,7 @@ workflows.
 - `GET /track/download/by/url` downloads track audio from a URL.
 - `GET /music/feed/browser` returns music candidates for feed posts.
 
-## Livestreams And Templates
+## Livestreams
 
 Livestream routes manage the authenticated account's Instagram Live broadcast
 state. They are exposed as resource state changes instead of `start`/`end`
@@ -258,8 +274,6 @@ action paths:
   `ended`.
 - `GET /media/livestream/comments` lists live comments for a `broadcast_id`.
 - `GET /media/livestream/viewers` lists live viewers for a `broadcast_id`.
-- `GET /clip/template` returns the raw clip template payload for a source
-  `media_id`.
 
 ## Notes
 
@@ -358,6 +372,11 @@ endpoints for photo, video, clip/Reels, IGTV, album/carousel, and the media
 edit endpoint accept `usertags` as one JSON array or repeated JSON-encoded
 `Usertag` values, and `location` as one JSON-encoded `Location` object. Leave
 these fields empty or omit them when no metadata is needed.
+
+Reel music upload and creation helpers also use JSON strings: `track` is a
+JSON-encoded `Track` object returned by music search/browser routes,
+`extra_data` is optional Reel configure data, and `device_status` is an
+optional JSON object for `GET /clip/share/facebook/config`.
 
 ## System Endpoints
 

@@ -248,11 +248,16 @@ async def test_openapi_uses_rest_http_methods():
         "/auth/settings": {"get", "patch"},
         "/auth/totp": {"delete", "post"},
         "/build": {"get"},
+        "/clip/creation/info": {"get"},
         "/clip/download": {"get"},
         "/clip/download/by/url": {"get"},
+        "/clip/pin": {"delete", "post"},
+        "/clip/share/facebook/config": {"get"},
         "/clip/template": {"get"},
+        "/clip/trial-eligibility": {"get"},
         "/clip/upload": {"post"},
         "/clip/upload/by/url": {"post"},
+        "/clip/upload/with/music": {"post"},
         "/deps": {"get"},
         "/direct/file": {"post"},
         "/direct/inbox": {"get"},
@@ -523,6 +528,7 @@ async def test_openapi_uses_client_friendly_schema_names():
         "StoryUploadRequest",
         "StoryUploadByUrlRequest",
         "ClipUploadByUrlRequest",
+        "ClipUploadWithMusicRequest",
     } <= schema_names
 
     operation_ids = [
@@ -687,7 +693,13 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/media/livestream"]["patch"]["summary"] == "Update livestream state"
     assert paths["/media/livestream/comments"]["get"]["summary"] == "List livestream comments"
     assert paths["/media/livestream/viewers"]["get"]["summary"] == "List livestream viewers"
+    assert paths["/clip/creation/info"]["get"]["summary"] == "Get Reel creation info"
+    assert paths["/clip/trial-eligibility"]["get"]["summary"] == "Check Trial Reels eligibility"
+    assert paths["/clip/share/facebook/config"]["get"]["summary"] == "Get Reel Facebook sharing config"
     assert paths["/clip/template"]["get"]["summary"] == "Get clip template"
+    assert paths["/clip/pin"]["post"]["summary"] == "Pin a Reel"
+    assert paths["/clip/pin"]["delete"]["summary"] == "Unpin a Reel"
+    assert paths["/clip/upload/with/music"]["post"]["summary"] == "Upload a Reel with music"
     assert paths["/music/feed/browser"]["get"]["summary"] == "Get feed music browser"
     assert paths["/note"]["get"]["summary"] == "Get note by username"
     assert paths["/note/music"]["post"]["summary"] == "Create music note"
@@ -902,6 +914,22 @@ async def test_upload_openapi_documents_json_encoded_form_usertags_and_location(
         assert usertags["nullable"] is True
         assert location["type"] == "string"
         assert location["nullable"] is True
+
+
+@pytest.mark.asyncio
+async def test_clip_upload_with_music_openapi_documents_json_encoded_form_fields():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/openapi.json")
+
+    assert response.status_code == 200
+    schema = response.json()["components"]["schemas"]["ClipUploadWithMusicRequest"]
+    track = schema["properties"]["track"]
+    extra_data = schema["properties"]["extra_data"]
+    assert track["type"] == "string"
+    assert "JSON-encoded Track object" in track["description"]
+    assert extra_data["type"] == "string"
+    assert "JSON-encoded extra configure data" in extra_data["description"]
+    assert extra_data["nullable"] is True
 
 
 @pytest.mark.asyncio

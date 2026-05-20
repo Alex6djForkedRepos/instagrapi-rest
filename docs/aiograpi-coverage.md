@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **257**
-- Methods not exposed as REST routes: **243**
-- Candidate REST backlog: **18**
+- Methods reached by REST routes: **263**
+- Methods not exposed as REST routes: **237**
+- Candidate REST backlog: **12**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 257 | Already used by public REST routes. |
-| `candidate` | 18 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 263 | Already used by public REST routes. |
+| `candidate` | 12 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -32,7 +32,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `auth` | 7 | 0 | 0 | 27 | 34 |
 | `bloks` | 0 | 0 | 0 | 2 | 2 |
 | `challenge` | 1 | 0 | 0 | 5 | 6 |
-| `clip` | 3 | 6 | 0 | 1 | 10 |
+| `clip` | 9 | 0 | 0 | 1 | 10 |
 | `collection` | 7 | 0 | 2 | 0 | 9 |
 | `comment` | 12 | 0 | 10 | 0 | 22 |
 | `direct` | 43 | 0 | 2 | 0 | 45 |
@@ -67,7 +67,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | Area | Candidate methods |
 |---|---|
 | `album` | `album_upload_with_music` |
-| `clip` | `clip_info_for_creation`, `clip_pin`, `clip_share_to_fb_config`, `clip_trial_eligible`, `clip_unpin`, `clip_upload_as_reel_with_music` |
 | `explore` | `report_explore_media` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
@@ -117,11 +116,17 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `PATCH /auth/settings` | `expose`, `set_locale`, `set_proxy`, `set_settings`, `set_timezone_offset` |
 | `DELETE /auth/totp` | `totp_disable` |
 | `POST /auth/totp` | `totp_enable` |
+| `GET /clip/creation/info` | `clip_info_for_creation` |
 | `GET /clip/download` | `clip_download` |
 | `GET /clip/download/by/url` | `clip_download_by_url` |
+| `DELETE /clip/pin` | `clip_unpin` |
+| `POST /clip/pin` | `clip_pin` |
+| `GET /clip/share/facebook/config` | `clip_share_to_fb_config` |
 | `GET /clip/template` | `media_template_v1` |
+| `GET /clip/trial-eligibility` | `clip_trial_eligible` |
 | `POST /clip/upload` | `clip_upload` |
 | `POST /clip/upload/by/url` | `clip_upload` |
+| `POST /clip/upload/with/music` | `clip_upload_as_reel_with_music` |
 | `POST /direct/cutout/sticker` | `direct_send_cutout_sticker` |
 | `POST /direct/file` | `direct_send_file` |
 | `GET /direct/inbox` | `direct_threads_chunk` |
@@ -370,13 +375,13 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `clip_configure(self, upload_id: str, thumbnail: pathlib._local.Path, width: int, height: int, duration: int, caption: str, usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, feed_show: str = '1', extra_data: Dict[str, str] = {}) -> Dict` | `clip` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `clip_download(self, media_pk: int, folder: pathlib._local.Path = '') -> str` | `clip` | `GET /clip/download` | `exposed` | used by at least one public REST route |
 | `clip_download_by_url(self, url: str, filename: str = '', folder: pathlib._local.Path = '') -> str` | `clip` | `GET /clip/download/by/url` | `exposed` | used by at least one public REST route |
-| `clip_info_for_creation(self) -> Dict` | `clip` | - | `candidate` | potential user-facing REST endpoint |
-| `clip_pin(self, media_pk: str, revert: bool = False) -> bool` | `clip` | - | `candidate` | potential user-facing REST endpoint |
-| `clip_share_to_fb_config(self, device_status: Optional[Dict[str, object]] = None) -> Dict` | `clip` | - | `candidate` | potential user-facing REST endpoint |
-| `clip_trial_eligible(self) -> bool` | `clip` | - | `candidate` | potential user-facing REST endpoint |
-| `clip_unpin(self, media_pk: str) -> bool` | `clip` | - | `candidate` | potential user-facing REST endpoint |
+| `clip_info_for_creation(self) -> Dict` | `clip` | `GET /clip/creation/info` | `exposed` | used by at least one public REST route |
+| `clip_pin(self, media_pk: str, revert: bool = False) -> bool` | `clip` | `POST /clip/pin` | `exposed` | used by at least one public REST route |
+| `clip_share_to_fb_config(self, device_status: Optional[Dict[str, object]] = None) -> Dict` | `clip` | `GET /clip/share/facebook/config` | `exposed` | used by at least one public REST route |
+| `clip_trial_eligible(self) -> bool` | `clip` | `GET /clip/trial-eligibility` | `exposed` | used by at least one public REST route |
+| `clip_unpin(self, media_pk: str) -> bool` | `clip` | `DELETE /clip/pin` | `exposed` | used by at least one public REST route |
 | `clip_upload(self, path: pathlib._local.Path, caption: str, thumbnail: pathlib._local.Path = None, usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, configure_timeout: int = 10, feed_show: str = '1', extra_data: Dict[str, object] = {}, trial: bool = False, trial_graduation_strategy: str = 'manual') -> aiograpi.types.Media` | `clip` | `POST /clip/upload`<br>`POST /clip/upload/by/url` | `exposed` | used by at least one public REST route |
-| `clip_upload_as_reel_with_music(self, path: pathlib._local.Path, caption: str, track: aiograpi.types.Track, extra_data: Dict[str, str] = {}) -> aiograpi.types.Media` | `clip` | - | `candidate` | potential user-facing REST endpoint |
+| `clip_upload_as_reel_with_music(self, path: pathlib._local.Path, caption: str, track: aiograpi.types.Track, extra_data: Dict[str, str] = {}) -> aiograpi.types.Media` | `clip` | `POST /clip/upload/with/music` | `exposed` | used by at least one public REST route |
 | `close_friend_add(self, user_id: str)` | `user` | `POST /user/close-friend` | `exposed` | used by at least one public REST route |
 | `close_friend_remove(self, user_id: str)` | `user` | `DELETE /user/close-friend` | `exposed` | used by at least one public REST route |
 | `collection_medias(self, collection_pk: str, amount: int = 21, last_media_pk: int = 0) -> List[aiograpi.types.Media]` | `collection` | `GET /account/collection/media` | `exposed` | used by at least one public REST route |

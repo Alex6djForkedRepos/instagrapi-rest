@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 from aiograpi.exceptions import PhotoConfigureStoryError, VideoConfigureStoryError
+from fastapi import HTTPException
 
 import aiograpi_rest.helpers as helpers
 
@@ -38,6 +39,10 @@ class FakeClient:
 
     async def clip_upload(self, path, **kwargs):
         self.calls.append(("clip_upload", path, kwargs))
+        return Path(path)
+
+    async def clip_upload_as_reel_with_music(self, path, caption, track, extra_data=None):
+        self.calls.append(("clip_upload_as_reel_with_music", path, caption, track.id, extra_data or {}))
         return Path(path)
 
     async def photo_upload_to_story(self, path, **kwargs):
@@ -234,6 +239,47 @@ async def test_clip_upload_post_writes_thumbnail_bytes_to_tempfile():
     thumbnail = call[2]["thumbnail"]
     assert isinstance(thumbnail, str)
     assert thumbnail.endswith(".jpg")
+
+
+@pytest.mark.asyncio
+async def test_clip_upload_with_music_post_writes_tempfile_and_calls_client():
+    class Track:
+        id = "track1"
+
+    cl = FakeClient()
+    result = await helpers.clip_upload_with_music_post(
+        cl,
+        b"vid",
+        caption="hi",
+        track=Track(),
+        extra_data={"share_to_facebook": "1"},
+    )
+    call = next(c for c in cl.calls if c[0] == "clip_upload_as_reel_with_music")
+    assert call[1].endswith(".mp4")
+    assert call[2] == "hi"
+    assert call[3] == "track1"
+    assert call[4] == {"share_to_facebook": "1"}
+    assert str(result).endswith(".mp4")
+
+
+def test_parse_json_form_dict_accepts_object_and_blank_default():
+    assert helpers.parse_json_form_dict('{"a": 1}', "device_status") == {"a": 1}
+    assert helpers.parse_json_form_dict("", "device_status", default=None) is None
+    assert helpers.parse_json_form_dict(None, "extra_data", default={}) == {}
+
+
+def test_parse_json_form_dict_rejects_invalid_json():
+    with pytest.raises(HTTPException) as exc:
+        helpers.parse_json_form_dict("{bad-json", "device_status")
+    assert exc.value.status_code == 422
+    assert exc.value.detail == "Invalid JSON object for form field 'device_status'"
+
+
+def test_parse_json_form_dict_rejects_non_object_json():
+    with pytest.raises(HTTPException) as exc:
+        helpers.parse_json_form_dict("[1, 2]", "extra_data")
+    assert exc.value.status_code == 422
+    assert exc.value.detail == "Invalid JSON object for form field 'extra_data'"
 
 
 @pytest.mark.asyncio

@@ -84,6 +84,26 @@ class FakeClient:
         self.calls.append(("media_template_v1", media_id))
         return {"template_clips_media_id": media_id, "status": "ok"}
 
+    async def clip_info_for_creation(self):
+        self.calls.append(("clip_info_for_creation",))
+        return {"trial_config": {"is_enabled": True}}
+
+    async def clip_trial_eligible(self):
+        self.calls.append(("clip_trial_eligible",))
+        return True
+
+    async def clip_share_to_fb_config(self, device_status=None):
+        self.calls.append(("clip_share_to_fb_config", device_status))
+        return {"device_status": device_status, "status": "ok"}
+
+    async def clip_pin(self, media_pk, revert=False):
+        self.calls.append(("clip_pin", media_pk, revert))
+        return True
+
+    async def clip_unpin(self, media_pk):
+        self.calls.append(("clip_unpin", media_pk))
+        return True
+
     async def igtv_download(self, media_pk, folder=""):
         self.calls.append(("igtv_download", media_pk, str(folder)))
         return Path(__file__).resolve()
@@ -119,6 +139,20 @@ class FakeClient:
 
     async def clip_upload(self, path, **kwargs):
         self.calls.append(("clip_upload", path, kwargs))
+        return _media_payload()
+
+    async def clip_upload_as_reel_with_music(self, path, caption, track, extra_data=None):
+        upload_path = Path(path)
+        self.calls.append(
+            (
+                "clip_upload_as_reel_with_music",
+                upload_path.suffix,
+                upload_path.read_bytes(),
+                caption,
+                track.id,
+                extra_data or {},
+            )
+        )
         return _media_payload()
 
     async def photo_upload_to_story(self, path, **kwargs):
@@ -624,6 +658,81 @@ async def test_clip_template_returns_raw_template(storage):
     assert response.status_code == 200
     assert response.json()["template_clips_media_id"] == "clip1"
     assert ("media_template_v1", "clip1") in storage.client.calls
+
+
+@pytest.mark.asyncio
+async def test_clip_creation_preflight_routes(storage):
+    device_status = {"hw_av1_dec": True, "chip_name": "m1"}
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        info = await ac.get("/clip/creation/info", params={"sessionid": "sid"})
+        trial = await ac.get("/clip/trial-eligibility", params={"sessionid": "sid"})
+        fb_default = await ac.get("/clip/share/facebook/config", params={"sessionid": "sid"})
+        fb_custom = await ac.get(
+            "/clip/share/facebook/config",
+            params={"sessionid": "sid", "device_status": json.dumps(device_status)},
+        )
+
+    assert info.status_code == 200
+    assert info.json()["trial_config"]["is_enabled"] is True
+    assert trial.status_code == 200
+    assert trial.json() is True
+    assert fb_default.status_code == 200
+    assert fb_default.json()["device_status"] is None
+    assert fb_custom.status_code == 200
+    assert fb_custom.json()["device_status"] == device_status
+    assert ("clip_info_for_creation",) in storage.client.calls
+    assert ("clip_trial_eligible",) in storage.client.calls
+    assert ("clip_share_to_fb_config", None) in storage.client.calls
+    assert ("clip_share_to_fb_config", device_status) in storage.client.calls
+
+
+@pytest.mark.asyncio
+async def test_clip_pin_and_upload_with_music(storage):
+    track = {
+        "id": "track1",
+        "title": "Track",
+        "subtitle": "Artist",
+        "display_artist": "Artist",
+        "audio_cluster_id": 1,
+        "highlight_start_times_in_ms": [1000],
+        "is_explicit": False,
+        "dash_manifest": "",
+        "uri": "https://example.test/track.m4a",
+        "has_lyrics": False,
+        "audio_asset_id": 2,
+        "duration_in_ms": 30000,
+        "allows_saving": True,
+        "territory_validity_periods": {},
+    }
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        pin = await ac.post("/clip/pin", data={"sessionid": "sid", "media_pk": "1"})
+        unpin = await ac.delete("/clip/pin", params={"sessionid": "sid", "media_pk": "1"})
+        upload = await ac.post(
+            "/clip/upload/with/music",
+            data={
+                "sessionid": "sid",
+                "caption": "music",
+                "track": json.dumps(track),
+                "extra_data": json.dumps({"share_to_facebook": "1"}),
+            },
+            files={"file": ("a.mp4", b"clip-music-bytes", "video/mp4")},
+        )
+
+    assert pin.status_code == 200
+    assert pin.json() is True
+    assert unpin.status_code == 200
+    assert unpin.json() is True
+    assert upload.status_code == 200
+    assert ("clip_pin", "1", False) in storage.client.calls
+    assert ("clip_unpin", "1") in storage.client.calls
+    assert (
+        "clip_upload_as_reel_with_music",
+        ".mp4",
+        b"clip-music-bytes",
+        "music",
+        "track1",
+        {"share_to_facebook": "1"},
+    ) in storage.client.calls
 
 
 @pytest.mark.asyncio

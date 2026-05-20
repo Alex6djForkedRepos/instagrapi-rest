@@ -50,6 +50,18 @@ def parse_json_form_model(value, model, field_name: str):
         _invalid_json_form_field(field_name, exc)
 
 
+def parse_json_form_dict(value, field_name: str, default=None):
+    if _is_blank_form_value(value):
+        return default
+    try:
+        payload = json.loads(value)
+        if not isinstance(payload, dict):
+            raise ValueError("Expected a JSON object")
+        return payload
+    except (json.JSONDecodeError, TypeError, ValueError) as exc:
+        _invalid_json_form_field(field_name, exc)
+
+
 def parse_upload_usertags(usertags):
     return parse_json_form_models(usertags, Usertag, "usertags")
 
@@ -157,3 +169,9 @@ async def clip_upload_post(cl, content, **kwargs):
     with tempfile.TemporaryDirectory() as td:
         path = _write_temp_file(td, content, '.mp4')
         return await cl.clip_upload(path, **_normalize_thumbnail(kwargs, td))
+
+
+async def clip_upload_with_music_post(cl, content, **kwargs):
+    with tempfile.TemporaryDirectory() as td:
+        path = _write_temp_file(td, content, '.mp4')
+        return await cl.clip_upload_as_reel_with_music(path, **kwargs)
