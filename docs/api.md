@@ -109,13 +109,22 @@ Search routes live under the `Search` tag and hide Instagram's internal
 - `GET /search/places` searches places by query with optional `lat` and `lng`
   ranking context.
 - `GET /search/top` returns Instagram's blended top search results.
+- `GET /search/top/flat` returns the older flat blended top-search list.
+- `GET /search/web/top` returns web top-search results.
+- `GET /search/web/hashtags` returns web hashtag search results.
 - `GET /search/reels` returns Reel search results.
+- `GET /search/item` returns one raw Instagram search tab by `item_id` and
+  `search_surface`.
+- `GET /search/suggested/users` returns suggested users for a profile.
 - `GET /search/recent` returns the authenticated account's recent searches.
 - `GET /search/typeahead` returns autocomplete suggestions for a partial query.
+- `GET /search/typeahead/stream` returns the raw typeahead stream envelope.
+- `GET /search/typeahead/users` returns flattened typeahead user suggestions.
 
-`/search/top`, `/search/reels`, `/search/accounts`, and `/search/typeahead`
-return raw Instagram-shaped objects because their payloads vary by ranking
-surface and cursor state.
+`/search/top`, `/search/top/flat`, `/search/web/top`, `/search/reels`,
+`/search/accounts`, `/search/typeahead`, `/search/typeahead/stream`, and
+`/search/item` return raw Instagram-shaped objects because their payloads vary
+by ranking surface and cursor state.
 
 ## Reels
 

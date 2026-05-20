@@ -327,14 +327,21 @@ async def test_openapi_uses_rest_http_methods():
         "/search/followers": {"get"},
         "/search/following": {"get"},
         "/search/hashtags": {"get"},
+        "/search/item": {"get"},
         "/search/locations": {"get"},
         "/search/music": {"get"},
         "/search/places": {"get"},
         "/search/recent": {"get"},
         "/search/reels": {"get"},
+        "/search/suggested/users": {"get"},
         "/search/top": {"get"},
+        "/search/top/flat": {"get"},
         "/search/typeahead": {"get"},
+        "/search/typeahead/stream": {"get"},
+        "/search/typeahead/users": {"get"},
         "/search/users": {"get"},
+        "/search/web/hashtags": {"get"},
+        "/search/web/top": {"get"},
         "/story": {"delete", "get"},
         "/story/archive": {"get"},
         "/story/download": {"get"},
@@ -631,14 +638,21 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/search/followers"]["get"]["summary"] == "Search a user's followers"
     assert paths["/search/following"]["get"]["summary"] == "Search accounts a user follows"
     assert paths["/search/hashtags"]["get"]["summary"] == "Search hashtags"
+    assert paths["/search/item"]["get"]["summary"] == "Search one Instagram result tab"
     assert paths["/search/locations"]["get"]["summary"] == "Search locations"
     assert paths["/search/music"]["get"]["summary"] == "Search music tracks"
     assert paths["/search/places"]["get"]["summary"] == "Search places"
     assert paths["/search/recent"]["get"]["summary"] == "List recent searches"
     assert paths["/search/reels"]["get"]["summary"] == "Search Reels"
+    assert paths["/search/suggested/users"]["get"]["summary"] == "List suggested users for a profile"
     assert paths["/search/top"]["get"]["summary"] == "Search top results"
+    assert paths["/search/top/flat"]["get"]["summary"] == "Search flat top results"
     assert paths["/search/typeahead"]["get"]["summary"] == "Get search autocomplete suggestions"
+    assert paths["/search/typeahead/stream"]["get"]["summary"] == "Get raw search typeahead stream"
+    assert paths["/search/typeahead/users"]["get"]["summary"] == "Get typeahead user suggestions"
     assert paths["/search/users"]["get"]["summary"] == "Search users"
+    assert paths["/search/web/hashtags"]["get"]["summary"] == "Search web hashtags"
+    assert paths["/search/web/top"]["get"]["summary"] == "Search web top results"
     assert paths["/story"]["get"]["summary"] == "Get story details"
     assert paths["/story/viewers"]["get"]["summary"] == "List paginated story viewers"
     assert paths["/track"]["get"]["summary"] == "Get music track details"

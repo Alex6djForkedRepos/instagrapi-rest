@@ -9,18 +9,18 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **203**
-- Methods not exposed as REST routes: **297**
-- Candidate REST backlog: **112**
+- Methods reached by REST routes: **210**
+- Methods not exposed as REST routes: **290**
+- Candidate REST backlog: **93**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 203 | Already used by public REST routes. |
-| `candidate` | 112 | Likely useful as a future user-facing REST endpoint. |
-| `duplicate` | 89 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
-| `internal` | 96 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
+| `exposed` | 210 | Already used by public REST routes. |
+| `candidate` | 93 | Likely useful as a future user-facing REST endpoint. |
+| `duplicate` | 97 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
+| `internal` | 100 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
 ## Coverage By Area
 
@@ -37,15 +37,15 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `comment` | 12 | 0 | 10 | 0 | 22 |
 | `direct` | 39 | 6 | 0 | 0 | 45 |
 | `explore` | 2 | 1 | 0 | 0 | 3 |
-| `fbsearch` | 9 | 7 | 0 | 0 | 16 |
+| `fbsearch` | 16 | 0 | 0 | 0 | 16 |
 | `fundraiser` | 0 | 1 | 0 | 0 | 1 |
 | `graphql` | 0 | 0 | 0 | 8 | 8 |
-| `hashtag` | 6 | 2 | 10 | 0 | 18 |
+| `hashtag` | 6 | 0 | 12 | 0 | 18 |
 | `highlight` | 7 | 3 | 2 | 0 | 12 |
 | `igtv` | 3 | 0 | 0 | 1 | 4 |
 | `insights` | 3 | 0 | 0 | 0 | 3 |
-| `location` | 5 | 6 | 9 | 0 | 20 |
-| `media` | 21 | 10 | 27 | 1 | 59 |
+| `location` | 5 | 0 | 11 | 4 | 20 |
+| `media` | 21 | 8 | 29 | 1 | 59 |
 | `multiple_accounts` | 0 | 2 | 0 | 0 | 2 |
 | `note` | 3 | 5 | 0 | 0 | 8 |
 | `notification` | 1 | 26 | 0 | 0 | 27 |
@@ -59,7 +59,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `timeline` | 4 | 0 | 0 | 0 | 4 |
 | `totp` | 2 | 2 | 0 | 0 | 4 |
 | `track` | 5 | 0 | 0 | 0 | 5 |
-| `user` | 32 | 18 | 20 | 4 | 74 |
+| `user` | 32 | 16 | 22 | 4 | 74 |
 | `video` | 4 | 1 | 1 | 4 | 10 |
 
 ## Candidate Backlog By Area
@@ -71,12 +71,9 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `clip` | `clip_info_for_creation`, `clip_pin`, `clip_share_to_fb_config`, `clip_trial_eligible`, `clip_unpin`, `clip_upload_as_reel_with_music` |
 | `direct` | `direct_answer`, `direct_message_unsend`, `direct_pending_inbox`, `direct_request_approve`, `direct_send_cutout_sticker`, `direct_spam_inbox` |
 | `explore` | `report_explore_media` |
-| `fbsearch` | `fbsearch_item`, `fbsearch_suggested_profiles`, `fbsearch_topsearch_flat`, `fbsearch_typeahead_stream`, `fbsearch_typehead`, `web_search_topsearch`, `web_search_topsearch_hashtags` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
-| `hashtag` | `hashtag_medias_recent`, `hashtag_medias_top` |
 | `highlight` | `highlight_change_cover`, `highlight_change_title`, `highlight_pk_from_url` |
-| `location` | `location_build`, `location_complete`, `location_medias_recent`, `location_medias_top`, `location_search_pk`, `location_story_sticker_id` |
-| `media` | `archive_medias`, `media_code_from_pk`, `media_create_livestream`, `media_end_livestream`, `media_get_livestream_comments`, `media_get_livestream_info`, `media_get_livestream_viewers`, `media_id`, `media_start_livestream`, `media_template_v1` |
+| `media` | `archive_medias`, `media_create_livestream`, `media_end_livestream`, `media_get_livestream_comments`, `media_get_livestream_info`, `media_get_livestream_viewers`, `media_start_livestream`, `media_template_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
 | `note` | `create_music_note`, `get_note_by_user`, `get_note_text_by_user`, `last_seen_update_note`, `notes_music_browser` |
 | `notification` | `notification_announcements`, `notification_comment_likes`, `notification_comments`, `notification_connection`, `notification_direct_group_requests`, `notification_direct_share_activity`, `notification_disable`, `notification_felix_upload_result`, `notification_first_post`, `notification_follow_request_accepted`, `notification_fundraiser_creator`, `notification_fundraiser_supporter`, `notification_like_and_comment_on_photo_user_tagged`, `notification_likes`, `notification_live_broadcast`, `notification_login`, `notification_mute_all`, `notification_new_follower`, `notification_pending_direct_share`, `notification_reminders`, `notification_report_updated`, `notification_rooms`, `notification_tagged_in_bio`, `notification_user_tagged`, `notification_video_call`, `notification_view_count` |
@@ -84,7 +81,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `share` | `share_code_from_url`, `share_info`, `share_info_by_url` |
 | `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
-| `user` | `chaining`, `creator_info`, `discover_recommended_accounts_for_category_v1`, `feed_user_stream_item`, `fetch_suggestion_details`, `new_feed_exist`, `user_follow_requests_approve`, `user_follow_requests_decline`, `user_friendships_v1`, `user_id_from_username`, `user_related_profiles_gql`, `user_short_gql`, `user_stream_by_id_flat`, `user_stream_by_id_v1`, `user_stream_by_username_flat`, `user_stream_by_username_v1`, `user_web_profile_info_v1`, `username_from_user_id` |
+| `user` | `chaining`, `creator_info`, `discover_recommended_accounts_for_category_v1`, `feed_user_stream_item`, `fetch_suggestion_details`, `new_feed_exist`, `user_follow_requests_approve`, `user_follow_requests_decline`, `user_friendships_v1`, `user_related_profiles_gql`, `user_short_gql`, `user_stream_by_id_flat`, `user_stream_by_id_v1`, `user_stream_by_username_flat`, `user_stream_by_username_v1`, `user_web_profile_info_v1` |
 | `video` | `video_upload_to_direct` |
 
 ## REST Routes To aiograpi Methods
@@ -227,14 +224,21 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /search/followers` | `search_followers_v1` |
 | `GET /search/following` | `search_following_v1` |
 | `GET /search/hashtags` | `search_hashtags` |
+| `GET /search/item` | `fbsearch_item` |
 | `GET /search/locations` | `location_search`, `location_search_name` |
 | `GET /search/music` | `search_music` |
 | `GET /search/places` | `fbsearch_places` |
 | `GET /search/recent` | `fbsearch_recent` |
 | `GET /search/reels` | `fbsearch_reels_v2` |
+| `GET /search/suggested/users` | `fbsearch_suggested_profiles` |
 | `GET /search/top` | `fbsearch_topsearch_v2` |
+| `GET /search/top/flat` | `fbsearch_topsearch_flat` |
 | `GET /search/typeahead` | `fbsearch_keyword_typeahead` |
+| `GET /search/typeahead/stream` | `fbsearch_typeahead_stream` |
+| `GET /search/typeahead/users` | `fbsearch_typehead` |
 | `GET /search/users` | `search_users` |
+| `GET /search/web/hashtags` | `web_search_topsearch_hashtags` |
+| `GET /search/web/top` | `web_search_topsearch` |
 | `DELETE /story` | `story_delete` |
 | `GET /story` | `story_info`, `story_pk_from_url` |
 | `GET /story/archive` | `archive_story_days_paginated_v1` |
@@ -423,16 +427,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `explore_reels(self, amount: int = 10, last_media_pk: int = 0) -> List[aiograpi.types.Media]` | `timeline` | `GET /reels/explore` | `exposed` | used by at least one public REST route |
 | `expose(self) -> Dict` | `auth` | `PATCH /auth/settings` | `exposed` | used by at least one public REST route |
 | `fbsearch_accounts_v2(self, query: str, page_token: Optional[str] = None) -> dict` | `fbsearch` | `GET /search/accounts` | `exposed` | used by at least one public REST route |
-| `fbsearch_item(self, item_id: str, search_surface: str, query: str, timezone_offset: int = 0, count: int = 30, reels_page_index: int = None, has_more_reels: str = None, reels_max_id: str = None, next_max_id: str = None, rank_token: str = None, page_index: int = None, page_token: str = None, paging_token: str = None) -> dict` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
+| `fbsearch_item(self, item_id: str, search_surface: str, query: str, timezone_offset: int = 0, count: int = 30, reels_page_index: int = None, has_more_reels: str = None, reels_max_id: str = None, next_max_id: str = None, rank_token: str = None, page_index: int = None, page_token: str = None, paging_token: str = None) -> dict` | `fbsearch` | `GET /search/item` | `exposed` | used by at least one public REST route |
 | `fbsearch_keyword_typeahead(self, query: str, timezone_offset: int = 0, count: int = 30) -> dict` | `fbsearch` | `GET /search/typeahead` | `exposed` | used by at least one public REST route |
 | `fbsearch_places(self, query: str, lat: float = 40.74, lng: float = -73.94) -> List[aiograpi.types.Location]` | `fbsearch` | `GET /search/places` | `exposed` | used by at least one public REST route |
 | `fbsearch_recent(self) -> List[Tuple[int, Union[aiograpi.types.UserShort, aiograpi.types.Hashtag, Dict]]]` | `fbsearch` | `GET /search/recent` | `exposed` | used by at least one public REST route |
 | `fbsearch_reels_v2(self, query: str, reels_max_id: Optional[str] = None, rank_token: Optional[str] = None) -> dict` | `fbsearch` | `GET /search/reels` | `exposed` | used by at least one public REST route |
-| `fbsearch_suggested_profiles(self, user_id: str) -> List[aiograpi.types.UserShort]` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
-| `fbsearch_topsearch_flat(self, query: str) -> List[dict]` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
+| `fbsearch_suggested_profiles(self, user_id: str) -> List[aiograpi.types.UserShort]` | `fbsearch` | `GET /search/suggested/users` | `exposed` | used by at least one public REST route |
+| `fbsearch_topsearch_flat(self, query: str) -> List[dict]` | `fbsearch` | `GET /search/top/flat` | `exposed` | used by at least one public REST route |
 | `fbsearch_topsearch_v2(self, query: str, next_max_id: Optional[str] = None, reels_max_id: Optional[str] = None, rank_token: Optional[str] = None) -> dict` | `fbsearch` | `GET /search/top` | `exposed` | used by at least one public REST route |
-| `fbsearch_typeahead_stream(self, query: str, timezone_offset: int = 0, count: int = 30) -> dict` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
-| `fbsearch_typehead(self, query: str) -> List[dict]` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
+| `fbsearch_typeahead_stream(self, query: str, timezone_offset: int = 0, count: int = 30) -> dict` | `fbsearch` | `GET /search/typeahead/stream` | `exposed` | used by at least one public REST route |
+| `fbsearch_typehead(self, query: str) -> List[dict]` | `fbsearch` | `GET /search/typeahead/users` | `exposed` | used by at least one public REST route |
 | `featured_accounts_v1(self, target_user_id: str) -> dict` | `multiple_accounts` | - | `candidate` | potential user-facing REST endpoint |
 | `feed_user_stream_item(self, item_id: str, is_pull_to_refresh: bool = False) -> dict` | `user` | - | `candidate` | potential user-facing REST endpoint |
 | `fetch_fb_dtsg(self)` | `graphql` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
@@ -460,11 +464,11 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `hashtag_info_v1(self, name: str) -> aiograpi.types.Hashtag` | `hashtag` | - | `duplicate` | variant of already exposed `hashtag_info` route family |
 | `hashtag_medias_a1(self, name: str, amount: int = 27, tab_key: str = '') -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | variant of already exposed `hashtag_medias` route family |
 | `hashtag_medias_a1_chunk(self, name: str, max_amount: int = 27, tab_key: str = '', end_cursor: str = None) -> Tuple[List[aiograpi.types.Media], str]` | `hashtag` | - | `duplicate` | variant of already exposed `hashtag_medias` route family |
-| `hashtag_medias_recent(self, name: str, amount: int = 27) -> List[aiograpi.types.Media]` | `hashtag` | - | `candidate` | potential user-facing REST endpoint |
+| `hashtag_medias_recent(self, name: str, amount: int = 27) -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | covered by `GET /hashtag/media/recent` |
 | `hashtag_medias_recent_a1(self, name: str, amount: int = 71) -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | variant of candidate `hashtag_medias_recent` |
 | `hashtag_medias_recent_v1(self, name: str, amount: int = 27) -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | variant of candidate `hashtag_medias_recent` |
 | `hashtag_medias_reels_v1(self, name: str, amount: int = 27) -> List[aiograpi.types.Media]` | `hashtag` | `GET /hashtag/reels` | `exposed` | used by at least one public REST route |
-| `hashtag_medias_top(self, name: str, amount: int = 9) -> List[aiograpi.types.Media]` | `hashtag` | - | `candidate` | potential user-facing REST endpoint |
+| `hashtag_medias_top(self, name: str, amount: int = 9) -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | covered by `GET /hashtag/media/top` |
 | `hashtag_medias_top_a1(self, name: str, amount: int = 9) -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | variant of candidate `hashtag_medias_top` |
 | `hashtag_medias_top_v1(self, name: str, amount: int = 9) -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | variant of candidate `hashtag_medias_top` |
 | `hashtag_medias_v1(self, name: str, amount: int = 27, tab_key: str = '') -> List[aiograpi.types.Media]` | `hashtag` | - | `duplicate` | variant of already exposed `hashtag_medias` route family |
@@ -493,8 +497,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `last_seen_update_note(self) -> bool` | `note` | - | `candidate` | potential user-facing REST endpoint |
 | `liked_medias(self, amount: int = 21, last_media_pk: int = 0) -> List[aiograpi.types.Media]` | `collection` | `GET /account/liked/media` | `exposed` | used by at least one public REST route |
 | `load_settings(self, path: Union[str, pathlib._local.Path], override_app_version: bool = False) -> Dict` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `location_build(self, location: aiograpi.types.Location) -> str` | `location` | - | `candidate` | potential user-facing REST endpoint |
-| `location_complete(self, location: aiograpi.types.Location) -> aiograpi.types.Location` | `location` | - | `candidate` | potential user-facing REST endpoint |
+| `location_build(self, location: aiograpi.types.Location) -> str` | `location` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
+| `location_complete(self, location: aiograpi.types.Location) -> aiograpi.types.Location` | `location` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `location_feed(self, location_id, count=16, end_cursor=None)` | `public` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `location_guides_v1(self, location_pk: int) -> List[aiograpi.types.Guide]` | `location` | `GET /location/guides` | `exposed` | used by at least one public REST route |
 | `location_info(self, location_pk: int) -> aiograpi.types.Location` | `location` | `GET /location` | `exposed` | used by at least one public REST route |
@@ -502,18 +506,18 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `location_info_v1(self, location_pk: int) -> aiograpi.types.Location` | `location` | - | `duplicate` | variant of already exposed `location_info` route family |
 | `location_medias_a1(self, location_pk: int, amount: int = 24, sleep: float = 0.5, tab_key: str = '') -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | variant of already exposed `location_medias` route family |
 | `location_medias_a1_chunk(self, location_pk: int, max_amount: int = 24, sleep: float = 0.5, tab_key: str = '', max_id: str = None) -> Tuple[List[aiograpi.types.Media], str]` | `location` | - | `duplicate` | variant of already exposed `location_medias` route family |
-| `location_medias_recent(self, location_pk: int, amount: int = 63, sleep: float = 0.5) -> List[aiograpi.types.Media]` | `location` | - | `candidate` | potential user-facing REST endpoint |
+| `location_medias_recent(self, location_pk: int, amount: int = 63, sleep: float = 0.5) -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | covered by `GET /location/media/recent` |
 | `location_medias_recent_a1(self, location_pk: int, amount: int = 24, sleep: float = 0.5) -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | variant of candidate `location_medias_recent` |
 | `location_medias_recent_v1(self, location_pk: int, amount: int = 63) -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | variant of candidate `location_medias_recent` |
-| `location_medias_top(self, location_pk: int, amount: int = 27, sleep: float = 0.5) -> List[aiograpi.types.Media]` | `location` | - | `candidate` | potential user-facing REST endpoint |
+| `location_medias_top(self, location_pk: int, amount: int = 27, sleep: float = 0.5) -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | covered by `GET /location/media/top` |
 | `location_medias_top_a1(self, location_pk: int, amount: int = 9, sleep: float = 0.5) -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | variant of candidate `location_medias_top` |
 | `location_medias_top_v1(self, location_pk: int, amount: int = 21) -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | variant of candidate `location_medias_top` |
 | `location_medias_v1(self, location_pk: int, amount: int = 63, tab_key: str = '') -> List[aiograpi.types.Media]` | `location` | - | `duplicate` | variant of already exposed `location_medias` route family |
 | `location_medias_v1_chunk(self, location_pk: int, max_amount: int = 63, tab_key: str = '', max_id: str = None) -> Tuple[List[aiograpi.types.Media], str]` | `location` | `GET /location/media/recent`<br>`GET /location/media/top` | `exposed` | used by at least one public REST route |
 | `location_search(self, lat: float, lng: float) -> List[aiograpi.types.Location]` | `location` | `GET /search/locations` | `exposed` | used by at least one public REST route |
 | `location_search_name(self, name: str) -> List[aiograpi.types.Location]` | `location` | `GET /search/locations` | `exposed` | used by at least one public REST route |
-| `location_search_pk(self, location_pk: int) -> aiograpi.types.Location` | `location` | - | `candidate` | potential user-facing REST endpoint |
-| `location_story_sticker_id(self, location: aiograpi.types.Location) -> str` | `location` | - | `candidate` | potential user-facing REST endpoint |
+| `location_search_pk(self, location_pk: int) -> aiograpi.types.Location` | `location` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
+| `location_story_sticker_id(self, location: aiograpi.types.Location) -> str` | `location` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `login(self, username: Optional[str] = None, password: Optional[str] = None, relogin: bool = False, verification_code: str = '') -> bool` | `auth` | `POST /auth/login` | `exposed` | used by at least one public REST route |
 | `login_by_sessionid(self, sessionid: str) -> bool` | `auth` | `POST /auth/login/by/sessionid` | `exposed` | used by at least one public REST route |
 | `login_flow(self) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
@@ -521,7 +525,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `media_archive(self, media_id: str, revert: bool = False) -> bool` | `media` | `POST /media/archive` | `exposed` | used by at least one public REST route |
 | `media_check_offensive_comment(self, media_id: str, text: str) -> bool` | `comment` | `POST /media/comment/check/offensive` | `exposed` | used by at least one public REST route |
 | `media_check_offensive_comment_v2(self, media_id: str, comment: str) -> dict` | `comment` | - | `duplicate` | variant of already exposed `media_check_offensive_comment` route family |
-| `media_code_from_pk(self, media_pk: str) -> str` | `media` | - | `candidate` | potential user-facing REST endpoint |
+| `media_code_from_pk(self, media_pk: str) -> str` | `media` | - | `duplicate` | identifier helper; `GET /media` accepts code, pk, id, or url |
 | `media_comment(self, media_id: str, text: str, replied_to_comment_id: Optional[int] = None) -> aiograpi.types.Comment` | `comment` | `POST /media/comment` | `exposed` | used by at least one public REST route |
 | `media_comment_infos(self, media_ids: List[str]) -> dict` | `comment` | `GET /media/comment/infos` | `exposed` | used by at least one public REST route |
 | `media_comment_replies(self, media_id: str, comment_id: str, amount: int = 0) -> List[aiograpi.types.Comment]` | `comment` | `GET /media/comment/replies` | `exposed` | used by at least one public REST route |
@@ -542,7 +546,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `media_get_livestream_comments(self, broadcast_id)` | `media` | - | `candidate` | potential user-facing REST endpoint |
 | `media_get_livestream_info(self, broadcast_id)` | `media` | - | `candidate` | potential user-facing REST endpoint |
 | `media_get_livestream_viewers(self, broadcast_id)` | `media` | - | `candidate` | potential user-facing REST endpoint |
-| `media_id(self, media_pk: str) -> str` | `media` | - | `candidate` | potential user-facing REST endpoint |
+| `media_id(self, media_pk: str) -> str` | `media` | - | `duplicate` | identifier helper; `GET /media` accepts code, pk, id, or url |
 | `media_info(self, media_pk: str, use_cache: bool = True) -> aiograpi.types.Media` | `media` | `GET /media` | `exposed` | used by at least one public REST route |
 | `media_info_a1(self, media_pk: str, max_id: str = None) -> aiograpi.types.Media` | `media` | - | `duplicate` | variant of already exposed `media_info` route family |
 | `media_info_gql(self, media_pk: str) -> aiograpi.types.Media` | `media` | - | `duplicate` | variant of already exposed `media_info` route family |
@@ -726,7 +730,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `user_guides_v1(self, user_id: int) -> List[aiograpi.types.Guide]` | `user` | `GET /user/guides` | `exposed` | used by at least one public REST route |
 | `user_highlights(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Highlight]` | `highlight` | `GET /user/highlights` | `exposed` | used by at least one public REST route |
 | `user_highlights_v1(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Highlight]` | `highlight` | - | `duplicate` | variant of already exposed `user_highlights` route family |
-| `user_id_from_username(self, username: str) -> str` | `user` | - | `candidate` | potential user-facing REST endpoint |
+| `user_id_from_username(self, username: str) -> str` | `user` | - | `duplicate` | identifier helper; `GET /user` accepts user_id or username |
 | `user_info(self, user_id: str) -> aiograpi.types.User` | `user` | `GET /user` | `exposed` | used by at least one public REST route |
 | `user_info_by_username(self, username: str) -> aiograpi.types.User` | `user` | `GET /user` | `exposed` | used by at least one public REST route |
 | `user_info_by_username_a1(self, username: str) -> dict` | `user` | - | `duplicate` | variant of already exposed `user_info_by_username` route family |
@@ -763,7 +767,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `user_videos_v1(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `user_videos` route family |
 | `user_web_profile_info_gql(self, user_id: str) -> dict` | `user` | - | `duplicate` | variant of candidate `user_web_profile_info_v1` |
 | `user_web_profile_info_v1(self, username: str) -> dict` | `user` | - | `candidate` | potential user-facing REST endpoint |
-| `username_from_user_id(self, user_id: str) -> str` | `user` | - | `candidate` | potential user-facing REST endpoint |
+| `username_from_user_id(self, user_id: str) -> str` | `user` | - | `duplicate` | identifier helper; `GET /user` accepts user_id or username |
 | `username_from_user_id_gql(self, user_id: str) -> str` | `user` | - | `duplicate` | variant of candidate `username_from_user_id` |
 | `users_stories_gql(self, user_ids: List[str], amount: int = 0) -> List[aiograpi.types.UserShort]` | `story` | - | `candidate` | potential user-facing REST endpoint |
 | `usertag_medias(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `usertag_medias` route family |
@@ -784,8 +788,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `video_upload_to_cutout_sticker(self, path: pathlib._local.Path, bypass_ai: bool = True) -> aiograpi.types.Media` | `video` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `video_upload_to_direct(self, path: pathlib._local.Path, caption: str = '', thumbnail: pathlib._local.Path = None, mentions: List[aiograpi.types.StoryMention] = [], medias: List[aiograpi.types.StoryMedia] = [], thread_ids: List[int] = [], extra_data: Dict[str, str] = {}) -> aiograpi.types.DirectMessage` | `video` | - | `candidate` | potential user-facing REST endpoint |
 | `video_upload_to_story(self, path: pathlib._local.Path, caption: str = '', thumbnail: pathlib._local.Path = None, mentions: List[aiograpi.types.StoryMention] = [], locations: List[aiograpi.types.StoryLocation] = [], links: List[aiograpi.types.StoryLink] = [], hashtags: List[aiograpi.types.StoryHashtag] = [], stickers: List[aiograpi.types.StorySticker] = [], medias: List[aiograpi.types.StoryMedia] = [], polls: List[aiograpi.types.StoryPoll] = [], extra_data: Dict[str, str] = {}) -> aiograpi.types.Story` | `video` | `POST /story/upload`<br>`POST /story/upload/by/url` | `exposed` | used by at least one public REST route |
-| `web_search_topsearch(self, query: str) -> dict` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
-| `web_search_topsearch_hashtags(self, query: str) -> List[aiograpi.types.Hashtag]` | `fbsearch` | - | `candidate` | potential user-facing REST endpoint |
+| `web_search_topsearch(self, query: str) -> dict` | `fbsearch` | `GET /search/web/top` | `exposed` | used by at least one public REST route |
+| `web_search_topsearch_hashtags(self, query: str) -> List[aiograpi.types.Hashtag]` | `fbsearch` | `GET /search/web/hashtags` | `exposed` | used by at least one public REST route |
 | `with_action_data(self, data: Dict) -> Dict` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `with_default_data(self, data: Dict) -> Dict` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `with_extra_data(self, data: Dict) -> Dict` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |

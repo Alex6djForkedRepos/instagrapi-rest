@@ -60,6 +60,10 @@ INTERNAL_EXACT_METHODS = {
     "fetch_fb_dtsg",
     "init",
     "inject_sessionid_to_public",
+    "location_build",
+    "location_complete",
+    "location_search_pk",
+    "location_story_sticker_id",
     "login_flow",
     "one_tap_app_login",
     "parse_authorization",
@@ -74,6 +78,16 @@ INTERNAL_EXACT_METHODS = {
     "small_delay",
     "very_small_delay",
     "with_query_params",
+}
+COVERED_BY_REST_EXACT_METHODS = {
+    "hashtag_medias_recent": "covered by `GET /hashtag/media/recent`",
+    "hashtag_medias_top": "covered by `GET /hashtag/media/top`",
+    "location_medias_recent": "covered by `GET /location/media/recent`",
+    "location_medias_top": "covered by `GET /location/media/top`",
+    "media_code_from_pk": "identifier helper; `GET /media` accepts code, pk, id, or url",
+    "media_id": "identifier helper; `GET /media` accepts code, pk, id, or url",
+    "user_id_from_username": "identifier helper; `GET /user` accepts user_id or username",
+    "username_from_user_id": "identifier helper; `GET /user` accepts user_id or username",
 }
 INTERNAL_PREFIXES = (
     "check_",
@@ -271,6 +285,9 @@ def classify_method(
 
     if _is_internal_method(method):
         return MethodClassification("internal", "low-level aiograpi helper or unsafe generic surface")
+
+    if method.name in COVERED_BY_REST_EXACT_METHODS:
+        return MethodClassification("duplicate", COVERED_BY_REST_EXACT_METHODS[method.name])
 
     method_names = method_names or set(client_methods())
     root_name = _canonical_method_root(method.name)

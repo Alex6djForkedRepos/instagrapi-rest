@@ -68,6 +68,13 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["track_stream_info_by_id"], covered).status == "exposed"
     assert classify_method(methods["track_download_by_url"], covered).status == "exposed"
     assert classify_method(methods["music_in_feed_audio_browser"], covered).status == "exposed"
+    assert classify_method(methods["fbsearch_item"], covered).status == "exposed"
+    assert classify_method(methods["fbsearch_suggested_profiles"], covered).status == "exposed"
+    assert classify_method(methods["fbsearch_topsearch_flat"], covered).status == "exposed"
+    assert classify_method(methods["fbsearch_typeahead_stream"], covered).status == "exposed"
+    assert classify_method(methods["fbsearch_typehead"], covered).status == "exposed"
+    assert classify_method(methods["web_search_topsearch"], covered).status == "exposed"
+    assert classify_method(methods["web_search_topsearch_hashtags"], covered).status == "exposed"
     assert classify_method(methods["user_follow_request_approve"], covered).status == "exposed"
     assert classify_method(methods["user_follow_request_decline"], covered).status == "exposed"
     assert classify_method(methods["close_friend_add"], covered).status == "exposed"
@@ -84,6 +91,18 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["comment_likers_gql_chunk"], covered).status == "duplicate"
     assert classify_method(methods["comment_pin"], covered).status == "exposed"
     assert classify_method(methods["comment_unpin"], covered).status == "exposed"
+    assert classify_method(methods["hashtag_medias_top"], covered).status == "duplicate"
+    assert classify_method(methods["hashtag_medias_recent"], covered).status == "duplicate"
+    assert classify_method(methods["location_medias_top"], covered).status == "duplicate"
+    assert classify_method(methods["location_medias_recent"], covered).status == "duplicate"
+    assert classify_method(methods["location_build"], covered).status == "internal"
+    assert classify_method(methods["location_complete"], covered).status == "internal"
+    assert classify_method(methods["location_search_pk"], covered).status == "internal"
+    assert classify_method(methods["location_story_sticker_id"], covered).status == "internal"
+    assert classify_method(methods["media_code_from_pk"], covered).status == "duplicate"
+    assert classify_method(methods["media_id"], covered).status == "duplicate"
+    assert classify_method(methods["user_id_from_username"], covered).status == "duplicate"
+    assert classify_method(methods["username_from_user_id"], covered).status == "duplicate"
     assert classify_method(methods["media_check_offensive_comment"], covered).status == "exposed"
     assert classify_method(methods["media_comment_infos"], covered).status == "exposed"
     assert classify_method(methods["media_stream_comments_v1_chunk"], covered).status == "exposed"
@@ -145,9 +164,12 @@ def test_aiograpi_coverage_markdown_summarizes_candidate_backlog():
     assert "| `explore` | `report_explore_media` |" in markdown
     assert "| `track` |" in markdown
     assert "`track_info_by_id`" in markdown
+    assert "`fbsearch_topsearch_flat`" in markdown
     assert "`comment_pin`" in markdown
     assert "`close_friend_add`" in markdown
     assert "`collections`" in markdown
+    assert "`location_build`" not in markdown.split("## Full Method Matrix", 1)[0]
+    assert "`media_id`" not in markdown.split("## Full Method Matrix", 1)[0]
     assert "`collection_medias_v1`" not in markdown.split("## Full Method Matrix", 1)[0]
     assert "`direct_message_like`" in markdown
     assert "`comment_likers_gql`" in markdown
