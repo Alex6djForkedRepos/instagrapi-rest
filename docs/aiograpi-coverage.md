@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **237**
-- Methods not exposed as REST routes: **263**
-- Candidate REST backlog: **38**
+- Methods reached by REST routes: **239**
+- Methods not exposed as REST routes: **261**
+- Candidate REST backlog: **36**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 237 | Already used by public REST routes. |
-| `candidate` | 38 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 239 | Already used by public REST routes. |
+| `candidate` | 36 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -59,7 +59,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `timeline` | 4 | 0 | 0 | 0 | 4 |
 | `totp` | 2 | 2 | 0 | 0 | 4 |
 | `track` | 5 | 0 | 0 | 0 | 5 |
-| `user` | 39 | 7 | 22 | 6 | 74 |
+| `user` | 41 | 5 | 22 | 6 | 74 |
 | `video` | 4 | 1 | 1 | 4 | 10 |
 
 ## Candidate Backlog By Area
@@ -76,7 +76,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `photo` | `photo_upload_with_music` |
 | `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
-| `user` | `feed_user_stream_item`, `user_friendships_v1`, `user_stream_by_id_flat`, `user_stream_by_id_v1`, `user_stream_by_username_flat`, `user_stream_by_username_v1`, `user_web_profile_info_v1` |
+| `user` | `feed_user_stream_item`, `user_stream_by_id_flat`, `user_stream_by_id_v1`, `user_stream_by_username_flat`, `user_stream_by_username_v1` |
 | `video` | `video_upload_to_direct` |
 
 ## REST Routes To aiograpi Methods
@@ -279,6 +279,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /user/followers` | `user_followers_v1_chunk` |
 | `GET /user/following` | `user_following_v1_chunk` |
 | `GET /user/friendship` | `user_friendship_v1` |
+| `GET /user/friendships` | `user_friendships_v1` |
 | `GET /user/guides` | `user_guides_v1` |
 | `GET /user/highlights` | `user_highlights` |
 | `DELETE /user/mute/posts` | `unmute_posts_from_follow` |
@@ -295,6 +296,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `POST /user/notifications/videos` | `enable_videos_notifications` |
 | `GET /user/pinned/posts` | `user_pinned_medias` |
 | `GET /user/posts` | `user_info_by_username_v1`, `user_medias_paginated_v1` |
+| `GET /user/profile/web` | `user_web_profile_info_v1` |
 | `GET /user/recommendations` | `discover_recommended_accounts_for_category_v1` |
 | `GET /user/reels` | `user_clips_paginated_v1`, `user_info_by_username_v1` |
 | `GET /user/stories` | `user_stories` |
@@ -743,7 +745,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `user_following_v1(self, user_id: str, amount: int = 0) -> List[aiograpi.types.UserShort]` | `user` | - | `duplicate` | variant of already exposed `user_following` route family |
 | `user_following_v1_chunk(self, user_id: str, max_amount: int = 0, max_id: str = '') -> Tuple[List[aiograpi.types.UserShort], str]` | `user` | `GET /user/following` | `exposed` | used by at least one public REST route |
 | `user_friendship_v1(self, user_id: str) -> aiograpi.types.Relationship` | `user` | `GET /user/friendship` | `exposed` | used by at least one public REST route |
-| `user_friendships_v1(self, user_ids: List[str]) -> List[aiograpi.types.RelationshipShort]` | `user` | - | `candidate` | potential user-facing REST endpoint |
+| `user_friendships_v1(self, user_ids: List[str]) -> List[aiograpi.types.RelationshipShort]` | `user` | `GET /user/friendships` | `exposed` | used by at least one public REST route |
 | `user_guides_v1(self, user_id: int) -> List[aiograpi.types.Guide]` | `user` | `GET /user/guides` | `exposed` | used by at least one public REST route |
 | `user_highlights(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Highlight]` | `highlight` | `GET /user/highlights` | `exposed` | used by at least one public REST route |
 | `user_highlights_v1(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Highlight]` | `highlight` | - | `duplicate` | variant of already exposed `user_highlights` route family |
@@ -782,8 +784,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `user_videos_chunk_v1(self, user_id: int, end_cursor: str = '') -> Tuple[List[aiograpi.types.Media], str]` | `media` | - | `duplicate` | variant of already exposed `user_videos` route family |
 | `user_videos_paginated_v1(self, user_id: str, amount: int = 50, end_cursor: str = '') -> Tuple[List[aiograpi.types.Media], str]` | `media` | `GET /user/videos` | `exposed` | used by at least one public REST route |
 | `user_videos_v1(self, user_id: int, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `user_videos` route family |
-| `user_web_profile_info_gql(self, user_id: str) -> dict` | `user` | - | `duplicate` | variant of candidate `user_web_profile_info_v1` |
-| `user_web_profile_info_v1(self, username: str) -> dict` | `user` | - | `candidate` | potential user-facing REST endpoint |
+| `user_web_profile_info_gql(self, user_id: str) -> dict` | `user` | - | `duplicate` | variant of already exposed `user_web_profile_info` route family |
+| `user_web_profile_info_v1(self, username: str) -> dict` | `user` | `GET /user/profile/web` | `exposed` | used by at least one public REST route |
 | `username_from_user_id(self, user_id: str) -> str` | `user` | - | `duplicate` | identifier helper; `GET /user` accepts user_id or username |
 | `username_from_user_id_gql(self, user_id: str) -> str` | `user` | - | `duplicate` | variant of candidate `username_from_user_id` |
 | `users_stories_gql(self, user_ids: List[str], amount: int = 0) -> List[aiograpi.types.UserShort]` | `story` | - | `candidate` | potential user-facing REST endpoint |

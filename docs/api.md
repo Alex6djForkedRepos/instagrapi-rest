@@ -191,6 +191,10 @@ Instagram-shaped objects where `aiograpi` exposes variable discovery payloads:
   target profile.
 - `GET /user/creator` returns creator metadata for a target profile as
   `{ "user": ..., "info": ... }`.
+- `GET /user/profile/web` returns Instagram's web-profile payload for a
+  username.
+- `GET /user/friendships` returns relationship summaries for repeated
+  `user_ids` query parameters.
 
 `GET /account/feed/new` belongs to the authenticated account context and returns
 whether Instagram says new timeline feed items are available.

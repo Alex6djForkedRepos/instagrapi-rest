@@ -169,6 +169,8 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["highlight_pk_from_url"], covered).status == "exposed"
     assert classify_method(methods["highlight_change_title"], covered).status == "exposed"
     assert classify_method(methods["highlight_change_cover"], covered).status == "exposed"
+    assert classify_method(methods["user_friendships_v1"], covered).status == "exposed"
+    assert classify_method(methods["user_web_profile_info_v1"], covered).status == "exposed"
     assert classify_method(methods["photo_configure"], covered).status == "internal"
     assert classify_method(methods["graphql_request"], covered).status == "internal"
     assert classify_method(methods["signup"], covered).status == "internal"

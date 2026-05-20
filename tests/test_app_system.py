@@ -379,8 +379,10 @@ async def test_openapi_uses_rest_http_methods():
         "/user/followers": {"get"},
         "/user/following": {"get"},
         "/user/friendship": {"get"},
+        "/user/friendships": {"get"},
         "/user/guides": {"get"},
         "/user/highlights": {"get"},
+        "/user/profile/web": {"get"},
         "/user/posts": {"get"},
         "/user/pinned/posts": {"get"},
         "/user/mute/posts": {"delete", "post"},
@@ -714,6 +716,8 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/user/notifications/reels"]["delete"]["summary"] == "Disable Reel notifications for a user"
     assert paths["/user/notifications/videos"]["post"]["summary"] == "Enable video notifications for a user"
     assert paths["/user/notifications/videos"]["delete"]["summary"] == "Disable video notifications for a user"
+    assert paths["/user/friendships"]["get"]["summary"] == "List user relationships"
+    assert paths["/user/profile/web"]["get"]["summary"] == "Get user web profile"
     assert paths["/user/pinned/posts"]["get"]["summary"] == "List user pinned posts"
     assert paths["/user/posts"]["get"]["summary"] == "List paginated user posts"
     assert paths["/user/reels"]["get"]["summary"] == "List paginated user Reels"

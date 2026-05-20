@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 from aiograpi.extractors import json_value
-from aiograpi.types import About, Guide, Highlight, Media, Relationship, User, UserShort
+from aiograpi.types import About, Guide, Highlight, Media, Relationship, RelationshipShort, User, UserShort
 from fastapi import APIRouter, Depends, Form, HTTPException, Query
 from pydantic import BaseModel, ValidationError
 
@@ -118,6 +118,16 @@ async def user_about(sessionid: str = Depends(get_sessionid),
             raise
         return _extract_about_from_last_json(last_json)
     return _normalize_about(about)
+
+
+@router.get("/profile/web", response_model=Dict[str, Any])
+async def user_profile_web(sessionid: str = Depends(get_sessionid),
+                           username: str = Query(...),
+                           clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get user web profile info
+    """
+    cl = await clients.get(sessionid)
+    return await cl.user_web_profile_info_v1(username.strip().lstrip("@"))
 
 
 @router.get("/suggestions", response_model=Dict[str, Any])
@@ -343,6 +353,16 @@ async def user_friendship(sessionid: str = Depends(get_sessionid),
     """
     cl = await clients.get(sessionid)
     return await cl.user_friendship_v1(user_id)
+
+
+@router.get("/friendships", response_model=List[RelationshipShort])
+async def user_friendships(sessionid: str = Depends(get_sessionid),
+                           user_ids: List[str] = Query(...),
+                           clients: ClientStorage = Depends(get_clients)) -> List[RelationshipShort]:
+    """Get relationships with multiple users
+    """
+    cl = await clients.get(sessionid)
+    return await cl.user_friendships_v1(user_ids)
 
 
 @router.post("/block", response_model=bool)

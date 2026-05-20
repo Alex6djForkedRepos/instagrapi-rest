@@ -120,6 +120,19 @@ def _relationship_payload(user_id="1"):
     }
 
 
+def _relationship_short_payload(user_id="1"):
+    return {
+        "user_id": user_id,
+        "following": True,
+        "incoming_request": False,
+        "is_bestie": False,
+        "is_feed_favorite": False,
+        "is_private": False,
+        "is_restricted": False,
+        "outgoing_request": False,
+    }
+
+
 def _highlight_payload(pk="h1"):
     return {
         "pk": pk,
@@ -621,6 +634,14 @@ class FakeExpandedClient:
     async def user_friendship_v1(self, user_id):
         self.calls.append(("user_friendship_v1", user_id))
         return _relationship_payload(user_id)
+
+    async def user_friendships_v1(self, user_ids):
+        self.calls.append(("user_friendships_v1", user_ids))
+        return [_relationship_short_payload(user_id) for user_id in user_ids]
+
+    async def user_web_profile_info_v1(self, username):
+        self.calls.append(("user_web_profile_info_v1", username))
+        return {"username": username, "profile_pic_url": "https://example.test/profile.jpg"}
 
     async def user_block(self, user_id, surface="profile"):
         self.calls.append(("user_block", user_id, surface))
@@ -1169,6 +1190,8 @@ async def test_discovery_user_routes(storage):
         location_guides = await ac.get("/location/guides", params={"sessionid": "sid", "location_pk": "1"})
         users = await ac.get("/search/users", params={"sessionid": "sid", "query": "insta"})
         friendship = await ac.get("/user/friendship", params={"sessionid": "sid", "user_id": "1"})
+        friendships = await ac.get("/user/friendships", params={"sessionid": "sid", "user_ids": ["1", "2"]})
+        web_profile = await ac.get("/user/profile/web", params={"sessionid": "sid", "username": "@instagram"})
         block = await ac.post("/user/block", data={"sessionid": "sid", "user_id": "1"})
         unblock = await ac.delete("/user/block", params={"sessionid": "sid", "user_id": "1"})
         user_pinned = await ac.get("/user/pinned/posts", params={"sessionid": "sid", "user_id": "1"})
@@ -1191,6 +1214,8 @@ async def test_discovery_user_routes(storage):
         location_guides,
         users,
         friendship,
+        friendships,
+        web_profile,
         block,
         unblock,
         user_pinned,
@@ -1205,6 +1230,8 @@ async def test_discovery_user_routes(storage):
     assert ("hashtag_related_hashtags", "python") in storage.client.calls
     assert ("hashtag_medias_reels_v1", "python", 2) in storage.client.calls
     assert ("location_guides_v1", 1) in storage.client.calls
+    assert ("user_friendships_v1", ["1", "2"]) in storage.client.calls
+    assert ("user_web_profile_info_v1", "instagram") in storage.client.calls
     assert ("user_unblock", "1", "profile") in storage.client.calls
     assert ("user_pinned_medias", 1) in storage.client.calls
     assert ("user_guides_v1", 1) in storage.client.calls
