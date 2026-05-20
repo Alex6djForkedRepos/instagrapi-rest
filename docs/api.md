@@ -373,10 +373,16 @@ edit endpoint accept `usertags` as one JSON array or repeated JSON-encoded
 `Usertag` values, and `location` as one JSON-encoded `Location` object. Leave
 these fields empty or omit them when no metadata is needed.
 
-Reel music upload and creation helpers also use JSON strings: `track` is a
-JSON-encoded `Track` object returned by music search/browser routes,
-`extra_data` is optional Reel configure data, and `device_status` is an
-optional JSON object for `GET /clip/share/facebook/config`.
+Music upload endpoints also use JSON strings: `track` is a JSON-encoded
+`Track` object returned by music search/browser routes, and `extra_data` is
+optional configure data. This applies to:
+
+- `POST /photo/upload/with/music`
+- `POST /clip/upload/with/music`
+- `POST /album/upload/with/music`
+
+`device_status` is an optional JSON object for
+`GET /clip/share/facebook/config`.
 
 ## System Endpoints
 

@@ -163,6 +163,8 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["archive_medias"], covered).status == "duplicate"
     assert classify_method(methods["archive_medias_paginated_v1"], covered).status == "exposed"
     assert classify_method(methods["media_template_v1"], covered).status == "exposed"
+    assert classify_method(methods["photo_upload_with_music"], covered).status == "exposed"
+    assert classify_method(methods["album_upload_with_music"], covered).status == "exposed"
     assert classify_method(methods["clip_info_for_creation"], covered).status == "exposed"
     assert classify_method(methods["clip_trial_eligible"], covered).status == "exposed"
     assert classify_method(methods["clip_share_to_fb_config"], covered).status == "exposed"

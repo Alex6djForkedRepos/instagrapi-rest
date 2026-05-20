@@ -241,6 +241,7 @@ async def test_openapi_uses_rest_http_methods():
         "/album/download": {"get"},
         "/album/download/by/urls": {"get"},
         "/album/upload": {"post"},
+        "/album/upload/with/music": {"post"},
         "/auth/challenge/resolve": {"post"},
         "/auth/login": {"post"},
         "/auth/login/by/sessionid": {"post"},
@@ -348,6 +349,7 @@ async def test_openapi_uses_rest_http_methods():
         "/photo/download/by/url": {"get"},
         "/photo/upload": {"post"},
         "/photo/upload/by/url": {"post"},
+        "/photo/upload/with/music": {"post"},
         "/ready": {"get"},
         "/reels": {"get"},
         "/reels/explore": {"get"},
@@ -529,6 +531,8 @@ async def test_openapi_uses_client_friendly_schema_names():
         "StoryUploadByUrlRequest",
         "ClipUploadByUrlRequest",
         "ClipUploadWithMusicRequest",
+        "PhotoUploadWithMusicRequest",
+        "AlbumUploadWithMusicRequest",
     } <= schema_names
 
     operation_ids = [
@@ -766,7 +770,9 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/user/videos"]["get"]["summary"] == "List paginated user videos"
     assert paths["/story/upload/by/url"]["post"]["summary"] == "Upload a story from a URL"
     assert paths["/clip/upload/by/url"]["post"]["summary"] == "Upload a Reel from a URL"
+    assert paths["/photo/upload/with/music"]["post"]["summary"] == "Upload a feed photo with music"
     assert paths["/album/download/by/urls"]["get"]["summary"] == "Download carousel album media from URLs"
+    assert paths["/album/upload/with/music"]["post"]["summary"] == "Upload a carousel album with music"
     assert paths["/build"]["get"]["summary"] == "Get build metadata"
     assert paths["/deps"]["get"]["summary"] == "Get dependency versions"
     assert paths["/health"]["get"]["summary"] == "Check liveness"
@@ -917,19 +923,21 @@ async def test_upload_openapi_documents_json_encoded_form_usertags_and_location(
 
 
 @pytest.mark.asyncio
-async def test_clip_upload_with_music_openapi_documents_json_encoded_form_fields():
+async def test_music_upload_openapi_documents_json_encoded_form_fields():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.get("/openapi.json")
 
     assert response.status_code == 200
-    schema = response.json()["components"]["schemas"]["ClipUploadWithMusicRequest"]
-    track = schema["properties"]["track"]
-    extra_data = schema["properties"]["extra_data"]
-    assert track["type"] == "string"
-    assert "JSON-encoded Track object" in track["description"]
-    assert extra_data["type"] == "string"
-    assert "JSON-encoded extra configure data" in extra_data["description"]
-    assert extra_data["nullable"] is True
+    schemas = response.json()["components"]["schemas"]
+    for schema_name in ("PhotoUploadWithMusicRequest", "ClipUploadWithMusicRequest", "AlbumUploadWithMusicRequest"):
+        schema = schemas[schema_name]
+        track = schema["properties"]["track"]
+        extra_data = schema["properties"]["extra_data"]
+        assert track["type"] == "string"
+        assert "JSON-encoded Track object" in track["description"]
+        assert extra_data["type"] == "string"
+        assert "JSON-encoded extra configure data" in extra_data["description"]
+        assert extra_data["nullable"] is True
 
 
 @pytest.mark.asyncio

@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **263**
-- Methods not exposed as REST routes: **237**
-- Candidate REST backlog: **12**
+- Methods reached by REST routes: **265**
+- Methods not exposed as REST routes: **235**
+- Candidate REST backlog: **10**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 263 | Already used by public REST routes. |
-| `candidate` | 12 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 265 | Already used by public REST routes. |
+| `candidate` | 10 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -28,7 +28,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 |---|---:|---:|---:|---:|---:|
 | `account` | 14 | 0 | 0 | 0 | 14 |
 | `aiograpi` | 1 | 0 | 0 | 0 | 1 |
-| `album` | 3 | 1 | 0 | 2 | 6 |
+| `album` | 4 | 0 | 0 | 2 | 6 |
 | `auth` | 7 | 0 | 0 | 27 | 34 |
 | `bloks` | 0 | 0 | 0 | 2 | 2 |
 | `challenge` | 1 | 0 | 0 | 5 | 6 |
@@ -50,7 +50,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `note` | 8 | 0 | 0 | 0 | 8 |
 | `notification` | 3 | 0 | 24 | 0 | 27 |
 | `password` | 0 | 0 | 0 | 2 | 2 |
-| `photo` | 4 | 1 | 1 | 4 | 10 |
+| `photo` | 5 | 0 | 1 | 4 | 10 |
 | `private` | 2 | 0 | 0 | 11 | 13 |
 | `public` | 0 | 0 | 0 | 9 | 9 |
 | `share` | 3 | 0 | 0 | 0 | 3 |
@@ -66,11 +66,9 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 
 | Area | Candidate methods |
 |---|---|
-| `album` | `album_upload_with_music` |
 | `explore` | `report_explore_media` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
-| `photo` | `photo_upload_with_music` |
 | `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
 | `video` | `video_upload_to_direct` |
@@ -108,6 +106,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /album/download` | `album_download` |
 | `GET /album/download/by/urls` | `album_download_by_urls` |
 | `POST /album/upload` | `album_upload` |
+| `POST /album/upload/with/music` | `album_upload_with_music` |
 | `POST /auth/challenge/resolve` | `challenge_resolve` |
 | `POST /auth/login` | `login`, `set_locale`, `set_proxy`, `set_timezone_offset` |
 | `POST /auth/login/by/sessionid` | `login_by_sessionid`, `set_locale`, `set_proxy`, `set_timezone_offset` |
@@ -243,6 +242,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /photo/download/by/url` | `photo_download_by_url` |
 | `POST /photo/upload` | `photo_upload` |
 | `POST /photo/upload/by/url` | `photo_upload` |
+| `POST /photo/upload/with/music` | `photo_upload_with_music` |
 | `GET /reels` | `reels` |
 | `GET /reels/explore` | `explore_reels` |
 | `GET /reels/friends` | `friends_reels` |
@@ -342,7 +342,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `album_download_by_urls(self, urls: List[str], folder: pathlib._local.Path = '', overwrite: bool = True) -> List[pathlib._local.Path]` | `album` | `GET /album/download/by/urls` | `exposed` | used by at least one public REST route |
 | `album_download_origin(self, media_pk: int) -> List[bytes]` | `album` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `album_upload(self, paths: List[pathlib._local.Path], caption: str, usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, configure_timeout: int = 3, configure_handler=None, configure_exception=None, to_story=False, extra_data: Dict[str, str] = {}) -> aiograpi.types.Media` | `album` | `POST /album/upload` | `exposed` | used by at least one public REST route |
-| `album_upload_with_music(self, paths: List[pathlib._local.Path], caption: str, track: Union[aiograpi.types.Track, Dict], usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, configure_timeout: int = 3, configure_handler=None, configure_exception=None, to_story=False, extra_data: Dict[str, str] = {}, audio_asset_start_time: Optional[int] = None, overlap_duration: int = 30000, browse_session_id: Optional[str] = None, alacorn_session_id: Optional[str] = None) -> aiograpi.types.Media` | `album` | - | `candidate` | potential user-facing REST endpoint |
+| `album_upload_with_music(self, paths: List[pathlib._local.Path], caption: str, track: Union[aiograpi.types.Track, Dict], usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, configure_timeout: int = 3, configure_handler=None, configure_exception=None, to_story=False, extra_data: Dict[str, str] = {}, audio_asset_start_time: Optional[int] = None, overlap_duration: int = 30000, browse_session_id: Optional[str] = None, alacorn_session_id: Optional[str] = None) -> aiograpi.types.Media` | `album` | `POST /album/upload/with/music` | `exposed` | used by at least one public REST route |
 | `archive_medias(self, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `archive_medias` route family |
 | `archive_medias_paginated_v1(self, amount: int = 0, end_cursor: str = '') -> Tuple[List[aiograpi.types.Media], str]` | `media` | `GET /account/archive/media` | `exposed` | used by at least one public REST route |
 | `archive_medias_v1(self, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `archive_medias` route family |
@@ -652,7 +652,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `photo_upload(self, path: pathlib._local.Path, caption: str, upload_id: str = '', usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, extra_data: Dict[str, str] = {}) -> aiograpi.types.Media` | `photo` | `POST /photo/upload`<br>`POST /photo/upload/by/url` | `exposed` | used by at least one public REST route |
 | `photo_upload_to_cutout_sticker(self, path: pathlib._local.Path, bypass_ai: bool = True) -> aiograpi.types.Media` | `photo` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `photo_upload_to_story(self, path: pathlib._local.Path, caption: str = '', upload_id: str = '', mentions: List[aiograpi.types.StoryMention] = [], locations: List[aiograpi.types.StoryLocation] = [], links: List[aiograpi.types.StoryLink] = [], hashtags: List[aiograpi.types.StoryHashtag] = [], stickers: List[aiograpi.types.StorySticker] = [], medias: List[aiograpi.types.StoryMedia] = [], polls: List[aiograpi.types.StoryPoll] = [], extra_data: Dict[str, str] = {}) -> aiograpi.types.Story` | `photo` | `POST /story/upload`<br>`POST /story/upload/by/url` | `exposed` | used by at least one public REST route |
-| `photo_upload_with_music(self, path: pathlib._local.Path, caption: str, track: Union[aiograpi.types.Track, Dict], upload_id: str = '', usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, extra_data: Dict[str, str] = {}, audio_asset_start_time: Optional[int] = None, overlap_duration: int = 30000, browse_session_id: Optional[str] = None, alacorn_session_id: Optional[str] = None) -> aiograpi.types.Media` | `photo` | - | `candidate` | potential user-facing REST endpoint |
+| `photo_upload_with_music(self, path: pathlib._local.Path, caption: str, track: Union[aiograpi.types.Track, Dict], upload_id: str = '', usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, extra_data: Dict[str, str] = {}, audio_asset_start_time: Optional[int] = None, overlap_duration: int = 30000, browse_session_id: Optional[str] = None, alacorn_session_id: Optional[str] = None) -> aiograpi.types.Media` | `photo` | `POST /photo/upload/with/music` | `exposed` | used by at least one public REST route |
 | `pre_login_flow(self) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `private_graphql_clips_profile(self, target_user_id: str, client_doc_id: str = '209049231614685382737238866578', priority: str = None, initial_stream_count: int = 6, page_size: int = 12, no_of_medias_in_each_chunk: int = 6) -> dict` | `user` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `private_graphql_followers_list(self, user_id: str, rank_token: str, client_doc_id: str = '28479704798344003308647327139', max_id: int = None, priority: str = None, exclude_field_is_favorite: bool = None, exclude_unused_fields: bool = None) -> dict` | `user` | - | `internal` | low-level aiograpi helper or unsafe generic surface |

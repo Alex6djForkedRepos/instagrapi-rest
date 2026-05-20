@@ -25,12 +25,20 @@ class FakeClient:
         self.calls.append(("photo_upload", path, kwargs))
         return Path(path)
 
+    async def photo_upload_with_music(self, path, **kwargs):
+        self.calls.append(("photo_upload_with_music", path, kwargs))
+        return Path(path)
+
     async def video_upload(self, path, **kwargs):
         self.calls.append(("video_upload", path, kwargs))
         return Path(path)
 
     async def album_upload(self, paths, **kwargs):
         self.calls.append(("album_upload", tuple(paths), kwargs))
+        return list(paths)
+
+    async def album_upload_with_music(self, paths, **kwargs):
+        self.calls.append(("album_upload_with_music", tuple(paths), kwargs))
         return list(paths)
 
     async def igtv_upload(self, path, **kwargs):
@@ -188,6 +196,24 @@ async def test_photo_upload_post_writes_tempfile_and_calls_client():
 
 
 @pytest.mark.asyncio
+async def test_photo_upload_with_music_post_writes_tempfile_and_calls_client():
+    cl = FakeClient()
+    result = await helpers.photo_upload_with_music_post(
+        cl,
+        b"image",
+        caption="hi",
+        track={"id": "track1"},
+        extra_data={"share_to_facebook": "1"},
+    )
+    call = next(c for c in cl.calls if c[0] == "photo_upload_with_music")
+    assert call[1].endswith(".jpg")
+    assert call[2]["caption"] == "hi"
+    assert call[2]["track"] == {"id": "track1"}
+    assert call[2]["extra_data"] == {"share_to_facebook": "1"}
+    assert str(result).endswith(".jpg")
+
+
+@pytest.mark.asyncio
 async def test_video_upload_post_writes_tempfile_and_calls_client():
     cl = FakeClient()
     result = await helpers.video_upload_post(cl, b"video", caption="hi")
@@ -292,4 +318,26 @@ async def test_album_upload_post_collects_files_into_tempdir():
     assert len(paths) == 2
     assert paths[0].endswith(".jpg")
     assert paths[1].endswith(".png")
+    assert len(result) == 2
+
+
+@pytest.mark.asyncio
+async def test_album_upload_with_music_post_collects_files_into_tempdir():
+    cl = FakeClient()
+    files = [FakeUploadFile("a.jpg", b"img-1"), FakeUploadFile("b.png", b"img-2")]
+    result = await helpers.album_upload_with_music_post(
+        cl,
+        files,
+        caption="hi",
+        track={"id": "track1"},
+        extra_data={"share_to_facebook": "1"},
+    )
+    call = next(c for c in cl.calls if c[0] == "album_upload_with_music")
+    paths = call[1]
+    assert len(paths) == 2
+    assert paths[0].endswith(".jpg")
+    assert paths[1].endswith(".png")
+    assert call[2]["caption"] == "hi"
+    assert call[2]["track"] == {"id": "track1"}
+    assert call[2]["extra_data"] == {"share_to_facebook": "1"}
     assert len(result) == 2

@@ -141,6 +141,13 @@ async def photo_upload_post(cl, content, **kwargs):
         return await cl.photo_upload(fp.name, **kwargs)
 
 
+async def photo_upload_with_music_post(cl, content, **kwargs):
+    with tempfile.NamedTemporaryFile(suffix='.jpg') as fp:
+        fp.write(content)
+        fp.flush()
+        return await cl.photo_upload_with_music(fp.name, **kwargs)
+
+
 async def video_upload_post(cl, content, **kwargs):
     with tempfile.TemporaryDirectory() as td:
         path = _write_temp_file(td, content, '.mp4')
@@ -157,6 +164,18 @@ async def album_upload_post(cl, files, **kwargs):
             fp.close()
             paths.append(fp.name)
         return await cl.album_upload(paths, **kwargs)
+
+
+async def album_upload_with_music_post(cl, files, **kwargs):
+    with tempfile.TemporaryDirectory() as td:
+        paths = []
+        for i in range(len(files)):
+            filename, ext = os.path.splitext(files[i].filename)
+            fp = tempfile.NamedTemporaryFile(suffix=ext, delete=False, dir=td)
+            fp.write(await files[i].read())
+            fp.close()
+            paths.append(fp.name)
+        return await cl.album_upload_with_music(paths, **kwargs)
 
 
 async def igtv_upload_post(cl, content, **kwargs):

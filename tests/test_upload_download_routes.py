@@ -51,6 +51,25 @@ def _story_payload():
     }
 
 
+def _track_payload():
+    return {
+        "id": "track1",
+        "title": "Track",
+        "subtitle": "Artist",
+        "display_artist": "Artist",
+        "audio_cluster_id": 1,
+        "highlight_start_times_in_ms": [1000],
+        "is_explicit": False,
+        "dash_manifest": "",
+        "uri": "https://example.test/track.m4a",
+        "has_lyrics": False,
+        "audio_asset_id": 2,
+        "duration_in_ms": 30000,
+        "allows_saving": True,
+        "territory_validity_periods": {},
+    }
+
+
 class FakeClient:
     def __init__(self):
         self.calls = []
@@ -125,12 +144,50 @@ class FakeClient:
         self.calls.append(("photo_upload", path, kwargs))
         return _media_payload()
 
+    async def photo_upload_with_music(self, path, **kwargs):
+        upload_path = Path(path)
+        self.calls.append(
+            (
+                "photo_upload_with_music",
+                upload_path.suffix,
+                upload_path.read_bytes(),
+                kwargs["caption"],
+                kwargs["track"].id,
+                kwargs["upload_id"],
+                kwargs["extra_data"],
+                kwargs["audio_asset_start_time"],
+                kwargs["overlap_duration"],
+                kwargs["browse_session_id"],
+                kwargs["alacorn_session_id"],
+            )
+        )
+        return _media_payload()
+
     async def video_upload(self, path, **kwargs):
         self.calls.append(("video_upload", path, kwargs))
         return _media_payload()
 
     async def album_upload(self, paths, **kwargs):
         self.calls.append(("album_upload", tuple(paths), kwargs))
+        return _media_payload()
+
+    async def album_upload_with_music(self, paths, **kwargs):
+        upload_paths = [Path(path) for path in paths]
+        self.calls.append(
+            (
+                "album_upload_with_music",
+                tuple(path.suffix for path in upload_paths),
+                tuple(path.read_bytes() for path in upload_paths),
+                kwargs["caption"],
+                kwargs["track"].id,
+                kwargs["configure_timeout"],
+                kwargs["extra_data"],
+                kwargs["audio_asset_start_time"],
+                kwargs["overlap_duration"],
+                kwargs["browse_session_id"],
+                kwargs["alacorn_session_id"],
+            )
+        )
         return _media_payload()
 
     async def igtv_upload(self, path, **kwargs):
@@ -281,6 +338,41 @@ async def test_photo_upload_uses_helper(storage):
         )
     assert response.status_code == 200
     assert any(call[0] == "photo_upload" for call in storage.client.calls)
+
+
+@pytest.mark.asyncio
+async def test_photo_upload_with_music_uses_track_and_extra_data(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/photo/upload/with/music",
+            data={
+                "sessionid": "sid",
+                "caption": "hi",
+                "track": json.dumps(_track_payload()),
+                "upload_id": "upload1",
+                "extra_data": json.dumps({"share_to_facebook": "1"}),
+                "audio_asset_start_time": "1000",
+                "overlap_duration": "25000",
+                "browse_session_id": "browse1",
+                "alacorn_session_id": "alacorn1",
+            },
+            files={"file": ("a.jpg", b"photo-music-bytes", "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    assert (
+        "photo_upload_with_music",
+        ".jpg",
+        b"photo-music-bytes",
+        "hi",
+        "track1",
+        "upload1",
+        {"share_to_facebook": "1"},
+        1000,
+        25000,
+        "browse1",
+        "alacorn1",
+    ) in storage.client.calls
 
 
 @pytest.mark.asyncio
@@ -866,6 +958,44 @@ async def test_igtv_upload_by_url_with_and_without_thumbnail(storage, fake_reque
         )
     assert no_thumb.status_code == 200
     assert with_thumb.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_album_upload_with_music_uses_track_and_extra_data(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/album/upload/with/music",
+            data={
+                "sessionid": "sid",
+                "caption": "hi",
+                "track": json.dumps(_track_payload()),
+                "configure_timeout": "5",
+                "extra_data": json.dumps({"share_to_facebook": "1"}),
+                "audio_asset_start_time": "1000",
+                "overlap_duration": "25000",
+                "browse_session_id": "browse1",
+                "alacorn_session_id": "alacorn1",
+            },
+            files=[
+                ("files", ("a.jpg", b"album-photo-1", "image/jpeg")),
+                ("files", ("b.jpg", b"album-photo-2", "image/jpeg")),
+            ],
+        )
+
+    assert response.status_code == 200
+    assert (
+        "album_upload_with_music",
+        (".jpg", ".jpg"),
+        (b"album-photo-1", b"album-photo-2"),
+        "hi",
+        "track1",
+        5,
+        {"share_to_facebook": "1"},
+        1000,
+        25000,
+        "browse1",
+        "alacorn1",
+    ) in storage.client.calls
 
 
 # Album routes
