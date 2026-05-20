@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 from aiograpi.types import Media
@@ -20,6 +20,18 @@ router = APIRouter(
     tags=["Clip (Reels)"],
     responses={404: {"description": "Not found"}},
 )
+
+
+@router.get("/template", response_model=Dict[str, Any])
+async def clip_template(
+    sessionid: str = Depends(get_sessionid),
+    media_id: str = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get clip template
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_template_v1(media_id)
 
 
 @router.get("/download")

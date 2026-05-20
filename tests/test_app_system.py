@@ -217,6 +217,7 @@ async def test_openapi_uses_sessionid_authorize_button_for_protected_routes():
 async def test_openapi_uses_rest_http_methods():
     expected_methods = {
         "/account": {"get", "patch"},
+        "/account/archive/media": {"get"},
         "/account/bio-links": {"delete"},
         "/account/biography": {"patch"},
         "/account/collection": {"get"},
@@ -249,6 +250,7 @@ async def test_openapi_uses_rest_http_methods():
         "/build": {"get"},
         "/clip/download": {"get"},
         "/clip/download/by/url": {"get"},
+        "/clip/template": {"get"},
         "/clip/upload": {"post"},
         "/clip/upload/by/url": {"post"},
         "/deps": {"get"},
@@ -320,14 +322,21 @@ async def test_openapi_uses_rest_http_methods():
         "/media/like": {"delete", "post"},
         "/account/liked/media": {"get"},
         "/media/likers": {"get"},
+        "/media/livestream": {"get", "patch", "post"},
+        "/media/livestream/comments": {"get"},
+        "/media/livestream/viewers": {"get"},
         "/media/oembed": {"get"},
         "/media/pin": {"delete", "post"},
         "/media/save": {"delete", "post"},
         "/media/seen": {"patch"},
         "/media/author": {"get"},
         "/music/feed/browser": {"get"},
-        "/note": {"delete", "post"},
+        "/note": {"delete", "get", "post"},
+        "/note/music": {"post"},
+        "/note/text": {"get"},
         "/notes": {"get"},
+        "/notes/last-seen": {"patch"},
+        "/notes/music/browser": {"get"},
         "/notifications": {"get"},
         "/notifications/settings": {"delete", "get", "patch"},
         "/photo/download": {"get"},
@@ -603,6 +612,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/auth/settings"]["patch"]["summary"] == "Save auth settings"
     assert paths["/account"]["get"]["summary"] == "Get authenticated account info"
     assert paths["/account"]["patch"]["summary"] == "Update authenticated account profile"
+    assert paths["/account/archive/media"]["get"]["summary"] == "List archived account media"
     assert paths["/account/collections"]["get"]["summary"] == "List saved collections"
     assert paths["/account/collection"]["get"]["summary"] == "Get a saved collection"
     assert paths["/account/collection/media"]["get"]["summary"] == "List saved collection media"
@@ -672,8 +682,19 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/media/comment/pin"]["post"]["summary"] == "Pin a media comment"
     assert paths["/media/comment/pin"]["delete"]["summary"] == "Unpin a media comment"
     assert paths["/media/likers"]["get"]["summary"] == "List media likers"
+    assert paths["/media/livestream"]["post"]["summary"] == "Create livestream"
+    assert paths["/media/livestream"]["get"]["summary"] == "Get livestream info"
+    assert paths["/media/livestream"]["patch"]["summary"] == "Update livestream state"
+    assert paths["/media/livestream/comments"]["get"]["summary"] == "List livestream comments"
+    assert paths["/media/livestream/viewers"]["get"]["summary"] == "List livestream viewers"
+    assert paths["/clip/template"]["get"]["summary"] == "Get clip template"
     assert paths["/music/feed/browser"]["get"]["summary"] == "Get feed music browser"
+    assert paths["/note"]["get"]["summary"] == "Get note by username"
+    assert paths["/note/music"]["post"]["summary"] == "Create music note"
+    assert paths["/note/text"]["get"]["summary"] == "Get note text by username"
     assert paths["/notes"]["get"]["summary"] == "List notes"
+    assert paths["/notes/last-seen"]["patch"]["summary"] == "Mark notes as seen"
+    assert paths["/notes/music/browser"]["get"]["summary"] == "Browse note music"
     assert paths["/reels"]["get"]["summary"] == "List connected Reels"
     assert paths["/reels/friends"]["get"]["summary"] == "List friends Reels"
     assert paths["/reels/explore"]["get"]["summary"] == "List explore Reels"

@@ -224,6 +224,8 @@ they read the current account's saved Instagram collections.
 - `GET /account/collection` gets one saved collection by `collection_pk` or `name`.
 - `GET /account/collection/media` lists media in one saved collection by
   `collection_pk` or `name`.
+- `GET /account/archive/media` lists archived media for the authenticated
+  account with `items` and `next_cursor`.
 
 ## Explore
 
@@ -242,6 +244,34 @@ workflows.
 - `GET /track/stream` returns streamed media for a track `id`.
 - `GET /track/download/by/url` downloads track audio from a URL.
 - `GET /music/feed/browser` returns music candidates for feed posts.
+
+## Livestreams And Templates
+
+Livestream routes manage the authenticated account's Instagram Live broadcast
+state. They are exposed as resource state changes instead of `start`/`end`
+action paths:
+
+- `POST /media/livestream` creates a live broadcast and returns stream server
+  metadata.
+- `GET /media/livestream` returns broadcast info by `broadcast_id`.
+- `PATCH /media/livestream` changes the broadcast `state` to `started` or
+  `ended`.
+- `GET /media/livestream/comments` lists live comments for a `broadcast_id`.
+- `GET /media/livestream/viewers` lists live viewers for a `broadcast_id`.
+- `GET /clip/template` returns the raw clip template payload for a source
+  `media_id`.
+
+## Notes
+
+- `GET /notes` lists visible notes.
+- `GET /note` returns a visible note by `username`.
+- `GET /note/text` returns only the visible note text by `username`.
+- `POST /note` creates a text note.
+- `POST /note/music` creates a note with music from a track payload returned by
+  `GET /notes/music/browser`.
+- `PATCH /notes/last-seen` marks notes as seen.
+- `DELETE /note` deletes one note by `note_id`.
+- `GET /notes/music/browser` returns music candidates for Notes.
 
 ## Comment Utilities
 
@@ -283,6 +313,7 @@ from the previous page. This shape is used for:
 - `GET /direct/inbox`
 - `GET /direct/pending`
 - `GET /direct/spam`
+- `GET /account/archive/media`
 - `GET /hashtag/media/recent`
 - `GET /hashtag/media/top`
 - `GET /location/media/recent`

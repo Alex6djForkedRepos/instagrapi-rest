@@ -80,6 +80,10 @@ class FakeClient:
         self.calls.append(("clip_download_by_url", url, filename, str(folder)))
         return Path(__file__).resolve()
 
+    async def media_template_v1(self, media_id):
+        self.calls.append(("media_template_v1", media_id))
+        return {"template_clips_media_id": media_id, "status": "ok"}
+
     async def igtv_download(self, media_pk, folder=""):
         self.calls.append(("igtv_download", media_pk, str(folder)))
         return Path(__file__).resolve()
@@ -610,6 +614,16 @@ async def test_clip_download_by_url_both_returnfile_modes(storage):
         )
     assert path_resp.status_code == 200
     assert file_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_clip_template_returns_raw_template(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/clip/template", params={"sessionid": "sid", "media_id": "clip1"})
+
+    assert response.status_code == 200
+    assert response.json()["template_clips_media_id"] == "clip1"
+    assert ("media_template_v1", "clip1") in storage.client.calls
 
 
 @pytest.mark.asyncio

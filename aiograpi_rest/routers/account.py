@@ -7,7 +7,7 @@ from aiograpi.types import Account, Collection, Media, UserShort
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from aiograpi_rest.dependencies import ClientStorage, get_clients, get_sessionid
-from aiograpi_rest.pagination import UserShortPage
+from aiograpi_rest.pagination import MediaPage, UserShortPage
 
 router = APIRouter(
     prefix="/account",
@@ -173,6 +173,20 @@ async def liked_medias(
     """
     cl = await clients.get(sessionid)
     return await cl.liked_medias(amount, last_media_pk)
+
+
+@router.get("/archive/media", response_model=MediaPage)
+async def account_archive_media(
+    sessionid: str = Depends(get_sessionid),
+    amount: int = Query(50, ge=1, le=200),
+    cursor: str = Query(""),
+    clients: ClientStorage = Depends(get_clients),
+) -> MediaPage:
+    """Get a page of archived account media
+    """
+    cl = await clients.get(sessionid)
+    items, next_cursor = await cl.archive_medias_paginated_v1(amount, cursor or "")
+    return MediaPage(items=items, next_cursor=next_cursor or "")
 
 
 @router.get("/collections", response_model=List[Collection])

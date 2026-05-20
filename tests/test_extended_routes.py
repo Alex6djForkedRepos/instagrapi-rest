@@ -195,6 +195,10 @@ class FakeExpandedClient:
         self.calls.append(("feed_user_stream_item", item_id, is_pull_to_refresh))
         return {"item_id": item_id, "is_pull_to_refresh": is_pull_to_refresh}
 
+    async def archive_medias_paginated_v1(self, amount=0, end_cursor=""):
+        self.calls.append(("archive_medias_paginated_v1", amount, end_cursor))
+        return [_media_payload(38)], "next-archive-media"
+
     async def account_edit(self, **data):
         self.calls.append(("account_edit", data))
         payload = _account_payload()
@@ -314,6 +318,30 @@ class FakeExpandedClient:
     async def media_unpin(self, media_pk):
         self.calls.append(("media_unpin", media_pk))
         return True
+
+    async def media_create_livestream(self, title="Instagram Live"):
+        self.calls.append(("media_create_livestream", title))
+        return {"broadcast_id": "live1", "stream_server": "rtmp://example.test/", "stream_key": "live1-key"}
+
+    async def media_get_livestream_info(self, broadcast_id):
+        self.calls.append(("media_get_livestream_info", broadcast_id))
+        return {"broadcast_id": broadcast_id, "status": "active"}
+
+    async def media_start_livestream(self, broadcast_id):
+        self.calls.append(("media_start_livestream", broadcast_id))
+        return True
+
+    async def media_end_livestream(self, broadcast_id):
+        self.calls.append(("media_end_livestream", broadcast_id))
+        return True
+
+    async def media_get_livestream_comments(self, broadcast_id):
+        self.calls.append(("media_get_livestream_comments", broadcast_id))
+        return [{"username": "viewer", "text": "hello"}]
+
+    async def media_get_livestream_viewers(self, broadcast_id):
+        self.calls.append(("media_get_livestream_viewers", broadcast_id))
+        return [{"username": "viewer", "pk": "1"}]
 
     async def direct_threads(self, amount=20, selected_filter="", box="", thread_message_limit=None):
         self.calls.append(("direct_threads", amount, selected_filter, box, thread_message_limit))
@@ -782,6 +810,49 @@ class FakeExpandedClient:
         self.calls.append(("delete_note", note_id))
         return True
 
+    async def notes_music_browser(self):
+        self.calls.append(("notes_music_browser",))
+        return {"alacorn_session_id": "music-session", "items": [{"audio_asset_id": "a1"}]}
+
+    async def create_music_note(
+        self,
+        track,
+        text="",
+        audience=0,
+        start_time=None,
+        duration=30000,
+        browse_session_id=None,
+        alacorn_session_id=None,
+    ):
+        self.calls.append(
+            (
+                "create_music_note",
+                track,
+                text,
+                audience,
+                start_time,
+                duration,
+                browse_session_id,
+                alacorn_session_id,
+            )
+        )
+        return _note_payload("music-note")
+
+    def get_note_by_user(self, notes, username):
+        note_ids = [note["id"] if isinstance(note, dict) else note.id for note in notes]
+        self.calls.append(("get_note_by_user", note_ids, username))
+        return notes[0] if username == "user1" else None
+
+    def get_note_text_by_user(self, notes, username):
+        note_ids = [note["id"] if isinstance(note, dict) else note.id for note in notes]
+        self.calls.append(("get_note_text_by_user", note_ids, username))
+        note = notes[0]
+        return (note["text"] if isinstance(note, dict) else note.text) if username == "user1" else None
+
+    async def last_seen_update_note(self):
+        self.calls.append(("last_seen_update_note",))
+        return True
+
     async def totp_enable(self, verification_code):
         self.calls.append(("totp_enable", verification_code))
         return ["backup-code"]
@@ -857,6 +928,10 @@ async def test_account_routes(storage):
             "/account/phone/confirm",
             data={"sessionid": "sid", "phone_number": "+15550000000"},
         )
+        archive_media = await ac.get(
+            "/account/archive/media",
+            params={"sessionid": "sid", "amount": "3", "cursor": "archive-cursor"},
+        )
         feed_user_stream_item = await ac.get(
             "/account/feed/user/stream-item",
             params={"sessionid": "sid", "item_id": "1", "is_pull_to_refresh": "true"},
@@ -876,6 +951,7 @@ async def test_account_routes(storage):
     assert reset_password.status_code == 200 and reset_password.json()["username"] == "account"
     assert confirm_email.status_code == 200 and confirm_email.json()["email"] == "new@example.com"
     assert confirm_phone.status_code == 200 and confirm_phone.json()["phone_number"] == "+15550000000"
+    assert archive_media.status_code == 200 and archive_media.json()["next_cursor"] == "next-archive-media"
     assert feed_user_stream_item.status_code == 200 and feed_user_stream_item.json()["is_pull_to_refresh"] is True
     assert ("account_set_private",) in storage.client.calls
     assert ("account_set_public",) in storage.client.calls
@@ -889,6 +965,7 @@ async def test_account_routes(storage):
     assert ("reset_password", "account") in storage.client.calls
     assert ("send_confirm_email", "new@example.com") in storage.client.calls
     assert ("send_confirm_phone_number", "+15550000000") in storage.client.calls
+    assert ("archive_medias_paginated_v1", 3, "archive-cursor") in storage.client.calls
     assert ("feed_user_stream_item", "1", True) in storage.client.calls
 
 
@@ -916,6 +993,28 @@ async def test_media_comment_save_pin_routes(storage):
         )
         pin = await ac.post("/media/pin", data={"sessionid": "sid", "media_pk": "1"})
         unpin = await ac.delete("/media/pin", params={"sessionid": "sid", "media_pk": "1"})
+        create_live = await ac.post("/media/livestream", data={"sessionid": "sid", "title": "Launch"})
+        live_info = await ac.get("/media/livestream", params={"sessionid": "sid", "broadcast_id": "live1"})
+        start_live = await ac.patch(
+            "/media/livestream",
+            data={"sessionid": "sid", "broadcast_id": "live1", "state": "started"},
+        )
+        end_live = await ac.patch(
+            "/media/livestream",
+            data={"sessionid": "sid", "broadcast_id": "live1", "state": "ended"},
+        )
+        invalid_live_state = await ac.patch(
+            "/media/livestream",
+            data={"sessionid": "sid", "broadcast_id": "live1", "state": "paused"},
+        )
+        live_comments = await ac.get(
+            "/media/livestream/comments",
+            params={"sessionid": "sid", "broadcast_id": "live1"},
+        )
+        live_viewers = await ac.get(
+            "/media/livestream/viewers",
+            params={"sessionid": "sid", "broadcast_id": "live1"},
+        )
 
     assert comments.status_code == 200
     assert comments.json()["items"][0]["pk"] == "10"
@@ -926,10 +1025,23 @@ async def test_media_comment_save_pin_routes(storage):
     assert like.status_code == 200 and unlike.status_code == 200
     assert liked.status_code == 200 and save.status_code == 200 and unsave.status_code == 200
     assert pin.status_code == 200 and unpin.status_code == 200
+    assert create_live.status_code == 200 and create_live.json()["broadcast_id"] == "live1"
+    assert live_info.status_code == 200 and live_info.json()["status"] == "active"
+    assert start_live.status_code == 200 and start_live.json() is True
+    assert end_live.status_code == 200 and end_live.json() is True
+    assert invalid_live_state.status_code == 422
+    assert live_comments.status_code == 200 and live_comments.json()[0]["text"] == "hello"
+    assert live_viewers.status_code == 200 and live_viewers.json()[0]["username"] == "viewer"
     assert ("media_comments_chunk", "m1", 2, "comments-cursor") in storage.client.calls
     assert ("comment_bulk_delete", "m1", [10]) in storage.client.calls
     assert ("media_unsave", "m1", 7) in storage.client.calls
     assert ("media_unpin", "1") in storage.client.calls
+    assert ("media_create_livestream", "Launch") in storage.client.calls
+    assert ("media_get_livestream_info", "live1") in storage.client.calls
+    assert ("media_start_livestream", "live1") in storage.client.calls
+    assert ("media_end_livestream", "live1") in storage.client.calls
+    assert ("media_get_livestream_comments", "live1") in storage.client.calls
+    assert ("media_get_livestream_viewers", "live1") in storage.client.calls
 
 
 @pytest.mark.asyncio
@@ -1459,7 +1571,24 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
         )
         disabled_settings = await ac.delete("/notifications/settings", params={"sessionid": "sid"})
         notes = await ac.get("/notes", params={"sessionid": "sid"})
+        note_by_user = await ac.get("/note", params={"sessionid": "sid", "username": "@user1"})
+        note_text = await ac.get("/note/text", params={"sessionid": "sid", "username": "@user1"})
+        notes_music = await ac.get("/notes/music/browser", params={"sessionid": "sid"})
         note = await ac.post("/note", data={"sessionid": "sid", "text": "note", "audience": "1"})
+        music_note = await ac.post(
+            "/note/music",
+            params={"sessionid": "sid"},
+            json={
+                "track": {"audio_asset_id": "a1", "audio_cluster_id": "c1"},
+                "text": "music",
+                "audience": 1,
+                "start_time": 1000,
+                "duration": 15000,
+                "browse_session_id": "browse",
+                "alacorn_session_id": "music-session",
+            },
+        )
+        notes_seen = await ac.patch("/notes/last-seen", params={"sessionid": "sid"})
         delete_note = await ac.delete("/note", params={"sessionid": "sid", "note_id": "1"})
         totp = await ac.post("/auth/totp", data={"sessionid": "sid", "verification_code": "123456"})
         disable_totp = await ac.delete("/auth/totp", params={"sessionid": "sid"})
@@ -1522,7 +1651,12 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
         muted_settings,
         disabled_settings,
         notes,
+        note_by_user,
+        note_text,
+        notes_music,
         note,
+        music_note,
+        notes_seen,
         delete_note,
         totp,
         disable_totp,
@@ -1546,6 +1680,20 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
     assert ("notification_settings", "likes", "off") in storage.client.calls
     assert ("notification_mute_all", "1_hour") in storage.client.calls
     assert ("notification_disable",) in storage.client.calls
+    assert ("get_note_by_user", ["n1"], "user1") in storage.client.calls
+    assert ("get_note_text_by_user", ["n1"], "user1") in storage.client.calls
+    assert ("notes_music_browser",) in storage.client.calls
+    assert (
+        "create_music_note",
+        {"audio_asset_id": "a1", "audio_cluster_id": "c1"},
+        "music",
+        1,
+        1000,
+        15000,
+        "browse",
+        "music-session",
+    ) in storage.client.calls
+    assert ("last_seen_update_note",) in storage.client.calls
     assert ("challenge_resolve", {"challenge": {"api_path": "/challenge/1/nonce/"}}) in storage.client.calls
     assert bad_cover.status_code == 422
     assert conflicting_highlight_selector.status_code == 422

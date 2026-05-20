@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from aiograpi import Client
 from aiograpi.types import Comment, Media, UserShort
@@ -270,6 +270,69 @@ async def media_unarchive(sessionid: str = Depends(get_sessionid),
     """
     cl = await clients.get(sessionid)
     return await cl.media_unarchive(media_id)
+
+
+@router.post("/livestream", response_model=Dict[str, Any])
+async def media_livestream_create(
+    sessionid: str = Depends(get_sessionid),
+    title: str = Form("Instagram Live"),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Create livestream
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_create_livestream(title)
+
+
+@router.get("/livestream", response_model=Dict[str, Any])
+async def media_livestream_info(
+    sessionid: str = Depends(get_sessionid),
+    broadcast_id: str = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get livestream info
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_get_livestream_info(broadcast_id)
+
+
+@router.patch("/livestream", response_model=bool)
+async def media_livestream_state(
+    sessionid: str = Depends(get_sessionid),
+    broadcast_id: str = Form(...),
+    state: Literal["started", "ended"] = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Update livestream state
+    """
+    cl = await clients.get(sessionid)
+    if state == "started":
+        return await cl.media_start_livestream(broadcast_id)
+    return await cl.media_end_livestream(broadcast_id)
+
+
+@router.get("/livestream/comments", response_model=List[Dict[str, Any]])
+async def media_livestream_comments(
+    sessionid: str = Depends(get_sessionid),
+    broadcast_id: str = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[Dict[str, Any]]:
+    """List livestream comments
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_get_livestream_comments(broadcast_id)
+
+
+@router.get("/livestream/viewers", response_model=List[Dict[str, Any]])
+async def media_livestream_viewers(
+    sessionid: str = Depends(get_sessionid),
+    broadcast_id: str = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[Dict[str, Any]]:
+    """List livestream viewers
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_get_livestream_viewers(broadcast_id)
 
 
 @router.get("/comments", response_model=CommentPage)
