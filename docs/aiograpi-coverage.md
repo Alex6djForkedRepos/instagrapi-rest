@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **265**
-- Methods not exposed as REST routes: **235**
-- Candidate REST backlog: **10**
+- Methods reached by REST routes: **266**
+- Methods not exposed as REST routes: **234**
+- Candidate REST backlog: **9**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 265 | Already used by public REST routes. |
-| `candidate` | 10 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 266 | Already used by public REST routes. |
+| `candidate` | 9 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -60,7 +60,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `totp` | 2 | 2 | 0 | 0 | 4 |
 | `track` | 5 | 0 | 0 | 0 | 5 |
 | `user` | 46 | 0 | 22 | 6 | 74 |
-| `video` | 4 | 1 | 1 | 4 | 10 |
+| `video` | 5 | 0 | 1 | 4 | 10 |
 
 ## Candidate Backlog By Area
 
@@ -71,7 +71,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
 | `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
-| `video` | `video_upload_to_direct` |
 
 ## REST Routes To aiograpi Methods
 
@@ -166,6 +165,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `POST /direct/thread/video/call/mute` | `direct_thread_mute_video_call` |
 | `GET /direct/threads` | `direct_threads` |
 | `POST /direct/video` | `direct_send_video` |
+| `POST /direct/video/upload` | `video_upload_to_direct` |
 | `POST /direct/voice` | `direct_send_voice` |
 | `GET /explore` | `explore_page` |
 | `GET /explore/media` | `explore_page_media_info` |
@@ -821,7 +821,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `video_rupload(self, path: pathlib._local.Path, thumbnail: pathlib._local.Path = None, to_album: bool = False, to_story: bool = False, to_direct: bool = False) -> tuple` | `video` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `video_upload(self, path: pathlib._local.Path, caption: str, thumbnail: pathlib._local.Path = None, usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, extra_data: Dict[str, str] = {}) -> aiograpi.types.Media` | `video` | `POST /video/upload`<br>`POST /video/upload/by/url` | `exposed` | used by at least one public REST route |
 | `video_upload_to_cutout_sticker(self, path: pathlib._local.Path, bypass_ai: bool = True) -> aiograpi.types.Media` | `video` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `video_upload_to_direct(self, path: pathlib._local.Path, caption: str = '', thumbnail: pathlib._local.Path = None, mentions: List[aiograpi.types.StoryMention] = [], medias: List[aiograpi.types.StoryMedia] = [], thread_ids: List[int] = [], extra_data: Dict[str, str] = {}) -> aiograpi.types.DirectMessage` | `video` | - | `candidate` | potential user-facing REST endpoint |
+| `video_upload_to_direct(self, path: pathlib._local.Path, caption: str = '', thumbnail: pathlib._local.Path = None, mentions: List[aiograpi.types.StoryMention] = [], medias: List[aiograpi.types.StoryMedia] = [], thread_ids: List[int] = [], extra_data: Dict[str, str] = {}) -> aiograpi.types.DirectMessage` | `video` | `POST /direct/video/upload` | `exposed` | used by at least one public REST route |
 | `video_upload_to_story(self, path: pathlib._local.Path, caption: str = '', thumbnail: pathlib._local.Path = None, mentions: List[aiograpi.types.StoryMention] = [], locations: List[aiograpi.types.StoryLocation] = [], links: List[aiograpi.types.StoryLink] = [], hashtags: List[aiograpi.types.StoryHashtag] = [], stickers: List[aiograpi.types.StorySticker] = [], medias: List[aiograpi.types.StoryMedia] = [], polls: List[aiograpi.types.StoryPoll] = [], extra_data: Dict[str, str] = {}) -> aiograpi.types.Story` | `video` | `POST /story/upload`<br>`POST /story/upload/by/url` | `exposed` | used by at least one public REST route |
 | `web_search_topsearch(self, query: str) -> dict` | `fbsearch` | `GET /search/web/top` | `exposed` | used by at least one public REST route |
 | `web_search_topsearch_hashtags(self, query: str) -> List[aiograpi.types.Hashtag]` | `fbsearch` | `GET /search/web/hashtags` | `exposed` | used by at least one public REST route |

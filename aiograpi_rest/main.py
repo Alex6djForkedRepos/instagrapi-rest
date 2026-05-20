@@ -236,6 +236,7 @@ OPERATION_SUMMARIES = {
     "postDirectStory": "Share a story to direct users or threads",
     "postDirectPhoto": "Send a direct photo",
     "postDirectVideo": "Send a direct video",
+    "postDirectVideoUpload": "Upload a video to direct",
     "postDirectVoice": "Send a direct voice message",
     "postDirectFile": "Send a direct file",
     "postDirectCutoutSticker": "Send a direct cutout sticker",

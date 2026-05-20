@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -532,6 +533,38 @@ class FakeExpandedClient:
         self.upload_paths.append(Path(path))
         self.calls.append(("direct_send_video", Path(path).suffix, payload, user_ids or [], thread_ids or []))
         return _direct_message_payload("video-direct")
+
+    async def video_upload_to_direct(
+        self,
+        path,
+        caption="",
+        thumbnail=None,
+        mentions=None,
+        medias=None,
+        thread_ids=None,
+        extra_data=None,
+    ):
+        payload = Path(path).read_bytes()
+        thumbnail_path = Path(thumbnail) if thumbnail else None
+        thumbnail_payload = thumbnail_path.read_bytes() if thumbnail_path else None
+        self.upload_paths.append(Path(path))
+        if thumbnail_path:
+            self.upload_paths.append(thumbnail_path)
+        self.calls.append(
+            (
+                "video_upload_to_direct",
+                Path(path).suffix,
+                payload,
+                caption,
+                thumbnail_path.suffix if thumbnail_path else None,
+                thumbnail_payload,
+                mentions or [],
+                medias or [],
+                thread_ids or [],
+                extra_data or {},
+            )
+        )
+        return _direct_message_payload("video-upload-direct")
 
     async def direct_send_voice(self, path, user_ids=None, thread_ids=None, waveform=None):
         payload = Path(path).read_bytes()
@@ -1306,6 +1339,53 @@ async def test_direct_routes(storage):
     assert storage.client.upload_paths
     assert all(not path.exists() for path in storage.client.upload_paths)
     assert ("direct_request_approve", 100) in storage.client.calls
+
+
+@pytest.mark.asyncio
+async def test_direct_video_upload_uses_video_upload_to_direct(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/direct/video/upload",
+            data={
+                "sessionid": "sid",
+                "caption": "hello direct",
+                "thread_ids": ["100", "101"],
+                "mentions": json.dumps(
+                    {
+                        "user": {"pk": "42", "username": "u", "full_name": "Full"},
+                        "x": 0.1,
+                        "y": 0.2,
+                        "width": 0.3,
+                        "height": 0.4,
+                        "rotation": 12.0,
+                    }
+                ),
+                "medias": json.dumps({"media_pk": 123, "user_id": 42}),
+                "extra_data": json.dumps({"share_to_facebook": "1"}),
+            },
+            files={
+                "file": ("clip.mp4", b"video-bytes", "video/mp4"),
+                "thumbnail": ("cover.jpg", b"thumb-bytes", "image/jpeg"),
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["id"] == "video-upload-direct"
+    upload_call = next(call for call in storage.client.calls if call[0] == "video_upload_to_direct")
+    assert upload_call[:6] == (
+        "video_upload_to_direct",
+        ".mp4",
+        b"video-bytes",
+        "hello direct",
+        ".jpg",
+        b"thumb-bytes",
+    )
+    assert upload_call[6][0].user.pk == "42"
+    assert upload_call[6][0].x == 0.1
+    assert upload_call[7][0].media_pk == 123
+    assert upload_call[8] == [100, 101]
+    assert upload_call[9] == {"share_to_facebook": "1"}
+    assert all(not path.exists() for path in storage.client.upload_paths)
 
 
 @pytest.mark.asyncio

@@ -72,6 +72,7 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["direct_pending_approve"], covered).status == "duplicate"
     assert classify_method(methods["direct_send_cutout_sticker"], covered).status == "exposed"
     assert classify_method(methods["direct_spam_inbox"], covered).status == "exposed"
+    assert classify_method(methods["video_upload_to_direct"], covered).status == "exposed"
     assert classify_method(methods["reels"], covered).status == "exposed"
     assert classify_method(methods["friends_reels"], covered).status == "exposed"
     assert classify_method(methods["explore_reels"], covered).status == "exposed"

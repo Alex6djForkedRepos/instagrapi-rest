@@ -290,6 +290,7 @@ async def test_openapi_uses_rest_http_methods():
         "/direct/thread/video/call/mute": {"delete", "post"},
         "/direct/threads": {"get"},
         "/direct/video": {"post"},
+        "/direct/video/upload": {"post"},
         "/direct/voice": {"post"},
         "/explore": {"get"},
         "/explore/media": {"get"},
@@ -527,6 +528,7 @@ async def test_openapi_uses_client_friendly_schema_names():
         "AuthSettingsRequest",
         "AccountPictureRequest",
         "DirectMessageRequest",
+        "DirectVideoUploadRequest",
         "StoryUploadRequest",
         "StoryUploadByUrlRequest",
         "ClipUploadByUrlRequest",
@@ -666,6 +668,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/direct/story"]["post"]["summary"] == "Share a story to direct users or threads"
     assert paths["/direct/photo"]["post"]["summary"] == "Send a direct photo"
     assert paths["/direct/video"]["post"]["summary"] == "Send a direct video"
+    assert paths["/direct/video/upload"]["post"]["summary"] == "Upload a video to direct"
     assert paths["/direct/voice"]["post"]["summary"] == "Send a direct voice message"
     assert paths["/direct/file"]["post"]["summary"] == "Send a direct file"
     assert paths["/direct/cutout/sticker"]["post"]["summary"] == "Send a direct cutout sticker"
@@ -938,6 +941,25 @@ async def test_music_upload_openapi_documents_json_encoded_form_fields():
         assert extra_data["type"] == "string"
         assert "JSON-encoded extra configure data" in extra_data["description"]
         assert extra_data["nullable"] is True
+
+
+@pytest.mark.asyncio
+async def test_direct_video_upload_openapi_documents_json_encoded_form_fields():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/openapi.json")
+
+    assert response.status_code == 200
+    schema = response.json()["components"]["schemas"]["DirectVideoUploadRequest"]
+    mentions = schema["properties"]["mentions"]
+    medias = schema["properties"]["medias"]
+    extra_data = schema["properties"]["extra_data"]
+    assert mentions["items"] == {"type": "string"}
+    assert "JSON-encoded StoryMention object" in mentions["description"]
+    assert medias["items"] == {"type": "string"}
+    assert "JSON-encoded StoryMedia object" in medias["description"]
+    assert extra_data["type"] == "string"
+    assert "JSON-encoded extra configure data" in extra_data["description"]
+    assert extra_data["nullable"] is True
 
 
 @pytest.mark.asyncio

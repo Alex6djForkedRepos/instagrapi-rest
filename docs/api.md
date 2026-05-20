@@ -317,6 +317,9 @@ belong to a media object.
 - `DELETE /direct/message` unsends a direct message.
 - `POST /direct/cutout/sticker` sends a cutout sticker to either `user_ids`
   or `thread_ids`.
+- `POST /direct/video/upload` uploads a video through aiograpi's story-direct
+  flow with `caption`, optional `thumbnail`, repeatable JSON `mentions` and
+  `medias`, required `thread_ids`, and optional JSON `extra_data`.
 
 ## Pagination
 

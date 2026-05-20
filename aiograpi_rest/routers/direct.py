@@ -2,11 +2,12 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, Dict, List, Literal, Optional
 
-from aiograpi.types import DirectMessage, DirectShortThread, DirectThread, Media, UserShort
+from aiograpi.types import DirectMessage, DirectShortThread, DirectThread, Media, StoryMedia, StoryMention, UserShort
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
 from aiograpi_rest.dependencies import ClientStorage, get_clients, get_sessionid
+from aiograpi_rest.helpers import parse_json_form_dict, parse_json_form_models
 from aiograpi_rest.pagination import DirectThreadPage
 
 router = APIRouter(
@@ -19,6 +20,17 @@ router = APIRouter(
 class DirectMessageSearchResult(BaseModel):
     message: DirectMessage
     thread: DirectShortThread
+
+
+STORY_MENTIONS_FORM_DESCRIPTION = (
+    "Repeat this form field with a JSON-encoded StoryMention object, "
+    "or pass one JSON array of StoryMention objects. Leave empty to omit."
+)
+STORY_MEDIAS_FORM_DESCRIPTION = (
+    "Repeat this form field with a JSON-encoded StoryMedia object, "
+    "or pass one JSON array of StoryMedia objects. Leave empty to omit."
+)
+EXTRA_DATA_FORM_DESCRIPTION = "JSON-encoded extra configure data. Leave empty to omit."
 
 
 @router.get("/inbox", response_model=DirectThreadPage)
@@ -529,6 +541,40 @@ async def direct_video_send(
     with TemporaryDirectory() as directory:
         path = await _write_direct_upload(file, directory, ".mp4")
         return await cl.direct_send_video(path, user_ids, thread_ids)
+
+
+@router.post("/video/upload", response_model=DirectMessage)
+async def direct_video_upload(
+    sessionid: str = Depends(get_sessionid),
+    file: UploadFile = File(...),
+    caption: str = Form(""),
+    thumbnail: Optional[UploadFile] = File(None),
+    mentions: Optional[List[str]] = Form([], description=STORY_MENTIONS_FORM_DESCRIPTION),
+    medias: Optional[List[str]] = Form([], description=STORY_MEDIAS_FORM_DESCRIPTION),
+    thread_ids: List[int] = Form(...),
+    extra_data: Optional[str] = Form(None, description=EXTRA_DATA_FORM_DESCRIPTION),
+    clients: ClientStorage = Depends(get_clients),
+) -> DirectMessage:
+    """Upload a video to direct
+    """
+    cl = await clients.get(sessionid)
+    parsed_mentions = parse_json_form_models(mentions, StoryMention, "mentions")
+    parsed_medias = parse_json_form_models(medias, StoryMedia, "medias")
+    parsed_extra_data = parse_json_form_dict(extra_data, "extra_data", default={})
+    with TemporaryDirectory() as directory:
+        path = await _write_direct_upload(file, directory, ".mp4")
+        thumbnail_path = None
+        if thumbnail is not None:
+            thumbnail_path = await _write_direct_upload(thumbnail, directory, ".jpg")
+        return await cl.video_upload_to_direct(
+            path,
+            caption=caption,
+            thumbnail=thumbnail_path,
+            mentions=parsed_mentions,
+            medias=parsed_medias,
+            thread_ids=thread_ids,
+            extra_data=parsed_extra_data,
+        )
 
 
 @router.post("/voice", response_model=DirectMessage)
