@@ -11,6 +11,7 @@ router = APIRouter(
 )
 
 SETTING_VALUES = ["off", "following_only", "everyone"]
+MUTE_ALL_SETTING_VALUES = ["cancel", "15_minutes", "1_hour", "2_hour", "4_hour", "8_hour"]
 SETTING_CONTENT_TYPES = [
     "likes",
     "like_and_comment_on_photo_user_tagged",
@@ -36,6 +37,7 @@ SETTING_CONTENT_TYPES = [
     "announcements",
     "report_updated",
     "login_notification",
+    "mute_all",
 ]
 
 
@@ -57,7 +59,11 @@ async def notifications_settings(
 ) -> Dict[str, List[str]]:
     """Get supported notification settings
     """
-    return {"content_types": SETTING_CONTENT_TYPES, "setting_values": SETTING_VALUES}
+    return {
+        "content_types": SETTING_CONTENT_TYPES,
+        "setting_values": SETTING_VALUES,
+        "mute_all_values": MUTE_ALL_SETTING_VALUES,
+    }
 
 
 @router.patch("/settings", response_model=bool)
@@ -71,7 +77,21 @@ async def notifications_settings_update(
     """
     if content_type not in SETTING_CONTENT_TYPES:
         raise HTTPException(status_code=422, detail="Unsupported content_type")
-    if setting_value not in SETTING_VALUES:
+    setting_values = MUTE_ALL_SETTING_VALUES if content_type == "mute_all" else SETTING_VALUES
+    if setting_value not in setting_values:
         raise HTTPException(status_code=422, detail="Unsupported setting_value")
     cl = await clients.get(sessionid)
+    if content_type == "mute_all":
+        return await cl.notification_mute_all(setting_value)
     return await cl.notification_settings(content_type, setting_value)
+
+
+@router.delete("/settings", response_model=bool)
+async def notifications_settings_disable(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Disable notification settings
+    """
+    cl = await clients.get(sessionid)
+    return await cl.notification_disable()

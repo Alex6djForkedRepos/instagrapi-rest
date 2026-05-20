@@ -104,6 +104,18 @@ User relationship routes use `POST` to create or enable a relationship state and
 - `POST /account/email/confirm` sends an email confirmation code.
 - `POST /account/phone/confirm` sends a phone confirmation code.
 
+## Notification Settings
+
+- `GET /notifications/settings` returns supported notification `content_type`
+  values and allowed setting values.
+- `PATCH /notifications/settings` updates one notification setting by
+  `content_type` and `setting_value`. Most notification settings accept `off`,
+  `following_only`, or `everyone`.
+- `PATCH /notifications/settings` with `content_type=mute_all` accepts only
+  `cancel`, `15_minutes`, `1_hour`, `2_hour`, `4_hour`, or `8_hour`.
+- `DELETE /notifications/settings` disables all supported notification
+  settings for the authenticated account.
+
 ## OpenAPI
 
 - Swagger UI: `/docs`

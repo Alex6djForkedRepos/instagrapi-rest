@@ -706,6 +706,14 @@ class FakeExpandedClient:
         self.calls.append(("notification_settings", content_type, setting_value))
         return True
 
+    async def notification_mute_all(self, setting_value):
+        self.calls.append(("notification_mute_all", setting_value))
+        return True
+
+    async def notification_disable(self):
+        self.calls.append(("notification_disable",))
+        return True
+
     async def get_notes(self):
         self.calls.append(("get_notes",))
         return [_note_payload()]
@@ -1336,6 +1344,11 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
             "/notifications/settings",
             data={"sessionid": "sid", "content_type": "likes", "setting_value": "off"},
         )
+        muted_settings = await ac.patch(
+            "/notifications/settings",
+            data={"sessionid": "sid", "content_type": "mute_all", "setting_value": "1_hour"},
+        )
+        disabled_settings = await ac.delete("/notifications/settings", params={"sessionid": "sid"})
         notes = await ac.get("/notes", params={"sessionid": "sid"})
         note = await ac.post("/note", data={"sessionid": "sid", "text": "note", "audience": "1"})
         delete_note = await ac.delete("/note", params={"sessionid": "sid", "note_id": "1"})
@@ -1361,6 +1374,10 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
             "/notifications/settings",
             data={"sessionid": "sid", "content_type": "likes", "setting_value": "nope"},
         )
+        bad_mute_all_value = await ac.patch(
+            "/notifications/settings",
+            data={"sessionid": "sid", "content_type": "mute_all", "setting_value": "everyone"},
+        )
 
     for response in (
         user_highlights,
@@ -1375,6 +1392,8 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
         notifications,
         settings,
         patched_settings,
+        muted_settings,
+        disabled_settings,
         notes,
         note,
         delete_note,
@@ -1384,15 +1403,20 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
     ):
         assert response.status_code == 200
     assert settings.json()["setting_values"] == ["off", "following_only", "everyone"]
+    assert settings.json()["mute_all_values"] == ["cancel", "15_minutes", "1_hour", "2_hour", "4_hour", "8_hour"]
+    assert "mute_all" in settings.json()["content_types"]
     assert viewers.json()["next_cursor"] == "next-viewers"
     assert archive.json()["next_cursor"] == "next-archive"
     assert ("archive_story_days_paginated_v1", 50, "", False, "") in storage.client.calls
     assert ("notification_settings", "likes", "off") in storage.client.calls
+    assert ("notification_mute_all", "1_hour") in storage.client.calls
+    assert ("notification_disable",) in storage.client.calls
     assert ("challenge_resolve", {"challenge": {"api_path": "/challenge/1/nonce/"}}) in storage.client.calls
     assert bad_cover.status_code == 422
     assert bad_challenge.status_code == 422
     assert bad_content_type.status_code == 422
     assert bad_setting_value.status_code == 422
+    assert bad_mute_all_value.status_code == 422
 
 
 @pytest.mark.asyncio

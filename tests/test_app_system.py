@@ -328,7 +328,7 @@ async def test_openapi_uses_rest_http_methods():
         "/note": {"delete", "post"},
         "/notes": {"get"},
         "/notifications": {"get"},
-        "/notifications/settings": {"get", "patch"},
+        "/notifications/settings": {"delete", "get", "patch"},
         "/photo/download": {"get"},
         "/photo/download/by/url": {"get"},
         "/photo/upload": {"post"},
@@ -689,6 +689,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/search/users"]["get"]["summary"] == "Search users"
     assert paths["/search/web/hashtags"]["get"]["summary"] == "Search web hashtags"
     assert paths["/search/web/top"]["get"]["summary"] == "Search web top results"
+    assert paths["/notifications/settings"]["delete"]["summary"] == "Disable all notification settings"
     assert paths["/story"]["get"]["summary"] == "Get story details"
     assert paths["/story/viewers"]["get"]["summary"] == "List paginated story viewers"
     assert paths["/track"]["get"]["summary"] == "Get music track details"

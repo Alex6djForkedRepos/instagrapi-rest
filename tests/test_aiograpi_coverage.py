@@ -112,6 +112,35 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["disable_reels_notifications"], covered).status == "exposed"
     assert classify_method(methods["enable_videos_notifications"], covered).status == "exposed"
     assert classify_method(methods["disable_videos_notifications"], covered).status == "exposed"
+    assert classify_method(methods["notification_disable"], covered).status == "exposed"
+    assert classify_method(methods["notification_mute_all"], covered).status == "exposed"
+    for method_name in (
+        "notification_announcements",
+        "notification_comment_likes",
+        "notification_comments",
+        "notification_connection",
+        "notification_direct_group_requests",
+        "notification_direct_share_activity",
+        "notification_felix_upload_result",
+        "notification_first_post",
+        "notification_follow_request_accepted",
+        "notification_fundraiser_creator",
+        "notification_fundraiser_supporter",
+        "notification_like_and_comment_on_photo_user_tagged",
+        "notification_likes",
+        "notification_live_broadcast",
+        "notification_login",
+        "notification_new_follower",
+        "notification_pending_direct_share",
+        "notification_reminders",
+        "notification_report_updated",
+        "notification_rooms",
+        "notification_tagged_in_bio",
+        "notification_user_tagged",
+        "notification_video_call",
+        "notification_view_count",
+    ):
+        assert classify_method(methods[method_name], covered).status == "duplicate"
     assert classify_method(methods["comment_likers_gql"], covered).status == "exposed"
     assert classify_method(methods["comment_likers_gql_chunk"], covered).status == "duplicate"
     assert classify_method(methods["comment_pin"], covered).status == "exposed"

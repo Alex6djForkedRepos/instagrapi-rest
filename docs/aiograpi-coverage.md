@@ -9,17 +9,17 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **229**
-- Methods not exposed as REST routes: **271**
-- Candidate REST backlog: **70**
+- Methods reached by REST routes: **231**
+- Methods not exposed as REST routes: **269**
+- Candidate REST backlog: **44**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 229 | Already used by public REST routes. |
-| `candidate` | 70 | Likely useful as a future user-facing REST endpoint. |
-| `duplicate` | 99 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
+| `exposed` | 231 | Already used by public REST routes. |
+| `candidate` | 44 | Likely useful as a future user-facing REST endpoint. |
+| `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
 ## Coverage By Area
@@ -48,7 +48,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `media` | 21 | 8 | 29 | 1 | 59 |
 | `multiple_accounts` | 0 | 2 | 0 | 0 | 2 |
 | `note` | 3 | 5 | 0 | 0 | 8 |
-| `notification` | 1 | 26 | 0 | 0 | 27 |
+| `notification` | 3 | 0 | 24 | 0 | 27 |
 | `password` | 0 | 0 | 0 | 2 | 2 |
 | `photo` | 4 | 1 | 1 | 4 | 10 |
 | `private` | 2 | 0 | 0 | 11 | 13 |
@@ -74,7 +74,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `media` | `archive_medias`, `media_create_livestream`, `media_end_livestream`, `media_get_livestream_comments`, `media_get_livestream_info`, `media_get_livestream_viewers`, `media_start_livestream`, `media_template_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
 | `note` | `create_music_note`, `get_note_by_user`, `get_note_text_by_user`, `last_seen_update_note`, `notes_music_browser` |
-| `notification` | `notification_announcements`, `notification_comment_likes`, `notification_comments`, `notification_connection`, `notification_direct_group_requests`, `notification_direct_share_activity`, `notification_disable`, `notification_felix_upload_result`, `notification_first_post`, `notification_follow_request_accepted`, `notification_fundraiser_creator`, `notification_fundraiser_supporter`, `notification_like_and_comment_on_photo_user_tagged`, `notification_likes`, `notification_live_broadcast`, `notification_login`, `notification_mute_all`, `notification_new_follower`, `notification_pending_direct_share`, `notification_reminders`, `notification_report_updated`, `notification_rooms`, `notification_tagged_in_bio`, `notification_user_tagged`, `notification_video_call`, `notification_view_count` |
 | `photo` | `photo_upload_with_music` |
 | `share` | `share_code_from_url`, `share_info`, `share_info_by_url` |
 | `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
@@ -224,8 +223,9 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `POST /note` | `create_note` |
 | `GET /notes` | `get_notes` |
 | `GET /notifications` | `news_inbox_v1` |
+| `DELETE /notifications/settings` | `notification_disable` |
 | `GET /notifications/settings` | - |
-| `PATCH /notifications/settings` | `notification_settings` |
+| `PATCH /notifications/settings` | `notification_mute_all`, `notification_settings` |
 | `GET /photo/download` | `photo_download` |
 | `GET /photo/download/by/url` | `photo_download_by_url` |
 | `POST /photo/upload` | `photo_upload` |
@@ -595,33 +595,33 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `new_feed_exist(self) -> bool` | `user` | `GET /account/feed/new` | `exposed` | used by at least one public REST route |
 | `news_inbox_v1(self, mark_as_seen: bool = False) -> dict` | `account` | `GET /notifications` | `exposed` | used by at least one public REST route |
 | `notes_music_browser(self) -> Dict` | `note` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_announcements(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_comment_likes(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_comments(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_connection(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_direct_group_requests(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_direct_share_activity(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_disable(self) -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_felix_upload_result(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_first_post(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_follow_request_accepted(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_fundraiser_creator(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_fundraiser_supporter(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_like_and_comment_on_photo_user_tagged(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_likes(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_live_broadcast(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_login(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_mute_all(self, setting_value: Literal['cancel', '15_minutes', '1_hour', '2_hour', '4_hour', '8_hour'] = '8_hour') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_new_follower(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_pending_direct_share(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_reminders(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_report_updated(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_rooms(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
+| `notification_announcements(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=announcements` |
+| `notification_comment_likes(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=comment_likes` |
+| `notification_comments(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=comments` |
+| `notification_connection(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=connection_notification` |
+| `notification_direct_group_requests(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=direct_group_requests` |
+| `notification_direct_share_activity(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=direct_share_activity` |
+| `notification_disable(self) -> bool` | `notification` | `DELETE /notifications/settings` | `exposed` | used by at least one public REST route |
+| `notification_felix_upload_result(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=felix_upload_result` |
+| `notification_first_post(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=first_post` |
+| `notification_follow_request_accepted(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=follow_request_accepted` |
+| `notification_fundraiser_creator(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=fundraiser_creator` |
+| `notification_fundraiser_supporter(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=fundraiser_supporter` |
+| `notification_like_and_comment_on_photo_user_tagged(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=like_and_comment_on_photo_user_tagged` |
+| `notification_likes(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=likes` |
+| `notification_live_broadcast(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=live_broadcast` |
+| `notification_login(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=login_notification` |
+| `notification_mute_all(self, setting_value: Literal['cancel', '15_minutes', '1_hour', '2_hour', '4_hour', '8_hour'] = '8_hour') -> bool` | `notification` | `PATCH /notifications/settings` | `exposed` | used by at least one public REST route |
+| `notification_new_follower(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=new_follower` |
+| `notification_pending_direct_share(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=pending_direct_share` |
+| `notification_reminders(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=notification_reminders` |
+| `notification_report_updated(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=report_updated` |
+| `notification_rooms(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=rooms` |
 | `notification_settings(self, content_type: str, setting_value: str) -> bool` | `notification` | `PATCH /notifications/settings` | `exposed` | used by at least one public REST route |
-| `notification_tagged_in_bio(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_user_tagged(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_video_call(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
-| `notification_view_count(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `candidate` | potential user-facing REST endpoint |
+| `notification_tagged_in_bio(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=tagged_in_bio` |
+| `notification_user_tagged(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=user_tagged` |
+| `notification_video_call(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=video_call` |
+| `notification_view_count(self, setting_value: Literal['off', 'following_only', 'everyone'] = 'off') -> bool` | `notification` | - | `duplicate` | covered by generic `PATCH /notifications/settings` with `content_type=view_count` |
 | `one_tap_app_login(self, user_id: str, nonce: str) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `parse_authorization(self, authorization) -> dict` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `password_encrypt(self, password)` | `password` | - | `internal` | low-level aiograpi helper or unsafe generic surface |

@@ -336,6 +336,7 @@ OPERATION_SUMMARIES = {
     "getNotifications": "Get notification inbox",
     "getNotificationsSettings": "Get supported notification settings",
     "patchNotificationsSettings": "Update notification settings",
+    "deleteNotificationsSettings": "Disable all notification settings",
     "getNotes": "List notes",
     "postNote": "Create a note",
     "deleteNote": "Delete a note",
