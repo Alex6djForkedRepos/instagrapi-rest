@@ -157,6 +157,16 @@ Search routes live under the `Search` tag and hide Instagram's internal
 `/search/item` return raw Instagram-shaped objects because their payloads vary
 by ranking surface and cursor state.
 
+## Share
+
+Share routes decode Instagram share URLs or encoded share codes without creating
+or changing Instagram state.
+
+- `GET /share?url=...` returns the decoded share `type`, `pk`, and extracted
+  `code` for a share URL.
+- `GET /share?code=...` returns the decoded share `type`, `pk`, and original
+  `code` for an encoded share code.
+
 ## User Discovery
 
 User discovery routes live under the target user context and return raw

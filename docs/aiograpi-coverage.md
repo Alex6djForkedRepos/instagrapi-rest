@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **231**
-- Methods not exposed as REST routes: **269**
-- Candidate REST backlog: **44**
+- Methods reached by REST routes: **234**
+- Methods not exposed as REST routes: **266**
+- Candidate REST backlog: **41**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 231 | Already used by public REST routes. |
-| `candidate` | 44 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 234 | Already used by public REST routes. |
+| `candidate` | 41 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -53,7 +53,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `photo` | 4 | 1 | 1 | 4 | 10 |
 | `private` | 2 | 0 | 0 | 11 | 13 |
 | `public` | 0 | 0 | 0 | 9 | 9 |
-| `share` | 0 | 3 | 0 | 0 | 3 |
+| `share` | 3 | 0 | 0 | 0 | 3 |
 | `signup` | 0 | 0 | 0 | 15 | 15 |
 | `story` | 11 | 3 | 7 | 0 | 21 |
 | `timeline` | 4 | 0 | 0 | 0 | 4 |
@@ -75,7 +75,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
 | `note` | `create_music_note`, `get_note_by_user`, `get_note_text_by_user`, `last_seen_update_note`, `notes_music_browser` |
 | `photo` | `photo_upload_with_music` |
-| `share` | `share_code_from_url`, `share_info`, `share_info_by_url` |
 | `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
 | `user` | `feed_user_stream_item`, `user_friendships_v1`, `user_stream_by_id_flat`, `user_stream_by_id_v1`, `user_stream_by_username_flat`, `user_stream_by_username_v1`, `user_web_profile_info_v1` |
@@ -253,6 +252,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /search/users` | `search_users` |
 | `GET /search/web/hashtags` | `web_search_topsearch_hashtags` |
 | `GET /search/web/top` | `web_search_topsearch` |
+| `GET /share` | `share_code_from_url`, `share_info`, `share_info_by_url` |
 | `DELETE /story` | `story_delete` |
 | `GET /story` | `story_info`, `story_pk_from_url` |
 | `GET /story/archive` | `archive_story_days_paginated_v1` |
@@ -689,9 +689,9 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `set_timezone_offset(self, seconds: int = 0)` | `private` | `POST /auth/login`<br>`POST /auth/login/by/sessionid`<br>`PATCH /auth/settings` | `exposed` | used by at least one public REST route |
 | `set_user_agent(self, user_agent: str = '', reset: bool = False) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `set_uuids(self, uuids: Dict = None) -> bool` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `share_code_from_url(self, url: str) -> str` | `share` | - | `candidate` | potential user-facing REST endpoint |
-| `share_info(self, code: str) -> aiograpi.types.Share` | `share` | - | `candidate` | potential user-facing REST endpoint |
-| `share_info_by_url(self, url: str) -> aiograpi.types.Share` | `share` | - | `candidate` | potential user-facing REST endpoint |
+| `share_code_from_url(self, url: str) -> str` | `share` | `GET /share` | `exposed` | used by at least one public REST route |
+| `share_info(self, code: str) -> aiograpi.types.Share` | `share` | `GET /share` | `exposed` | used by at least one public REST route |
+| `share_info_by_url(self, url: str) -> aiograpi.types.Share` | `share` | `GET /share` | `exposed` | used by at least one public REST route |
 | `signup(self, username: str, password: str, email: str = '', phone_number: str = '', full_name: str = '', year: int = None, month: int = None, day: int = None) -> aiograpi.types.UserShort` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `small_delay(self)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `standalone_fundraiser_info_v1(self, user_id: str)` | `fundraiser` | - | `candidate` | potential user-facing REST endpoint |

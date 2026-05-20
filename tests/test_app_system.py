@@ -357,6 +357,7 @@ async def test_openapi_uses_rest_http_methods():
         "/search/users": {"get"},
         "/search/web/hashtags": {"get"},
         "/search/web/top": {"get"},
+        "/share": {"get"},
         "/story": {"delete", "get"},
         "/story/archive": {"get"},
         "/story/download": {"get"},
@@ -551,6 +552,7 @@ async def test_openapi_uses_human_friendly_tag_names():
         "Photo",
         "Reels",
         "Search",
+        "Share",
         "Story",
         "System",
         "Track (Music)",
@@ -562,6 +564,7 @@ async def test_openapi_uses_human_friendly_tag_names():
         "Account",
         "User",
         "Search",
+        "Share",
         "Reels",
         "Explore",
         "Media (Post)",
@@ -689,6 +692,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/search/users"]["get"]["summary"] == "Search users"
     assert paths["/search/web/hashtags"]["get"]["summary"] == "Search web hashtags"
     assert paths["/search/web/top"]["get"]["summary"] == "Search web top results"
+    assert paths["/share"]["get"]["summary"] == "Get share info"
     assert paths["/notifications/settings"]["delete"]["summary"] == "Disable all notification settings"
     assert paths["/story"]["get"]["summary"] == "Get story details"
     assert paths["/story/viewers"]["get"]["summary"] == "List paginated story viewers"

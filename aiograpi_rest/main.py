@@ -33,6 +33,7 @@ from aiograpi_rest.routers import (
     photo,
     reels,
     search,
+    share,
     story,
     track,
     user,
@@ -101,6 +102,7 @@ OPENAPI_TAGS = [
     {"name": "Account", "description": "Authenticated account profile and privacy operations."},
     {"name": "User", "description": "Profile lookup and user relationship operations."},
     {"name": "Search", "description": "Cross-resource search operations."},
+    {"name": "Share", "description": "Instagram share URL and code decoding operations."},
     {"name": "Reels", "description": "Connected, friends, explore, and collection Reels feeds."},
     {"name": "Explore", "description": "Instagram Explore page and Explore media metadata."},
     {"name": "Media (Post)", "description": "Generic media/post lookup, edits, and interactions."},
@@ -262,6 +264,7 @@ OPERATION_SUMMARIES = {
     "getSearchTypeaheadUsers": "Get typeahead user suggestions",
     "getSearchWebHashtags": "Search web hashtags",
     "getSearchWebTop": "Search web top results",
+    "getShare": "Get share info",
     "getPhotoDownload": "Download feed photo",
     "getPhotoDownloadByUrl": "Download feed photo from a URL",
     "postPhotoUpload": "Upload a feed photo",
@@ -538,6 +541,7 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(account.router)
 app.include_router(search.router)
+app.include_router(share.router)
 app.include_router(reels.router)
 app.include_router(explore.router)
 app.include_router(media.router)
