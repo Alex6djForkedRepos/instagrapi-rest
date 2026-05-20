@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **234**
-- Methods not exposed as REST routes: **266**
-- Candidate REST backlog: **41**
+- Methods reached by REST routes: **237**
+- Methods not exposed as REST routes: **263**
+- Candidate REST backlog: **38**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 234 | Already used by public REST routes. |
-| `candidate` | 41 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 237 | Already used by public REST routes. |
+| `candidate` | 38 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -41,7 +41,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `fundraiser` | 0 | 1 | 0 | 0 | 1 |
 | `graphql` | 0 | 0 | 0 | 8 | 8 |
 | `hashtag` | 6 | 0 | 12 | 0 | 18 |
-| `highlight` | 7 | 3 | 2 | 0 | 12 |
+| `highlight` | 10 | 0 | 2 | 0 | 12 |
 | `igtv` | 3 | 0 | 0 | 1 | 4 |
 | `insights` | 3 | 0 | 0 | 0 | 3 |
 | `location` | 5 | 0 | 11 | 4 | 20 |
@@ -70,7 +70,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `clip` | `clip_info_for_creation`, `clip_pin`, `clip_share_to_fb_config`, `clip_trial_eligible`, `clip_unpin`, `clip_upload_as_reel_with_music` |
 | `explore` | `report_explore_media` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
-| `highlight` | `highlight_change_cover`, `highlight_change_title`, `highlight_pk_from_url` |
 | `media` | `archive_medias`, `media_create_livestream`, `media_end_livestream`, `media_get_livestream_comments`, `media_get_livestream_info`, `media_get_livestream_viewers`, `media_start_livestream`, `media_template_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
 | `note` | `create_music_note`, `get_note_by_user`, `get_note_text_by_user`, `last_seen_update_note`, `notes_music_browser` |
@@ -174,8 +173,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /hashtag/reels` | `hashtag_medias_reels_v1` |
 | `GET /hashtag/related` | `hashtag_related_hashtags` |
 | `DELETE /highlight` | `highlight_delete` |
-| `GET /highlight` | `highlight_info` |
-| `PATCH /highlight` | `highlight_edit` |
+| `GET /highlight` | `highlight_info`, `highlight_pk_from_url` |
+| `PATCH /highlight` | `highlight_change_cover`, `highlight_change_title`, `highlight_edit` |
 | `POST /highlight` | `highlight_create` |
 | `DELETE /highlight/story` | `highlight_remove_stories` |
 | `POST /highlight/story` | `highlight_add_stories` |
@@ -494,14 +493,14 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `hashtag_related_hashtags(self, name: str) -> List[aiograpi.types.Hashtag]` | `hashtag` | `GET /hashtag/related` | `exposed` | used by at least one public REST route |
 | `hashtag_unfollow(self, hashtag: str) -> bool` | `hashtag` | `DELETE /hashtag/follow` | `exposed` | used by at least one public REST route |
 | `highlight_add_stories(self, highlight_pk: str, added_media_ids: List[str]) -> aiograpi.types.Highlight` | `highlight` | `POST /highlight/story` | `exposed` | used by at least one public REST route |
-| `highlight_change_cover(self, highlight_pk: str, cover_path: pathlib._local.Path) -> aiograpi.types.Highlight` | `highlight` | - | `candidate` | potential user-facing REST endpoint |
-| `highlight_change_title(self, highlight_pk: str, title: str) -> aiograpi.types.Highlight` | `highlight` | - | `candidate` | potential user-facing REST endpoint |
+| `highlight_change_cover(self, highlight_pk: str, cover_path: pathlib._local.Path) -> aiograpi.types.Highlight` | `highlight` | `PATCH /highlight` | `exposed` | used by at least one public REST route |
+| `highlight_change_title(self, highlight_pk: str, title: str) -> aiograpi.types.Highlight` | `highlight` | `PATCH /highlight` | `exposed` | used by at least one public REST route |
 | `highlight_create(self, title: str, story_ids: List[str], cover_story_id: str = '', crop_rect: List[float] = [0.0, 0.21830457, 1.0, 0.78094524]) -> aiograpi.types.Highlight` | `highlight` | `POST /highlight` | `exposed` | used by at least one public REST route |
 | `highlight_delete(self, highlight_pk: str) -> bool` | `highlight` | `DELETE /highlight` | `exposed` | used by at least one public REST route |
 | `highlight_edit(self, highlight_pk: str, title: str = '', cover: Dict = {}, added_media_ids: List[str] = [], removed_media_ids: List[str] = [])` | `highlight` | `PATCH /highlight` | `exposed` | used by at least one public REST route |
 | `highlight_info(self, highlight_pk: str) -> aiograpi.types.Highlight` | `highlight` | `GET /highlight` | `exposed` | used by at least one public REST route |
 | `highlight_info_v1(self, highlight_pk: str) -> aiograpi.types.Highlight` | `highlight` | - | `duplicate` | variant of already exposed `highlight_info` route family |
-| `highlight_pk_from_url(self, url: str) -> str` | `highlight` | - | `candidate` | potential user-facing REST endpoint |
+| `highlight_pk_from_url(self, url: str) -> str` | `highlight` | `GET /highlight` | `exposed` | used by at least one public REST route |
 | `highlight_remove_stories(self, highlight_pk: str, removed_media_ids: List[str]) -> aiograpi.types.Highlight` | `highlight` | `DELETE /highlight/story` | `exposed` | used by at least one public REST route |
 | `igtv_configure(self, upload_id: str, thumbnail: pathlib._local.Path, width: int, height: int, duration: int, title: str, caption: str, usertags: List[aiograpi.types.Usertag] = [], location: aiograpi.types.Location = None, extra_data: Dict[str, str] = {}) -> Dict` | `igtv` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `igtv_download(self, media_pk: int, folder: pathlib._local.Path = '') -> str` | `igtv` | `GET /igtv/download` | `exposed` | used by at least one public REST route |

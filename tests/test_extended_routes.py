@@ -654,12 +654,27 @@ class FakeExpandedClient:
         self.calls.append(("highlight_info", highlight_pk))
         return _highlight_payload(highlight_pk)
 
+    async def highlight_pk_from_url(self, url):
+        self.calls.append(("highlight_pk_from_url", url))
+        return "h-from-url"
+
     async def highlight_create(self, title, story_ids, cover_story_id="", crop_rect=None):
         self.calls.append(("highlight_create", title, story_ids, cover_story_id, crop_rect))
         return _highlight_payload()
 
     async def highlight_edit(self, highlight_pk, title="", cover=None, added_media_ids=None, removed_media_ids=None):
         self.calls.append(("highlight_edit", highlight_pk, title, cover or {}, added_media_ids or [], removed_media_ids or []))
+        return _highlight_payload(highlight_pk)
+
+    async def highlight_change_title(self, highlight_pk, title):
+        self.calls.append(("highlight_change_title", highlight_pk, title))
+        return _highlight_payload(highlight_pk)
+
+    async def highlight_change_cover(self, highlight_pk, cover_path):
+        cover = Path(cover_path)
+        payload = cover.read_bytes()
+        self.upload_paths.append(cover)
+        self.calls.append(("highlight_change_cover", highlight_pk, cover.suffix, payload))
         return _highlight_payload(highlight_pk)
 
     async def highlight_delete(self, highlight_pk):
@@ -1324,7 +1339,25 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         user_highlights = await ac.get("/user/highlights", params={"sessionid": "sid", "user_id": "1"})
         highlight = await ac.get("/highlight", params={"sessionid": "sid", "highlight_pk": "h1"})
+        highlight_by_url = await ac.get(
+            "/highlight",
+            params={"sessionid": "sid", "url": "https://www.instagram.com/stories/highlights/123/"},
+        )
         created = await ac.post("/highlight", data={"sessionid": "sid", "title": "Trip", "story_ids": ["s1"]})
+        title_changed = await ac.patch(
+            "/highlight",
+            data={"sessionid": "sid", "highlight_pk": "h1", "title": "Only title"},
+        )
+        cover_changed = await ac.patch(
+            "/highlight",
+            data={"sessionid": "sid", "highlight_pk": "h1"},
+            files={"cover_picture": ("cover.jpg", b"cover-bytes", "image/jpeg")},
+        )
+        title_and_cover_changed = await ac.patch(
+            "/highlight",
+            data={"sessionid": "sid", "highlight_pk": "h1", "title": "Title and cover"},
+            files={"cover_picture": ("cover.png", b"cover-and-title-bytes", "image/png")},
+        )
         edited = await ac.patch(
             "/highlight",
             data={"sessionid": "sid", "highlight_pk": "h1", "title": "Trip 2", "added_media_ids": ["s2"]},
@@ -1362,6 +1395,20 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
             "/highlight",
             data={"sessionid": "sid", "highlight_pk": "h1", "cover": "not-json"},
         )
+        conflicting_highlight_selector = await ac.get(
+            "/highlight",
+            params={
+                "sessionid": "sid",
+                "highlight_pk": "h1",
+                "url": "https://www.instagram.com/stories/highlights/123/",
+            },
+        )
+        missing_highlight_selector = await ac.get("/highlight", params={"sessionid": "sid"})
+        conflicting_cover_selector = await ac.patch(
+            "/highlight",
+            data={"sessionid": "sid", "highlight_pk": "h1", "cover": '{"media_id":"s1"}'},
+            files={"cover_picture": ("cover.jpg", b"cover-conflict", "image/jpeg")},
+        )
         bad_challenge = await ac.post(
             "/auth/challenge/resolve",
             data={"sessionid": "sid", "last_json": "not-json"},
@@ -1382,7 +1429,11 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
     for response in (
         user_highlights,
         highlight,
+        highlight_by_url,
         created,
+        title_changed,
+        cover_changed,
+        title_and_cover_changed,
         edited,
         deleted,
         add_stories,
@@ -1405,6 +1456,14 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
     assert settings.json()["setting_values"] == ["off", "following_only", "everyone"]
     assert settings.json()["mute_all_values"] == ["cancel", "15_minutes", "1_hour", "2_hour", "4_hour", "8_hour"]
     assert "mute_all" in settings.json()["content_types"]
+    assert ("highlight_pk_from_url", "https://www.instagram.com/stories/highlights/123/") in storage.client.calls
+    assert ("highlight_info", "h-from-url") in storage.client.calls
+    assert ("highlight_change_title", "h1", "Only title") in storage.client.calls
+    assert ("highlight_change_cover", "h1", ".jpg", b"cover-bytes") in storage.client.calls
+    assert ("highlight_edit", "h1", "Title and cover", {}, [], []) in storage.client.calls
+    assert ("highlight_change_cover", "h1", ".png", b"cover-and-title-bytes") in storage.client.calls
+    assert storage.client.upload_paths
+    assert all(not path.exists() for path in storage.client.upload_paths)
     assert viewers.json()["next_cursor"] == "next-viewers"
     assert archive.json()["next_cursor"] == "next-archive"
     assert ("archive_story_days_paginated_v1", 50, "", False, "") in storage.client.calls
@@ -1413,6 +1472,9 @@ async def test_highlight_story_note_notification_and_auth_routes(storage):
     assert ("notification_disable",) in storage.client.calls
     assert ("challenge_resolve", {"challenge": {"api_path": "/challenge/1/nonce/"}}) in storage.client.calls
     assert bad_cover.status_code == 422
+    assert conflicting_highlight_selector.status_code == 422
+    assert missing_highlight_selector.status_code == 422
+    assert conflicting_cover_selector.status_code == 422
     assert bad_challenge.status_code == 422
     assert bad_content_type.status_code == 422
     assert bad_setting_value.status_code == 422

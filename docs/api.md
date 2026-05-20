@@ -167,6 +167,18 @@ or changing Instagram state.
 - `GET /share?code=...` returns the decoded share `type`, `pk`, and original
   `code` for an encoded share code.
 
+## Highlight
+
+Highlight routes manage Story highlights and accept either the Instagram
+highlight PK or a highlight URL where lookup can be resolved from a URL:
+
+- `GET /highlight?highlight_pk=...` returns highlight details by PK.
+- `GET /highlight?url=...` resolves the PK from the URL and returns highlight
+  details.
+- `PATCH /highlight` updates title, cover, and story membership. A title-only
+  patch uses aiograpi's dedicated title-change method, and `cover_picture`
+  uploads a cover image through aiograpi's dedicated cover-change method.
+
 ## User Discovery
 
 User discovery routes live under the target user context and return raw
