@@ -203,6 +203,17 @@ belong to a media object.
 - `POST /media/comment/check/offensive` checks whether text is offensive for
   the target media.
 
+## Direct
+
+- `GET /direct/pending/inbox` lists pending direct request threads up to
+  `amount`.
+- `GET /direct/spam/inbox` lists spam direct request threads up to `amount`.
+- `POST /direct/request/approve` approves a direct message request thread.
+- `POST /direct/thread/message` replies in an existing direct thread.
+- `DELETE /direct/message` unsends a direct message.
+- `POST /direct/cutout/sticker` sends a cutout sticker to either `user_ids`
+  or `thread_ids`.
+
 ## Pagination
 
 Paginated read-list routes return an object with `items` and `next_cursor`.
@@ -210,6 +221,8 @@ Pass the returned `next_cursor` as `cursor` on the next request to continue
 from the previous page. This shape is used for:
 
 - `GET /direct/inbox`
+- `GET /direct/pending`
+- `GET /direct/spam`
 - `GET /hashtag/media/recent`
 - `GET /hashtag/media/top`
 - `GET /location/media/recent`

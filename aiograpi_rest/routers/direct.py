@@ -54,6 +54,18 @@ async def direct_requests(
     return await cl.direct_requests(amount)
 
 
+@router.get("/pending/inbox", response_model=List[DirectThread])
+async def direct_pending_inbox(
+    sessionid: str = Depends(get_sessionid),
+    amount: int = Query(20),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[DirectThread]:
+    """List direct pending inbox threads
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_pending_inbox(amount)
+
+
 @router.get("/spam", response_model=DirectThreadPage)
 async def direct_spam(
     sessionid: str = Depends(get_sessionid),
@@ -65,6 +77,18 @@ async def direct_spam(
     cl = await clients.get(sessionid)
     items, next_cursor = await cl.direct_spam_chunk(cursor or None)
     return DirectThreadPage(items=items, next_cursor=next_cursor or "")
+
+
+@router.get("/spam/inbox", response_model=List[DirectThread])
+async def direct_spam_inbox(
+    sessionid: str = Depends(get_sessionid),
+    amount: int = Query(20),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[DirectThread]:
+    """List direct spam inbox threads
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_spam_inbox(amount)
 
 
 @router.get("/threads", response_model=List[DirectThread])
@@ -348,19 +372,29 @@ async def direct_pending(
     return DirectThreadPage(items=items, next_cursor=next_cursor or "")
 
 
-@router.patch("/pending", response_model=bool)
-async def direct_pending_update(
+@router.post("/request/approve", response_model=bool)
+async def direct_request_approve(
     sessionid: str = Depends(get_sessionid),
     thread_id: int = Form(...),
-    approved: bool = Form(...),
     clients: ClientStorage = Depends(get_clients),
 ) -> bool:
-    """Approve a pending direct thread request
+    """Approve a direct message request
     """
-    if not approved:
-        raise HTTPException(status_code=422, detail="Only approved=true is supported")
     cl = await clients.get(sessionid)
-    return await cl.direct_pending_approve(thread_id)
+    return await cl.direct_request_approve(thread_id)
+
+
+@router.post("/thread/message", response_model=DirectMessage)
+async def direct_thread_message(
+    sessionid: str = Depends(get_sessionid),
+    thread_id: int = Form(...),
+    text: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> DirectMessage:
+    """Reply in a direct thread
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_answer(thread_id, text)
 
 
 @router.get("/search", response_model=List[UserShort])
@@ -533,6 +567,21 @@ async def direct_file_send(
         return await cl.direct_send_file(path, user_ids, thread_ids, content_type)
 
 
+@router.post("/cutout/sticker", response_model=DirectMessage)
+async def direct_cutout_sticker_send(
+    sessionid: str = Depends(get_sessionid),
+    sticker_pk: str = Form(...),
+    user_ids: List[int] = Form([]),
+    thread_ids: List[int] = Form([]),
+    clients: ClientStorage = Depends(get_clients),
+) -> DirectMessage:
+    """Send a direct cutout sticker
+    """
+    _validate_direct_targets(user_ids, thread_ids)
+    cl = await clients.get(sessionid)
+    return await cl.direct_send_cutout_sticker(sticker_pk, user_ids, thread_ids)
+
+
 @router.post("/thread", response_model=str)
 async def direct_thread_create(
     sessionid: str = Depends(get_sessionid),
@@ -574,10 +623,10 @@ async def direct_message_delete(
     message_id: int = Query(...),
     clients: ClientStorage = Depends(get_clients),
 ) -> bool:
-    """Delete a direct message
+    """Unsend a direct message
     """
     cl = await clients.get(sessionid)
-    return await cl.direct_message_delete(thread_id, message_id)
+    return await cl.direct_message_unsend(thread_id, message_id)
 
 
 @router.patch("/message/seen", response_model=bool)

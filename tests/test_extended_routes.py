@@ -292,9 +292,17 @@ class FakeExpandedClient:
         self.calls.append(("direct_requests", amount))
         return [_direct_thread_payload()]
 
+    async def direct_pending_inbox(self, amount=20):
+        self.calls.append(("direct_pending_inbox", amount))
+        return [_direct_thread_payload()]
+
     async def direct_spam_chunk(self, cursor=None):
         self.calls.append(("direct_spam_chunk", cursor))
         return [_direct_thread_payload()], "next-spam"
+
+    async def direct_spam_inbox(self, amount=20):
+        self.calls.append(("direct_spam_inbox", amount))
+        return [_direct_thread_payload()]
 
     async def direct_search(self, query, mode="universal"):
         self.calls.append(("direct_search", query, mode))
@@ -328,8 +336,16 @@ class FakeExpandedClient:
         self.calls.append(("direct_send", text, user_ids or [], thread_ids or [], send_attribute))
         return _direct_message_payload()
 
+    async def direct_answer(self, thread_id, text):
+        self.calls.append(("direct_answer", thread_id, text))
+        return _direct_message_payload("answer")
+
     async def direct_message_delete(self, thread_id, message_id):
         self.calls.append(("direct_message_delete", thread_id, message_id))
+        return True
+
+    async def direct_message_unsend(self, thread_id, message_id):
+        self.calls.append(("direct_message_unsend", thread_id, message_id))
         return True
 
     async def direct_message_seen(self, thread_id, message_id):
@@ -453,6 +469,14 @@ class FakeExpandedClient:
     async def direct_pending_approve(self, thread_id):
         self.calls.append(("direct_pending_approve", thread_id))
         return True
+
+    async def direct_request_approve(self, thread_id):
+        self.calls.append(("direct_request_approve", thread_id))
+        return True
+
+    async def direct_send_cutout_sticker(self, sticker_pk, user_ids=None, thread_ids=None):
+        self.calls.append(("direct_send_cutout_sticker", sticker_pk, user_ids or [], thread_ids or []))
+        return _direct_message_payload("cutout-sticker")
 
     async def hashtag_info(self, name):
         self.calls.append(("hashtag_info", name))
@@ -778,7 +802,9 @@ async def test_direct_routes(storage):
         )
         pending = await ac.get("/direct/pending", params={"sessionid": "sid", "cursor": "pending-cursor"})
         requests = await ac.get("/direct/requests", params={"sessionid": "sid", "amount": "2"})
+        pending_inbox = await ac.get("/direct/pending/inbox", params={"sessionid": "sid", "amount": "3"})
         spam = await ac.get("/direct/spam", params={"sessionid": "sid", "cursor": "spam-cursor"})
+        spam_inbox = await ac.get("/direct/spam/inbox", params={"sessionid": "sid", "amount": "4"})
         search = await ac.get("/direct/search", params={"sessionid": "sid", "query": "user", "mode": "raven"})
         message_search = await ac.get(
             "/direct/messages/search",
@@ -795,6 +821,10 @@ async def test_direct_routes(storage):
         message = await ac.post(
             "/direct/message",
             data={"sessionid": "sid", "text": "hello", "thread_ids": ["100"]},
+        )
+        answer = await ac.post(
+            "/direct/thread/message",
+            data={"sessionid": "sid", "thread_id": "100", "text": "reply"},
         )
         deleted = await ac.delete(
             "/direct/message", params={"sessionid": "sid", "thread_id": "100", "message_id": "1"}
@@ -896,9 +926,13 @@ async def test_direct_routes(storage):
             data={"sessionid": "sid", "user_ids": ["2"], "content_type": "video"},
             files={"file": ("document.bin", b"file-bytes", "application/octet-stream")},
         )
-        approve_pending = await ac.patch(
-            "/direct/pending",
-            data={"sessionid": "sid", "thread_id": "100", "approved": "true"},
+        send_cutout_sticker = await ac.post(
+            "/direct/cutout/sticker",
+            data={"sessionid": "sid", "sticker_pk": "123", "thread_ids": ["100"]},
+        )
+        approve_pending = await ac.post(
+            "/direct/request/approve",
+            data={"sessionid": "sid", "thread_id": "100"},
         )
         invalid_patch_thread = await ac.patch("/direct/thread", data={"sessionid": "sid", "thread_id": "100"})
         invalid_thread_read_state = await ac.patch(
@@ -910,10 +944,6 @@ async def test_direct_routes(storage):
             "/direct/file",
             data={"sessionid": "sid", "user_ids": ["2"], "thread_ids": ["100"]},
             files={"file": ("document.bin", b"file-bytes", "application/octet-stream")},
-        )
-        invalid_pending = await ac.patch(
-            "/direct/pending",
-            data={"sessionid": "sid", "thread_id": "100", "approved": "false"},
         )
         empty = await ac.post(
             "/direct/message",
@@ -927,7 +957,8 @@ async def test_direct_routes(storage):
 
     assert inbox.status_code == 200 and threads.status_code == 200 and thread.status_code == 200
     assert messages.status_code == 200 and message_lookup.status_code == 200
-    assert pending.status_code == 200 and requests.status_code == 200 and spam.status_code == 200
+    assert pending.status_code == 200 and requests.status_code == 200 and pending_inbox.status_code == 200
+    assert spam.status_code == 200 and spam_inbox.status_code == 200
     assert search.status_code == 200 and message_search.status_code == 200
     assert thread_media.status_code == 200 and active_presence.status_code == 200
     assert users_presence.status_code == 200 and thread_by_participants.status_code == 200
@@ -945,6 +976,7 @@ async def test_direct_routes(storage):
     assert thread_by_participants.json()["thread_id"] == "100"
     assert created.status_code == 200 and created.json() == "100"
     assert message.status_code == 200 and message.json()["text"] == "hello"
+    assert answer.status_code == 200 and answer.json()["id"] == "answer"
     assert deleted.status_code == 200 and seen.status_code == 200 and thread_seen.status_code == 200
     assert patch_thread.status_code == 200 and add_user.status_code == 200 and hide_thread.status_code == 200
     assert mute_thread.status_code == 200 and unmute_thread.status_code == 200
@@ -958,12 +990,12 @@ async def test_direct_routes(storage):
     assert send_video.status_code == 200 and send_video.json()["id"] == "video-direct"
     assert send_voice.status_code == 200 and send_voice.json()["id"] == "voice-direct"
     assert send_file.status_code == 200 and send_file.json()["id"] == "file-direct"
+    assert send_cutout_sticker.status_code == 200 and send_cutout_sticker.json()["id"] == "cutout-sticker"
     assert approve_pending.status_code == 200
     assert invalid_patch_thread.status_code == 422
     assert invalid_thread_read_state.status_code == 422
     assert invalid_profile_share.status_code == 422
     assert invalid_direct_file_targets.status_code == 422
-    assert invalid_pending.status_code == 422
     assert empty.status_code == 422 and both.status_code == 422
     assert single.status_code == 422
     assert inbox.json()["next_cursor"] == "next-direct"
@@ -973,7 +1005,9 @@ async def test_direct_routes(storage):
     assert ("direct_message", 100, 1, 6) in storage.client.calls
     assert ("direct_pending_chunk", "pending-cursor") in storage.client.calls
     assert ("direct_requests", 2) in storage.client.calls
+    assert ("direct_pending_inbox", 3) in storage.client.calls
     assert ("direct_spam_chunk", "spam-cursor") in storage.client.calls
+    assert ("direct_spam_inbox", 4) in storage.client.calls
     assert ("direct_search", "user", "raven") in storage.client.calls
     assert ("direct_message_search", "hello") in storage.client.calls
     assert ("direct_media", 100, 2) in storage.client.calls
@@ -981,6 +1015,8 @@ async def test_direct_routes(storage):
     assert ("direct_users_presence", [1, 2]) in storage.client.calls
     assert ("direct_thread_by_participants", [1, 2]) in storage.client.calls
     assert ("direct_thread_create", [1, 2], "Team") in storage.client.calls
+    assert ("direct_answer", 100, "reply") in storage.client.calls
+    assert ("direct_message_unsend", 100, 1) in storage.client.calls
     assert ("direct_message_seen", 100, 1) in storage.client.calls
     assert ("direct_send_seen", 100) in storage.client.calls
     assert ("direct_thread_update_title", 100, "Renamed") in storage.client.calls
@@ -1002,9 +1038,10 @@ async def test_direct_routes(storage):
     assert ("direct_send_video", ".mp4", b"video-bytes", [], [100]) in storage.client.calls
     assert ("direct_send_voice", ".m4a", b"voice-bytes", [], [100], [0.1, 0.2]) in storage.client.calls
     assert ("direct_send_file", ".bin", b"file-bytes", [2], [], "video") in storage.client.calls
+    assert ("direct_send_cutout_sticker", "123", [], [100]) in storage.client.calls
     assert storage.client.upload_paths
     assert all(not path.exists() for path in storage.client.upload_paths)
-    assert ("direct_pending_approve", 100) in storage.client.calls
+    assert ("direct_request_approve", 100) in storage.client.calls
 
 
 @pytest.mark.asyncio

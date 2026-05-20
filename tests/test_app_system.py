@@ -245,6 +245,7 @@ async def test_openapi_uses_rest_http_methods():
         "/deps": {"get"},
         "/direct/file": {"post"},
         "/direct/inbox": {"get"},
+        "/direct/cutout/sticker": {"post"},
         "/direct/media": {"get", "post"},
         "/direct/message": {"delete", "get", "post"},
         "/direct/message/like": {"delete", "post"},
@@ -252,16 +253,20 @@ async def test_openapi_uses_rest_http_methods():
         "/direct/message/seen": {"patch"},
         "/direct/messages": {"get"},
         "/direct/messages/search": {"get"},
-        "/direct/pending": {"get", "patch"},
+        "/direct/pending": {"get"},
+        "/direct/pending/inbox": {"get"},
         "/direct/photo": {"post"},
         "/direct/presence": {"get"},
         "/direct/profile": {"post"},
+        "/direct/request/approve": {"post"},
         "/direct/requests": {"get"},
         "/direct/search": {"get"},
         "/direct/spam": {"get"},
+        "/direct/spam/inbox": {"get"},
         "/direct/story": {"post"},
         "/direct/thread": {"delete", "get", "patch", "post"},
         "/direct/thread/by/participants": {"get"},
+        "/direct/thread/message": {"post"},
         "/direct/thread/mute": {"delete", "post"},
         "/direct/thread/seen": {"patch"},
         "/direct/thread/user": {"post"},
@@ -601,11 +606,14 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/direct/thread/video/call/mute"]["delete"]["summary"] == "Unmute direct thread video calls"
     assert paths["/direct/thread/by/participants"]["get"]["summary"] == "Find a direct thread by participants"
     assert paths["/direct/message/like"]["post"]["summary"] == "Like a direct message"
+    assert paths["/direct/message"]["delete"]["summary"] == "Unsend a direct message"
     assert paths["/direct/message/reaction"]["delete"]["summary"] == "Remove a direct message reaction"
     assert paths["/direct/messages/search"]["get"]["summary"] == "Search direct messages"
-    assert paths["/direct/pending"]["patch"]["summary"] == "Approve a pending direct thread request"
+    assert paths["/direct/request/approve"]["post"]["summary"] == "Approve a direct message request"
+    assert paths["/direct/pending/inbox"]["get"]["summary"] == "List direct pending inbox threads"
     assert paths["/direct/requests"]["get"]["summary"] == "List direct message requests"
     assert paths["/direct/spam"]["get"]["summary"] == "List paginated direct spam threads"
+    assert paths["/direct/spam/inbox"]["get"]["summary"] == "List direct spam inbox threads"
     assert paths["/direct/presence"]["get"]["summary"] == "Get direct presence"
     assert paths["/direct/media"]["get"]["summary"] == "List direct thread media"
     assert paths["/direct/media"]["post"]["summary"] == "Share media to direct users"
@@ -615,6 +623,8 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/direct/video"]["post"]["summary"] == "Send a direct video"
     assert paths["/direct/voice"]["post"]["summary"] == "Send a direct voice message"
     assert paths["/direct/file"]["post"]["summary"] == "Send a direct file"
+    assert paths["/direct/cutout/sticker"]["post"]["summary"] == "Send a direct cutout sticker"
+    assert paths["/direct/thread/message"]["post"]["summary"] == "Reply in a direct thread"
     assert paths["/explore"]["get"]["summary"] == "Get Explore page"
     assert paths["/explore/media"]["get"]["summary"] == "Get Explore media details"
     assert paths["/hashtag"]["get"]["summary"] == "Get hashtag details"

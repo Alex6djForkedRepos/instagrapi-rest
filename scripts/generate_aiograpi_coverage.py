@@ -82,6 +82,8 @@ INTERNAL_EXACT_METHODS = {
     "with_query_params",
 }
 COVERED_BY_REST_EXACT_METHODS = {
+    "direct_message_delete": "covered by `DELETE /direct/message` via `direct_message_unsend`",
+    "direct_pending_approve": "covered by `POST /direct/request/approve` via `direct_request_approve`",
     "hashtag_medias_recent": "covered by `GET /hashtag/media/recent`",
     "hashtag_medias_top": "covered by `GET /hashtag/media/top`",
     "location_medias_recent": "covered by `GET /location/media/recent`",
