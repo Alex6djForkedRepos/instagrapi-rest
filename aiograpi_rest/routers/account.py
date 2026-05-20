@@ -65,6 +65,17 @@ async def timeline_feed(
     return await cl.get_timeline_feed()
 
 
+@router.get("/feed/new", response_model=bool)
+async def account_feed_new(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Check whether the authenticated account has new feed items
+    """
+    cl = await clients.get(sessionid)
+    return await cl.new_feed_exist()
+
+
 @router.get("/follow/requests", response_model=UserShortPage)
 async def account_follow_requests(
     sessionid: str = Depends(get_sessionid),
@@ -77,6 +88,30 @@ async def account_follow_requests(
     cl = await clients.get(sessionid)
     items, next_cursor = await cl.user_follow_requests_chunk(amount, cursor or "")
     return UserShortPage(items=items, next_cursor=next_cursor or "")
+
+
+@router.post("/follow/requests/approve", response_model=Dict[str, bool])
+async def account_follow_requests_approve(
+    sessionid: str = Depends(get_sessionid),
+    user_ids: List[str] = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, bool]:
+    """Approve pending follow requests
+    """
+    cl = await clients.get(sessionid)
+    return await cl.user_follow_requests_approve(user_ids)
+
+
+@router.delete("/follow/requests", response_model=Dict[str, bool])
+async def account_follow_requests_decline(
+    sessionid: str = Depends(get_sessionid),
+    user_ids: List[str] = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, bool]:
+    """Decline pending follow requests
+    """
+    cl = await clients.get(sessionid)
+    return await cl.user_follow_requests_decline(user_ids)
 
 
 @router.post("/follow/request/approve", response_model=bool)

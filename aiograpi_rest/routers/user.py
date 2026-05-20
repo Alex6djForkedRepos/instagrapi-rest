@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from aiograpi.extractors import json_value
 from aiograpi.types import About, Guide, Highlight, Media, Relationship, User, UserShort
 from fastapi import APIRouter, Depends, Form, HTTPException, Query
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from aiograpi_rest.dependencies import ClientStorage, get_clients, get_sessionid
 from aiograpi_rest.pagination import UserShortPage
@@ -51,6 +51,11 @@ def _extract_about_from_last_json(data: Dict) -> About:
             payload["former_usernames"] = parts[index + 2].strip().split(",")[0][1:-1]
         date_found = '"Date joined"' in value
     return _normalize_about(payload)
+
+
+class CreatorInfoResponse(BaseModel):
+    user: UserShort
+    info: Dict[str, Any]
 
 
 @router.get("/followers", response_model=UserShortPage)
@@ -113,6 +118,49 @@ async def user_about(sessionid: str = Depends(get_sessionid),
             raise
         return _extract_about_from_last_json(last_json)
     return _normalize_about(about)
+
+
+@router.get("/suggestions", response_model=Dict[str, Any])
+async def user_suggestions(sessionid: str = Depends(get_sessionid),
+                           user_id: str = Query(...),
+                           clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get suggested users for a target user
+    """
+    cl = await clients.get(sessionid)
+    return await cl.chaining(user_id)
+
+
+@router.get("/suggestions/details", response_model=Dict[str, Any])
+async def user_suggestion_details(sessionid: str = Depends(get_sessionid),
+                                  user_id: str = Query(...),
+                                  chained_ids: List[str] = Query(...),
+                                  clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get expanded details for suggested users
+    """
+    cl = await clients.get(sessionid)
+    return await cl.fetch_suggestion_details(user_id, chained_ids)
+
+
+@router.get("/recommendations", response_model=Dict[str, Any])
+async def user_recommendations(sessionid: str = Depends(get_sessionid),
+                               user_id: str = Query(...),
+                               clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get recommended accounts for a target user category
+    """
+    cl = await clients.get(sessionid)
+    return await cl.discover_recommended_accounts_for_category_v1(user_id)
+
+
+@router.get("/creator", response_model=CreatorInfoResponse)
+async def user_creator(sessionid: str = Depends(get_sessionid),
+                       user_id: str = Query(...),
+                       entry_point: str = Query("direct_thread"),
+                       clients: ClientStorage = Depends(get_clients)) -> CreatorInfoResponse:
+    """Get creator info for a user
+    """
+    cl = await clients.get(sessionid)
+    user, info = await cl.creator_info(user_id, entry_point=entry_point)
+    return CreatorInfoResponse(user=user, info=info)
 
 
 @router.post("/follow", response_model=bool)

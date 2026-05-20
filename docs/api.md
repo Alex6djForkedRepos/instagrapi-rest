@@ -74,6 +74,8 @@ User relationship routes use `POST` to create or enable a relationship state and
 - `DELETE /user/follower` removes a follower.
 - `POST /account/follow/request/approve` approves a pending follow request.
 - `DELETE /account/follow/request` declines a pending follow request.
+- `POST /account/follow/requests/approve` approves multiple pending follow requests.
+- `DELETE /account/follow/requests` declines multiple pending follow requests.
 - `POST /user/close-friend` adds a user to close friends.
 - `DELETE /user/close-friend` removes a user from close friends.
 - `POST /user/notifications/posts` enables post notifications for a user.
@@ -125,6 +127,22 @@ Search routes live under the `Search` tag and hide Instagram's internal
 `/search/accounts`, `/search/typeahead`, `/search/typeahead/stream`, and
 `/search/item` return raw Instagram-shaped objects because their payloads vary
 by ranking surface and cursor state.
+
+## User Discovery
+
+User discovery routes live under the target user context and return raw
+Instagram-shaped objects where `aiograpi` exposes variable discovery payloads:
+
+- `GET /user/suggestions` returns suggested users for a target profile.
+- `GET /user/suggestions/details` returns expanded social context for
+  suggestion IDs from `/user/suggestions`.
+- `GET /user/recommendations` returns category-based recommended accounts for a
+  target profile.
+- `GET /user/creator` returns creator metadata for a target profile as
+  `{ "user": ..., "info": ... }`.
+
+`GET /account/feed/new` belongs to the authenticated account context and returns
+whether Instagram says new timeline feed items are available.
 
 ## Reels
 

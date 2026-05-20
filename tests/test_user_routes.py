@@ -98,6 +98,34 @@ class FakeClient:
         self.calls.append(("user_follow_request_decline", user_id))
         return True
 
+    async def user_follow_requests_approve(self, user_ids):
+        self.calls.append(("user_follow_requests_approve", user_ids))
+        return {str(user_id): True for user_id in user_ids}
+
+    async def user_follow_requests_decline(self, user_ids):
+        self.calls.append(("user_follow_requests_decline", user_ids))
+        return {str(user_id): False for user_id in user_ids}
+
+    async def new_feed_exist(self):
+        self.calls.append(("new_feed_exist",))
+        return True
+
+    async def chaining(self, user_id):
+        self.calls.append(("chaining", user_id))
+        return {"users": [_user_short(2)], "status": "ok"}
+
+    async def fetch_suggestion_details(self, user_id, chained_ids):
+        self.calls.append(("fetch_suggestion_details", user_id, chained_ids))
+        return {"users": [{"pk": "2", "social_context": "followed by test"}], "status": "ok"}
+
+    async def discover_recommended_accounts_for_category_v1(self, user_id):
+        self.calls.append(("discover_recommended_accounts_for_category_v1", user_id))
+        return {"users": [_user_short(4)], "status": "ok"}
+
+    async def creator_info(self, user_id, entry_point="direct_thread"):
+        self.calls.append(("creator_info", user_id, entry_point))
+        return _user_short(5), {"category": "Digital creator"}
+
     async def close_friend_add(self, user_id):
         self.calls.append(("close_friend_add", user_id))
         return True
@@ -430,6 +458,63 @@ async def test_account_follow_request_actions(storage):
     assert decline.status_code == 200 and decline.json() is True
     assert ("user_follow_request_approve", 1) in storage.client_instance.calls
     assert ("user_follow_request_decline", 1) in storage.client_instance.calls
+
+
+@pytest.mark.asyncio
+async def test_account_bulk_follow_request_actions(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        approve = await ac.post(
+            "/account/follow/requests/approve",
+            data={"sessionid": "sid", "user_ids": ["1", "2"]},
+        )
+        decline = await ac.delete(
+            "/account/follow/requests",
+            params=[("sessionid", "sid"), ("user_ids", "1"), ("user_ids", "2")],
+        )
+
+    assert approve.status_code == 200 and approve.json() == {"1": True, "2": True}
+    assert decline.status_code == 200 and decline.json() == {"1": False, "2": False}
+    assert ("user_follow_requests_approve", ["1", "2"]) in storage.client_instance.calls
+    assert ("user_follow_requests_decline", ["1", "2"]) in storage.client_instance.calls
+
+
+@pytest.mark.asyncio
+async def test_account_feed_new_returns_bool(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/account/feed/new", params={"sessionid": "sid"})
+
+    assert response.status_code == 200
+    assert response.json() is True
+    assert ("new_feed_exist",) in storage.client_instance.calls
+
+
+@pytest.mark.asyncio
+async def test_user_discovery_routes_call_aiograpi_methods(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        suggestions = await ac.get("/user/suggestions", params={"sessionid": "sid", "user_id": "1"})
+        details = await ac.get(
+            "/user/suggestions/details",
+            params=[("sessionid", "sid"), ("user_id", "1"), ("chained_ids", "2"), ("chained_ids", "3")],
+        )
+        recommendations = await ac.get("/user/recommendations", params={"sessionid": "sid", "user_id": "1"})
+        creator = await ac.get(
+            "/user/creator",
+            params={"sessionid": "sid", "user_id": "1", "entry_point": "profile"},
+        )
+
+    assert suggestions.status_code == 200
+    assert suggestions.json()["users"][0]["pk"] == "2"
+    assert details.status_code == 200
+    assert details.json()["users"][0]["social_context"] == "followed by test"
+    assert recommendations.status_code == 200
+    assert recommendations.json()["users"][0]["pk"] == "4"
+    assert creator.status_code == 200
+    assert creator.json()["user"]["pk"] == "5"
+    assert creator.json()["info"]["category"] == "Digital creator"
+    assert ("chaining", "1") in storage.client_instance.calls
+    assert ("fetch_suggestion_details", "1", ["2", "3"]) in storage.client_instance.calls
+    assert ("discover_recommended_accounts_for_category_v1", "1") in storage.client_instance.calls
+    assert ("creator_info", "1", "profile") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio

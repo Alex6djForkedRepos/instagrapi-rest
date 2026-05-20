@@ -76,6 +76,8 @@ INTERNAL_EXACT_METHODS = {
     "set_ig_u_rur",
     "set_ig_www_claim",
     "small_delay",
+    "user_related_profiles_gql",
+    "user_short_gql",
     "very_small_delay",
     "with_query_params",
 }
