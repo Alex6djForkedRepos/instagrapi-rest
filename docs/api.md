@@ -36,6 +36,10 @@ any of:
 If `POST /auth/login` returns `TwoFactorRequired`, retry the same endpoint with
 the same `username` and `password` plus `verification_code`.
 
+`GET /auth/totp/seed` generates a TOTP seed for the authenticated session.
+`GET /auth/totp/code?seed=...` generates the current six-digit TOTP code from a
+seed without requiring a session.
+
 If it returns `ChallengeRequired`, resolve the Instagram challenge in the
 account/session context first, then retry login or import a known-good saved
 session through `PATCH /auth/settings`.

@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **269**
-- Methods not exposed as REST routes: **231**
-- Candidate REST backlog: **6**
+- Methods reached by REST routes: **271**
+- Methods not exposed as REST routes: **229**
+- Candidate REST backlog: **4**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 269 | Already used by public REST routes. |
-| `candidate` | 6 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 271 | Already used by public REST routes. |
+| `candidate` | 4 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -57,7 +57,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `signup` | 0 | 0 | 0 | 15 | 15 |
 | `story` | 14 | 0 | 7 | 0 | 21 |
 | `timeline` | 4 | 0 | 0 | 0 | 4 |
-| `totp` | 2 | 2 | 0 | 0 | 4 |
+| `totp` | 4 | 0 | 0 | 0 | 4 |
 | `track` | 5 | 0 | 0 | 0 | 5 |
 | `user` | 46 | 0 | 22 | 6 | 74 |
 | `video` | 5 | 0 | 1 | 4 | 10 |
@@ -69,7 +69,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `explore` | `report_explore_media` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
-| `totp` | `totp_generate_code`, `totp_generate_seed` |
 
 ## REST Routes To aiograpi Methods
 
@@ -113,6 +112,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `PATCH /auth/settings` | `expose`, `set_locale`, `set_proxy`, `set_settings`, `set_timezone_offset` |
 | `DELETE /auth/totp` | `totp_disable` |
 | `POST /auth/totp` | `totp_enable` |
+| `GET /auth/totp/code` | `totp_generate_code` |
+| `GET /auth/totp/seed` | `totp_generate_seed` |
 | `GET /clip/creation/info` | `clip_info_for_creation` |
 | `GET /clip/download` | `clip_download` |
 | `GET /clip/download/by/url` | `clip_download_by_url` |
@@ -731,8 +732,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `top_search(self, query)` | `public` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `totp_disable(self) -> bool` | `totp` | `DELETE /auth/totp` | `exposed` | used by at least one public REST route |
 | `totp_enable(self, verification_code: str) -> List[str]` | `totp` | `POST /auth/totp` | `exposed` | used by at least one public REST route |
-| `totp_generate_code(seed: str) -> str` | `totp` | - | `candidate` | potential user-facing REST endpoint |
-| `totp_generate_seed(self) -> str` | `totp` | - | `candidate` | potential user-facing REST endpoint |
+| `totp_generate_code(seed: str) -> str` | `totp` | `GET /auth/totp/code` | `exposed` | used by at least one public REST route |
+| `totp_generate_seed(self) -> str` | `totp` | `GET /auth/totp/seed` | `exposed` | used by at least one public REST route |
 | `track_download_by_url(self, url: str, filename: str = '', folder: pathlib._local.Path = '') -> pathlib._local.Path` | `track` | `GET /track/download/by/url` | `exposed` | used by at least one public REST route |
 | `track_info_by_canonical_id(self, music_canonical_id: str) -> aiograpi.types.Track` | `track` | `GET /track` | `exposed` | used by at least one public REST route |
 | `track_info_by_id(self, track_id: str, max_id: str = '') -> Dict` | `track` | `GET /track` | `exposed` | used by at least one public REST route |

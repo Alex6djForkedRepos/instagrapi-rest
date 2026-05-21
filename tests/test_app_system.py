@@ -195,6 +195,7 @@ async def test_openapi_uses_sessionid_authorize_button_for_protected_routes():
     public_paths = {
         "/auth/login",
         "/auth/login/by/sessionid",
+        "/auth/totp/code",
         "/health",
         "/ready",
         "/metrics",
@@ -248,6 +249,8 @@ async def test_openapi_uses_rest_http_methods():
         "/auth/relogin": {"patch"},
         "/auth/settings": {"get", "patch"},
         "/auth/totp": {"delete", "post"},
+        "/auth/totp/code": {"get"},
+        "/auth/totp/seed": {"get"},
         "/build": {"get"},
         "/clip/creation/info": {"get"},
         "/clip/download": {"get"},
@@ -625,6 +628,8 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/auth/login/by/sessionid"]["post"]["summary"] == "Create a session from an existing session ID"
     assert paths["/auth/settings"]["get"]["summary"] == "Get saved auth settings"
     assert paths["/auth/settings"]["patch"]["summary"] == "Save auth settings"
+    assert paths["/auth/totp/code"]["get"]["summary"] == "Generate a TOTP code"
+    assert paths["/auth/totp/seed"]["get"]["summary"] == "Generate a TOTP seed"
     assert paths["/account"]["get"]["summary"] == "Get authenticated account info"
     assert paths["/account"]["patch"]["summary"] == "Update authenticated account profile"
     assert paths["/account/archive/media"]["get"]["summary"] == "List archived account media"

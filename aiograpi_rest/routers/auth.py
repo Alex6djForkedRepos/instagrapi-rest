@@ -2,7 +2,8 @@ import json
 from typing import Dict, List, Optional, Union
 from unittest.mock import patch
 
-from fastapi import APIRouter, Depends, Form, HTTPException
+from aiograpi import Client
+from fastapi import APIRouter, Depends, Form, HTTPException, Query
 
 from aiograpi_rest.dependencies import ClientStorage, get_clients, get_optional_sessionid, get_sessionid
 
@@ -92,6 +93,22 @@ async def auth_relogin(sessionid: str = Depends(get_sessionid),
     """
     cl = await clients.get(sessionid)
     return await cl.relogin()
+
+
+@router.get("/totp/seed", response_model=str)
+async def totp_seed(sessionid: str = Depends(get_sessionid),
+                    clients: ClientStorage = Depends(get_clients)) -> str:
+    """Generate TOTP seed
+    """
+    cl = await clients.get(sessionid)
+    return await cl.totp_generate_seed()
+
+
+@router.get("/totp/code", response_model=str)
+async def totp_code(seed: str = Query(...)) -> str:
+    """Generate TOTP code
+    """
+    return Client().totp_generate_code(seed)
 
 
 @router.get("/settings")

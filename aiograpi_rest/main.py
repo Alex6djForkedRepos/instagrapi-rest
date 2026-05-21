@@ -130,6 +130,8 @@ OPERATION_SUMMARIES = {
     "patchAuthSettings": "Save auth settings",
     "postAuthTotp": "Enable TOTP two-factor authentication",
     "deleteAuthTotp": "Disable TOTP two-factor authentication",
+    "getAuthTotpCode": "Generate a TOTP code",
+    "getAuthTotpSeed": "Generate a TOTP seed",
     "postAuthChallengeResolve": "Resolve an Instagram login challenge",
     "getAccount": "Get authenticated account info",
     "getAccountArchiveMedia": "List archived account media",

@@ -221,7 +221,7 @@ For typed client generation in C++, C#, F#, D, Erlang, Elixir, Nim, Haskell, Lis
 
 ## Features
 
-1. **Authorization** — login, 2FA, settings management
+1. **Authorization** — login, 2FA, TOTP utilities, settings management
 2. **Account** — account info, profile, profile picture, privacy
 3. **Media** — info, paginated comments, likes, saves, pins, archive, edit, delete
 4. **Direct** — inbox, threads, messages, seen state

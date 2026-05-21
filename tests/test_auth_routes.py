@@ -39,6 +39,10 @@ class FakeClient:
         self.calls.append(("relogin",))
         return True
 
+    async def totp_generate_seed(self):
+        self.calls.append(("totp_generate_seed",))
+        return "JBSWY3DPEHPK3PXP"
+
     def get_settings(self):
         return self.settings
 
@@ -303,6 +307,29 @@ async def test_relogin_awaits_aiograpi(fake_storage):
     assert response.status_code == 200
     assert response.json() is True
     assert ("relogin",) in fake_storage.created.calls
+
+
+@pytest.mark.asyncio
+async def test_totp_seed_awaits_aiograpi(fake_storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/auth/totp/seed", params={"sessionid": "sid"})
+
+    assert response.status_code == 200
+    assert response.json() == "JBSWY3DPEHPK3PXP"
+    assert ("totp_generate_seed",) in fake_storage.created.calls
+
+
+@pytest.mark.asyncio
+async def test_totp_code_generates_six_digit_code(fake_storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get(
+            "/auth/totp/code",
+            params={"seed": "JBSWY3DPEHPK3PXP"},
+        )
+
+    assert response.status_code == 200
+    assert response.json().isdigit()
+    assert len(response.json()) == 6
 
 
 @pytest.mark.asyncio
