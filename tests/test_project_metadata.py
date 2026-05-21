@@ -641,6 +641,7 @@ def test_live_tests_cover_published_image_and_paginated_read_lists():
         "/direct/inbox",
         "/story/archive",
         "/story/archive/media",
+        "/story/stickers",
         "/story/viewers",
     ):
         assert endpoint in live_smoke

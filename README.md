@@ -229,7 +229,7 @@ For typed client generation in C++, C#, F#, D, Erlang, Elixir, Nim, Haskell, Lis
    top, Reel, recent, and typeahead search; related hashtags, hashtag Reels,
    location guides, pinned posts, friendship, blocks, follow requests
 6. **Video / Photo / IGTV / Reels / Album** — upload to feed and story, download
-7. **Story / Highlights / Notes** — archive, viewers, highlights, notes
+7. **Story / Highlights / Notes** — archive, viewers, sticker tray, highlights, notes
 8. **Notifications / Insights** — inbox, notification settings, media and account insights
 
 ## Installation

@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **267**
-- Methods not exposed as REST routes: **233**
-- Candidate REST backlog: **8**
+- Methods reached by REST routes: **268**
+- Methods not exposed as REST routes: **232**
+- Candidate REST backlog: **7**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 267 | Already used by public REST routes. |
-| `candidate` | 8 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 268 | Already used by public REST routes. |
+| `candidate` | 7 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -55,7 +55,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `public` | 0 | 0 | 0 | 9 | 9 |
 | `share` | 3 | 0 | 0 | 0 | 3 |
 | `signup` | 0 | 0 | 0 | 15 | 15 |
-| `story` | 12 | 2 | 7 | 0 | 21 |
+| `story` | 13 | 1 | 7 | 0 | 21 |
 | `timeline` | 4 | 0 | 0 | 0 | 4 |
 | `totp` | 2 | 2 | 0 | 0 | 4 |
 | `track` | 5 | 0 | 0 | 0 | 5 |
@@ -69,7 +69,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `explore` | `report_explore_media` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
-| `story` | `sticker_tray`, `users_stories_gql` |
+| `story` | `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
 
 ## REST Routes To aiograpi Methods
@@ -276,6 +276,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `DELETE /story/like` | `story_unlike` |
 | `POST /story/like` | `story_like` |
 | `PATCH /story/seen` | `story_seen` |
+| `GET /story/stickers` | `sticker_tray` |
 | `POST /story/upload` | `photo_upload_to_story`, `user_stories`, `video_upload_to_story` |
 | `POST /story/upload/by/url` | `photo_upload_to_story`, `user_stories`, `video_upload_to_story` |
 | `GET /story/viewers` | `story_viewers_chunk` |
@@ -713,7 +714,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `signup(self, username: str, password: str, email: str = '', phone_number: str = '', full_name: str = '', year: int = None, month: int = None, day: int = None) -> aiograpi.types.UserShort` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `small_delay(self)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `standalone_fundraiser_info_v1(self, user_id: str)` | `fundraiser` | - | `candidate` | potential user-facing REST endpoint |
-| `sticker_tray(self) -> dict` | `story` | - | `candidate` | potential user-facing REST endpoint |
+| `sticker_tray(self) -> dict` | `story` | `GET /story/stickers` | `exposed` | used by at least one public REST route |
 | `story_delete(self, story_pk: str) -> bool` | `story` | `DELETE /story` | `exposed` | used by at least one public REST route |
 | `story_download(self, story_pk: str, filename: str = '', folder: pathlib._local.Path = '') -> pathlib._local.Path` | `story` | `GET /story/download` | `exposed` | used by at least one public REST route |
 | `story_download_by_url(self, url: str, filename: str = '', folder: pathlib._local.Path = '') -> pathlib._local.Path` | `story` | `GET /story/download/by/url` | `exposed` | used by at least one public REST route |

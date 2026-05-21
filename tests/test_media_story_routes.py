@@ -124,6 +124,10 @@ class FakeMediaClient:
         self.calls.append(("archive_stories", amount))
         return [_story_payload(pk=11)]
 
+    async def sticker_tray(self):
+        self.calls.append(("sticker_tray",))
+        return {"status": "ok", "stickers": [{"id": "sticker1", "name": "Sticker"}]}
+
     async def story_delete(self, story_pk):
         self.calls.append(("story_delete", story_pk))
         return True
@@ -529,6 +533,15 @@ async def test_story_archive_media_lists_archived_stories(storage):
     assert response.status_code == 200
     assert response.json()[0]["pk"] == "11"
     assert ("archive_stories", 3) in storage.client.calls
+
+
+@pytest.mark.asyncio
+async def test_story_stickers_returns_sticker_tray(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/story/stickers", params={"sessionid": "sid"})
+    assert response.status_code == 200
+    assert response.json()["stickers"][0]["id"] == "sticker1"
+    assert ("sticker_tray",) in storage.client.calls
 
 
 @pytest.mark.asyncio

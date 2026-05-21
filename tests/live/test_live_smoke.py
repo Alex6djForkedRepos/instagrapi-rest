@@ -210,6 +210,10 @@ async def try_settings_import_paginated_read_lists(account, tmp_path):
         assert archived_stories_response.status_code == 200, archived_stories_response.text
         assert isinstance(archived_stories_response.json(), list)
 
+        stickers_response = await api.get("/story/stickers", headers=headers)
+        assert stickers_response.status_code == 200, stickers_response.text
+        assert isinstance(stickers_response.json(), dict)
+
         location_pk = _first_location_pk(media_page, hashtag_top_page, hashtag_recent_page)
         if location_pk:
             for path in ("/location/media/top", "/location/media/recent"):

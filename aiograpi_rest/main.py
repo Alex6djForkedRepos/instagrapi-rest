@@ -312,6 +312,7 @@ OPERATION_SUMMARIES = {
     "getStoryViewers": "List paginated story viewers",
     "getStoryArchive": "List paginated story archive days",
     "getStoryArchiveMedia": "List archived story media",
+    "getStoryStickers": "Get story sticker tray",
     "getStoryDownload": "Download story media",
     "getStoryDownloadByUrl": "Download story media from a URL",
     "getTrack": "Get music track details",

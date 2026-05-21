@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 from aiograpi import Client
@@ -273,6 +273,17 @@ async def story_archive_media(
     """
     cl = await clients.get(sessionid)
     return await cl.archive_stories(amount)
+
+
+@router.get("/stickers", response_model=Dict[str, Any])
+async def story_stickers(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get story sticker tray
+    """
+    cl = await clients.get(sessionid)
+    return await cl.sticker_tray()
 
 
 @router.get("/download")

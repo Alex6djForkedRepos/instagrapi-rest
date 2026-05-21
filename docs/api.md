@@ -189,6 +189,8 @@ story media collection:
 - `GET /story/archive/media` returns archived stories from the authenticated
   account. Pass `amount=0` to keep aiograpi's default of returning all
   available archived stories, or a positive amount to limit the list.
+- `GET /story/stickers` returns Instagram's raw story sticker tray payload for
+  building story upload decorations.
 
 ## User Discovery
 
