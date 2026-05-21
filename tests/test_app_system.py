@@ -378,6 +378,7 @@ async def test_openapi_uses_rest_http_methods():
         "/share": {"get"},
         "/story": {"delete", "get"},
         "/story/archive": {"get"},
+        "/story/archive/media": {"get"},
         "/story/download": {"get"},
         "/story/download/by/url": {"get"},
         "/story/like": {"delete", "post"},
@@ -740,6 +741,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/share"]["get"]["summary"] == "Get share info"
     assert paths["/notifications/settings"]["delete"]["summary"] == "Disable all notification settings"
     assert paths["/story"]["get"]["summary"] == "Get story details"
+    assert paths["/story/archive/media"]["get"]["summary"] == "List archived story media"
     assert paths["/story/viewers"]["get"]["summary"] == "List paginated story viewers"
     assert paths["/track"]["get"]["summary"] == "Get music track details"
     assert paths["/track/stream"]["get"]["summary"] == "Get track stream media"

@@ -9,16 +9,16 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **266**
-- Methods not exposed as REST routes: **234**
-- Candidate REST backlog: **9**
+- Methods reached by REST routes: **267**
+- Methods not exposed as REST routes: **233**
+- Candidate REST backlog: **8**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 266 | Already used by public REST routes. |
-| `candidate` | 9 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 267 | Already used by public REST routes. |
+| `candidate` | 8 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
 | `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
@@ -55,7 +55,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `public` | 0 | 0 | 0 | 9 | 9 |
 | `share` | 3 | 0 | 0 | 0 | 3 |
 | `signup` | 0 | 0 | 0 | 15 | 15 |
-| `story` | 11 | 3 | 7 | 0 | 21 |
+| `story` | 12 | 2 | 7 | 0 | 21 |
 | `timeline` | 4 | 0 | 0 | 0 | 4 |
 | `totp` | 2 | 2 | 0 | 0 | 4 |
 | `track` | 5 | 0 | 0 | 0 | 5 |
@@ -69,7 +69,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `explore` | `report_explore_media` |
 | `fundraiser` | `standalone_fundraiser_info_v1` |
 | `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
-| `story` | `archive_stories`, `sticker_tray`, `users_stories_gql` |
+| `story` | `sticker_tray`, `users_stories_gql` |
 | `totp` | `totp_generate_code`, `totp_generate_seed` |
 
 ## REST Routes To aiograpi Methods
@@ -270,6 +270,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `DELETE /story` | `story_delete` |
 | `GET /story` | `story_info`, `story_pk_from_url` |
 | `GET /story/archive` | `archive_story_days_paginated_v1` |
+| `GET /story/archive/media` | `archive_stories` |
 | `GET /story/download` | `story_download` |
 | `GET /story/download/by/url` | `story_download_by_url` |
 | `DELETE /story/like` | `story_unlike` |
@@ -346,8 +347,8 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `archive_medias(self, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `archive_medias` route family |
 | `archive_medias_paginated_v1(self, amount: int = 0, end_cursor: str = '') -> Tuple[List[aiograpi.types.Media], str]` | `media` | `GET /account/archive/media` | `exposed` | used by at least one public REST route |
 | `archive_medias_v1(self, amount: int = 0) -> List[aiograpi.types.Media]` | `media` | - | `duplicate` | variant of already exposed `archive_medias` route family |
-| `archive_stories(self, amount: int = 0) -> List[aiograpi.types.Story]` | `story` | - | `candidate` | potential user-facing REST endpoint |
-| `archive_stories_v1(self, amount: int = 0) -> List[aiograpi.types.Story]` | `story` | - | `duplicate` | variant of candidate `archive_stories` |
+| `archive_stories(self, amount: int = 0) -> List[aiograpi.types.Story]` | `story` | `GET /story/archive/media` | `exposed` | used by at least one public REST route |
+| `archive_stories_v1(self, amount: int = 0) -> List[aiograpi.types.Story]` | `story` | - | `duplicate` | variant of already exposed `archive_stories` route family |
 | `archive_story_days(self, amount: int = 0, include_memories: bool = True) -> List[aiograpi.types.StoryArchiveDay]` | `story` | - | `duplicate` | variant of already exposed `archive_story_days` route family |
 | `archive_story_days_paginated_v1(self, amount: int = 0, end_cursor: str = '', include_memories: bool = True, reel_id: str = '') -> Tuple[List[aiograpi.types.StoryArchiveDay], str]` | `story` | `GET /story/archive` | `exposed` | used by at least one public REST route |
 | `archive_story_days_v1(self, amount: int = 0, include_memories: bool = True) -> List[aiograpi.types.StoryArchiveDay]` | `story` | - | `duplicate` | variant of already exposed `archive_story_days` route family |

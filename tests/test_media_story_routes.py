@@ -120,6 +120,10 @@ class FakeMediaClient:
         self.calls.append(("story_info", story_pk, use_cache))
         return _story_payload(pk=story_pk)
 
+    async def archive_stories(self, amount=0):
+        self.calls.append(("archive_stories", amount))
+        return [_story_payload(pk=11)]
+
     async def story_delete(self, story_pk):
         self.calls.append(("story_delete", story_pk))
         return True
@@ -514,6 +518,17 @@ async def test_story_info_awaits_client(storage):
         )
     assert response.status_code == 200
     assert str(response.json()["pk"]) == "1"
+
+
+@pytest.mark.asyncio
+async def test_story_archive_media_lists_archived_stories(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get(
+            "/story/archive/media", params={"sessionid": "sid", "amount": "3"}
+        )
+    assert response.status_code == 200
+    assert response.json()[0]["pk"] == "11"
+    assert ("archive_stories", 3) in storage.client.calls
 
 
 @pytest.mark.asyncio

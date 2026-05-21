@@ -202,6 +202,14 @@ async def try_settings_import_paginated_read_lists(account, tmp_path):
         ):
             _assert_paginated_page(await api.get(path, params=params, headers=headers))
 
+        archived_stories_response = await api.get(
+            "/story/archive/media",
+            params={"amount": 2},
+            headers=headers,
+        )
+        assert archived_stories_response.status_code == 200, archived_stories_response.text
+        assert isinstance(archived_stories_response.json(), list)
+
         location_pk = _first_location_pk(media_page, hashtag_top_page, hashtag_recent_page)
         if location_pk:
             for path in ("/location/media/top", "/location/media/recent"):

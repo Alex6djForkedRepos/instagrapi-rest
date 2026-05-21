@@ -179,6 +179,17 @@ highlight PK or a highlight URL where lookup can be resolved from a URL:
   patch uses aiograpi's dedicated title-change method, and `cover_picture`
   uploads a cover image through aiograpi's dedicated cover-change method.
 
+## Story
+
+Story archive routes expose both archive day pages and the actual archived
+story media collection:
+
+- `GET /story/archive` returns paginated archive day groups with `items` and
+  `next_cursor`.
+- `GET /story/archive/media` returns archived stories from the authenticated
+  account. Pass `amount=0` to keep aiograpi's default of returning all
+  available archived stories, or a positive amount to limit the list.
+
 ## User Discovery
 
 User discovery routes live under the target user context and return raw

@@ -263,6 +263,18 @@ async def story_archive(sessionid: str = Depends(get_sessionid),
     return StoryArchiveDayPage(items=items, next_cursor=next_cursor or "")
 
 
+@router.get("/archive/media", response_model=List[Story])
+async def story_archive_media(
+    sessionid: str = Depends(get_sessionid),
+    amount: int = Query(0, ge=0),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[Story]:
+    """List archived story media
+    """
+    cl = await clients.get(sessionid)
+    return await cl.archive_stories(amount)
+
+
 @router.get("/download")
 async def story_download(sessionid: str = Depends(get_sessionid),
                          story_pk: int = Query(...),

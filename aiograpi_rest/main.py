@@ -311,6 +311,7 @@ OPERATION_SUMMARIES = {
     "deleteStoryLike": "Unlike a story",
     "getStoryViewers": "List paginated story viewers",
     "getStoryArchive": "List paginated story archive days",
+    "getStoryArchiveMedia": "List archived story media",
     "getStoryDownload": "Download story media",
     "getStoryDownloadByUrl": "Download story media from a URL",
     "getTrack": "Get music track details",
