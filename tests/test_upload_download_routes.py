@@ -198,16 +198,28 @@ class FakeClient:
         self.calls.append(("clip_upload", path, kwargs))
         return _media_payload()
 
-    async def clip_upload_as_reel_with_music(self, path, caption, track, extra_data=None):
+    async def clip_upload_with_music(self, path, caption, track, **kwargs):
         upload_path = Path(path)
+        thumbnail = kwargs.get("thumbnail")
+        thumbnail_path = Path(thumbnail) if thumbnail else None
         self.calls.append(
             (
-                "clip_upload_as_reel_with_music",
+                "clip_upload_with_music",
                 upload_path.suffix,
                 upload_path.read_bytes(),
                 caption,
                 track.id,
-                extra_data or {},
+                thumbnail_path.suffix if thumbnail_path else None,
+                thumbnail_path.read_bytes() if thumbnail_path else None,
+                kwargs["usertags"],
+                kwargs["location"],
+                kwargs["extra_data"],
+                kwargs["audio_asset_start_time"],
+                kwargs["overlap_duration"],
+                kwargs["original_volume"],
+                kwargs["music_volume"],
+                kwargs["product"],
+                kwargs["alacorn_session_id"],
             )
         )
         return _media_payload()
@@ -806,8 +818,17 @@ async def test_clip_pin_and_upload_with_music(storage):
                 "caption": "music",
                 "track": json.dumps(track),
                 "extra_data": json.dumps({"share_to_facebook": "1"}),
+                "audio_asset_start_time": "1000",
+                "overlap_duration": "25000",
+                "original_volume": "0.75",
+                "music_volume": "0.85",
+                "product": "clips",
+                "alacorn_session_id": "alacorn-1",
             },
-            files={"file": ("a.mp4", b"clip-music-bytes", "video/mp4")},
+            files={
+                "file": ("a.mp4", b"clip-music-bytes", "video/mp4"),
+                "thumbnail": ("cover.jpg", b"cover-bytes", "image/jpeg"),
+            },
         )
 
     assert pin.status_code == 200
@@ -817,14 +838,20 @@ async def test_clip_pin_and_upload_with_music(storage):
     assert upload.status_code == 200
     assert ("clip_pin", "1", False) in storage.client.calls
     assert ("clip_unpin", "1") in storage.client.calls
-    assert (
-        "clip_upload_as_reel_with_music",
+    upload_call = next(call for call in storage.client.calls if call[0] == "clip_upload_with_music")
+    assert upload_call[:7] == (
+        "clip_upload_with_music",
         ".mp4",
         b"clip-music-bytes",
         "music",
         "track1",
-        {"share_to_facebook": "1"},
-    ) in storage.client.calls
+        ".jpg",
+        b"cover-bytes",
+    )
+    assert upload_call[7] == []
+    assert upload_call[8] is None
+    assert upload_call[9] == {"share_to_facebook": "1"}
+    assert upload_call[10:] == (1000, 25000, 0.75, 0.85, "clips", "alacorn-1")
 
 
 @pytest.mark.asyncio

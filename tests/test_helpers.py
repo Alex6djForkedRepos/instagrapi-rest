@@ -49,8 +49,8 @@ class FakeClient:
         self.calls.append(("clip_upload", path, kwargs))
         return Path(path)
 
-    async def clip_upload_as_reel_with_music(self, path, caption, track, extra_data=None):
-        self.calls.append(("clip_upload_as_reel_with_music", path, caption, track.id, extra_data or {}))
+    async def clip_upload_with_music(self, path, caption, track, **kwargs):
+        self.calls.append(("clip_upload_with_music", path, caption, track.id, kwargs))
         return Path(path)
 
     async def photo_upload_to_story(self, path, **kwargs):
@@ -280,11 +280,11 @@ async def test_clip_upload_with_music_post_writes_tempfile_and_calls_client():
         track=Track(),
         extra_data={"share_to_facebook": "1"},
     )
-    call = next(c for c in cl.calls if c[0] == "clip_upload_as_reel_with_music")
+    call = next(c for c in cl.calls if c[0] == "clip_upload_with_music")
     assert call[1].endswith(".mp4")
     assert call[2] == "hi"
     assert call[3] == "track1"
-    assert call[4] == {"share_to_facebook": "1"}
+    assert call[4]["extra_data"] == {"share_to_facebook": "1"}
     assert str(result).endswith(".mp4")
 
 

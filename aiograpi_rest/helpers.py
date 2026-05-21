@@ -193,4 +193,4 @@ async def clip_upload_post(cl, content, **kwargs):
 async def clip_upload_with_music_post(cl, content, **kwargs):
     with tempfile.TemporaryDirectory() as td:
         path = _write_temp_file(td, content, '.mp4')
-        return await cl.clip_upload_as_reel_with_music(path, **kwargs)
+        return await cl.clip_upload_with_music(path, **_normalize_thumbnail(kwargs, td))

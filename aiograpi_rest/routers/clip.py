@@ -167,7 +167,16 @@ async def clip_upload_with_music(
     file: UploadFile = File(...),
     caption: str = Form(...),
     track: str = Form(..., description=TRACK_FORM_DESCRIPTION),
+    thumbnail: Optional[UploadFile] = File(None),
+    usertags: Optional[List[str]] = Form([], description=USERTAGS_FORM_DESCRIPTION),
+    location: Optional[str] = Form(None, description=LOCATION_FORM_DESCRIPTION),
     extra_data: Optional[str] = Form(None, description=EXTRA_DATA_FORM_DESCRIPTION),
+    audio_asset_start_time: Optional[int] = Form(None),
+    overlap_duration: int = Form(30000),
+    original_volume: float = Form(1.0),
+    music_volume: float = Form(1.0),
+    product: str = Form("story_camera_clips_v2"),
+    alacorn_session_id: str = Form("null"),
     clients: ClientStorage = Depends(get_clients)
 ) -> Media:
     """Upload a Reel with music
@@ -176,11 +185,23 @@ async def clip_upload_with_music(
 
     content = await file.read()
     parsed_track = parse_json_form_model(track, Track, "track")
+    parsed_usertags = parse_upload_usertags(usertags)
+    parsed_location = parse_upload_location(location)
     parsed_extra_data = parse_json_form_dict(extra_data, "extra_data", default={})
+    thumbnail_content = await thumbnail.read() if thumbnail is not None else None
     return await clip_upload_with_music_post(
             cl, content, caption=caption,
+            thumbnail=thumbnail_content,
+            usertags=parsed_usertags,
+            location=parsed_location,
             track=parsed_track,
-            extra_data=parsed_extra_data)
+            extra_data=parsed_extra_data,
+            audio_asset_start_time=audio_asset_start_time,
+            overlap_duration=overlap_duration,
+            original_volume=original_volume,
+            music_volume=music_volume,
+            product=product,
+            alacorn_session_id=alacorn_session_id)
 
 
 @router.post("/upload/by/url", response_model=Media)

@@ -240,13 +240,17 @@ class FakeExpandedClient:
             return True
         return {"status": "ok"}
 
-    async def reset_password(self, username):
-        self.calls.append(("reset_password", username))
-        return {"status": "ok", "username": username}
+    async def send_password_reset(self, identifier, recaptcha_challenge_field=""):
+        self.calls.append(("send_password_reset", identifier, recaptcha_challenge_field))
+        return {"status": "ok", "identifier": identifier, "recaptcha_challenge_field": recaptcha_challenge_field}
 
     async def send_confirm_email(self, email):
         self.calls.append(("send_confirm_email", email))
         return {"status": "ok", "email": email}
+
+    async def confirm_email(self, email, code):
+        self.calls.append(("confirm_email", email, code))
+        return {"status": "ok", "email": email, "code": code}
 
     async def send_confirm_phone_number(self, phone_number):
         self.calls.append(("send_confirm_phone_number", phone_number))
@@ -344,9 +348,37 @@ class FakeExpandedClient:
         self.calls.append(("media_get_livestream_viewers", broadcast_id))
         return [{"username": "viewer", "pk": "1"}]
 
+    async def media_note_create(self, media_id, text="", audience=7, note_style=13, extra_data=None):
+        self.calls.append(("media_note_create", media_id, text, audience, note_style, extra_data or {}))
+        return {"status": "ok", "id": "media-note-1", "media_id": media_id, "text": text}
+
+    async def media_note_delete(self, note_id, extra_data=None):
+        self.calls.append(("media_note_delete", note_id, extra_data or {}))
+        return True
+
     async def direct_threads(self, amount=20, selected_filter="", box="", thread_message_limit=None):
         self.calls.append(("direct_threads", amount, selected_filter, box, thread_message_limit))
         return [_direct_thread_payload()]
+
+    async def direct_channels(self, user_id=None, thread_subtypes=None):
+        self.calls.append(("direct_channels", user_id, thread_subtypes))
+        return [{"id": "channel1", "user_id": user_id, "thread_subtypes": thread_subtypes or []}]
+
+    async def direct_has_interop_upgraded(self):
+        self.calls.append(("direct_has_interop_upgraded",))
+        return True
+
+    async def direct_pending_requests_preview(self, pending_inbox_filters=None):
+        self.calls.append(("direct_pending_requests_preview", pending_inbox_filters))
+        return {"total_count": 1, "filters": pending_inbox_filters or []}
+
+    async def direct_search_gen_ai_bots(self, amount=20):
+        self.calls.append(("direct_search_gen_ai_bots", amount))
+        return [_user_short(8)]
+
+    async def direct_set_e2ee_eligibility(self, e2ee_eligibility=4):
+        self.calls.append(("direct_set_e2ee_eligibility", e2ee_eligibility))
+        return True
 
     async def direct_threads_chunk(self, selected_filter="", box="", thread_message_limit=None, cursor=None):
         self.calls.append(("direct_threads_chunk", selected_filter, box, thread_message_limit, cursor))
@@ -605,10 +637,6 @@ class FakeExpandedClient:
     async def hashtag_medias_v1_chunk(self, name, max_amount=27, tab_key="", max_id=None):
         self.calls.append(("hashtag_medias_v1_chunk", name, max_amount, tab_key, max_id))
         return [_media_payload()], f"next-hashtag-{tab_key}"
-
-    async def hashtag_related_hashtags(self, name):
-        self.calls.append(("hashtag_related_hashtags", name))
-        return [{"id": "tag-related", "name": f"{name}dev", "media_count": 2}]
 
     async def hashtag_medias_reels_v1(self, name, amount=27):
         self.calls.append(("hashtag_medias_reels_v1", name, amount))
@@ -952,9 +980,20 @@ async def test_account_routes(storage):
             "/account/password",
             data={"sessionid": "sid", "old_password": "old", "new_password": "bool"},
         )
-        reset_password = await ac.post("/account/password/reset", data={"sessionid": "sid", "username": "account"})
+        reset_password = await ac.post(
+            "/account/password/reset",
+            data={
+                "sessionid": "sid",
+                "identifier": "account@example.com",
+                "recaptcha_challenge_field": "captcha-token",
+            },
+        )
         confirm_email = await ac.post(
             "/account/email/confirm",
+            data={"sessionid": "sid", "email": "new@example.com", "code": "123456"},
+        )
+        send_confirm_email = await ac.post(
+            "/account/email/confirmation",
             data={"sessionid": "sid", "email": "new@example.com"},
         )
         confirm_phone = await ac.post(
@@ -981,8 +1020,9 @@ async def test_account_routes(storage):
     assert remove_links.status_code == 200 and remove_links.json()["removed"] == ["1", "2"]
     assert password.status_code == 200 and password.json() is True
     assert password_bool.status_code == 200 and password_bool.json() is True
-    assert reset_password.status_code == 200 and reset_password.json()["username"] == "account"
-    assert confirm_email.status_code == 200 and confirm_email.json()["email"] == "new@example.com"
+    assert reset_password.status_code == 200 and reset_password.json()["identifier"] == "account@example.com"
+    assert confirm_email.status_code == 200 and confirm_email.json()["code"] == "123456"
+    assert send_confirm_email.status_code == 200 and send_confirm_email.json()["email"] == "new@example.com"
     assert confirm_phone.status_code == 200 and confirm_phone.json()["phone_number"] == "+15550000000"
     assert archive_media.status_code == 200 and archive_media.json()["next_cursor"] == "next-archive-media"
     assert feed_user_stream_item.status_code == 200 and feed_user_stream_item.json()["is_pull_to_refresh"] is True
@@ -995,7 +1035,8 @@ async def test_account_routes(storage):
     assert ("remove_bio_links", ["1", "2"]) in storage.client.calls
     assert ("change_password", "old", "new") in storage.client.calls
     assert ("change_password", "old", "bool") in storage.client.calls
-    assert ("reset_password", "account") in storage.client.calls
+    assert ("send_password_reset", "account@example.com", "captcha-token") in storage.client.calls
+    assert ("confirm_email", "new@example.com", "123456") in storage.client.calls
     assert ("send_confirm_email", "new@example.com") in storage.client.calls
     assert ("send_confirm_phone_number", "+15550000000") in storage.client.calls
     assert ("archive_medias_paginated_v1", 3, "archive-cursor") in storage.client.calls
@@ -1048,6 +1089,21 @@ async def test_media_comment_save_pin_routes(storage):
             "/media/livestream/viewers",
             params={"sessionid": "sid", "broadcast_id": "live1"},
         )
+        create_note = await ac.post(
+            "/media/note",
+            data={
+                "sessionid": "sid",
+                "media_id": "m1",
+                "text": "media note",
+                "audience": "7",
+                "note_style": "13",
+                "extra_data": json.dumps({"source": "test"}),
+            },
+        )
+        delete_note = await ac.delete(
+            "/media/note",
+            params={"sessionid": "sid", "note_id": "media-note-1", "extra_data": json.dumps({"source": "test"})},
+        )
 
     assert comments.status_code == 200
     assert comments.json()["items"][0]["pk"] == "10"
@@ -1065,6 +1121,8 @@ async def test_media_comment_save_pin_routes(storage):
     assert invalid_live_state.status_code == 422
     assert live_comments.status_code == 200 and live_comments.json()[0]["text"] == "hello"
     assert live_viewers.status_code == 200 and live_viewers.json()[0]["username"] == "viewer"
+    assert create_note.status_code == 200 and create_note.json()["text"] == "media note"
+    assert delete_note.status_code == 200 and delete_note.json() is True
     assert ("media_comments_chunk", "m1", 2, "comments-cursor") in storage.client.calls
     assert ("comment_bulk_delete", "m1", [10]) in storage.client.calls
     assert ("media_unsave", "m1", 7) in storage.client.calls
@@ -1075,6 +1133,8 @@ async def test_media_comment_save_pin_routes(storage):
     assert ("media_end_livestream", "live1") in storage.client.calls
     assert ("media_get_livestream_comments", "live1") in storage.client.calls
     assert ("media_get_livestream_viewers", "live1") in storage.client.calls
+    assert ("media_note_create", "m1", "media note", 7, 13, {"source": "test"}) in storage.client.calls
+    assert ("media_note_delete", "media-note-1", {"source": "test"}) in storage.client.calls
 
 
 @pytest.mark.asyncio
@@ -1099,9 +1159,23 @@ async def test_direct_routes(storage):
         )
         pending = await ac.get("/direct/pending", params={"sessionid": "sid", "cursor": "pending-cursor"})
         requests = await ac.get("/direct/requests", params={"sessionid": "sid", "amount": "2"})
+        requests_preview = await ac.get(
+            "/direct/requests/preview",
+            params={"sessionid": "sid", "pending_inbox_filters": ["unread", "flagged"]},
+        )
         pending_inbox = await ac.get("/direct/pending/inbox", params={"sessionid": "sid", "amount": "3"})
         spam = await ac.get("/direct/spam", params={"sessionid": "sid", "cursor": "spam-cursor"})
         spam_inbox = await ac.get("/direct/spam/inbox", params={"sessionid": "sid", "amount": "4"})
+        channels = await ac.get(
+            "/direct/channels",
+            params={"sessionid": "sid", "user_id": "42", "thread_subtypes": ["29", "30"]},
+        )
+        interop = await ac.get("/direct/interop/upgraded", params={"sessionid": "sid"})
+        genai_bots = await ac.get("/direct/genai/bots", params={"sessionid": "sid", "amount": "3"})
+        e2ee = await ac.patch(
+            "/direct/e2ee/eligibility",
+            data={"sessionid": "sid", "e2ee_eligibility": "5"},
+        )
         search = await ac.get("/direct/search", params={"sessionid": "sid", "query": "user", "mode": "raven"})
         message_search = await ac.get(
             "/direct/messages/search",
@@ -1259,6 +1333,8 @@ async def test_direct_routes(storage):
     assert inbox.status_code == 200 and threads.status_code == 200 and thread.status_code == 200
     assert messages.status_code == 200 and message_lookup.status_code == 200
     assert pending.status_code == 200 and requests.status_code == 200 and pending_inbox.status_code == 200
+    assert requests_preview.status_code == 200 and channels.status_code == 200 and interop.status_code == 200
+    assert genai_bots.status_code == 200 and e2ee.status_code == 200
     assert spam.status_code == 200 and spam_inbox.status_code == 200
     assert search.status_code == 200 and message_search.status_code == 200
     assert thread_media.status_code == 200 and active_presence.status_code == 200
@@ -1267,6 +1343,11 @@ async def test_direct_routes(storage):
     assert messages.json()[0]["text"] == "hello"
     assert message_lookup.json()["id"] == "1"
     assert pending.json()["next_cursor"] == "next-pending"
+    assert requests_preview.json()["total_count"] == 1
+    assert channels.json()[0]["id"] == "channel1"
+    assert interop.json() is True
+    assert genai_bots.json()[0]["pk"] == "8"
+    assert e2ee.json() is True
     assert spam.json()["next_cursor"] == "next-spam"
     assert search.json()[0]["username"] == "user2"
     assert message_search.json()[0]["message"]["id"] == "search1"
@@ -1307,6 +1388,11 @@ async def test_direct_routes(storage):
     assert ("direct_message", 100, 1, 6) in storage.client.calls
     assert ("direct_pending_chunk", "pending-cursor") in storage.client.calls
     assert ("direct_requests", 2) in storage.client.calls
+    assert ("direct_pending_requests_preview", ["unread", "flagged"]) in storage.client.calls
+    assert ("direct_channels", 42, [29, 30]) in storage.client.calls
+    assert ("direct_has_interop_upgraded",) in storage.client.calls
+    assert ("direct_search_gen_ai_bots", 3) in storage.client.calls
+    assert ("direct_set_e2ee_eligibility", 5) in storage.client.calls
     assert ("direct_pending_inbox", 3) in storage.client.calls
     assert ("direct_spam_chunk", "spam-cursor") in storage.client.calls
     assert ("direct_spam_inbox", 4) in storage.client.calls
@@ -1399,7 +1485,6 @@ async def test_discovery_user_routes(storage):
         hashtag = await ac.get("/hashtag", params={"sessionid": "sid", "name": "python"})
         top = await ac.get("/hashtag/media/top", params={"sessionid": "sid", "name": "python", "amount": "1"})
         recent = await ac.get("/hashtag/media/recent", params={"sessionid": "sid", "name": "python", "amount": "1"})
-        related = await ac.get("/hashtag/related", params={"sessionid": "sid", "name": "python"})
         reels = await ac.get("/hashtag/reels", params={"sessionid": "sid", "name": "python", "amount": "2"})
         follow = await ac.post("/hashtag/follow", data={"sessionid": "sid", "hashtag": "python"})
         unfollow = await ac.delete("/hashtag/follow", params={"sessionid": "sid", "hashtag": "python"})
@@ -1439,7 +1524,6 @@ async def test_discovery_user_routes(storage):
         hashtag,
         top,
         recent,
-        related,
         reels,
         follow,
         unfollow,
@@ -1469,7 +1553,6 @@ async def test_discovery_user_routes(storage):
     assert stream_invalid_view.status_code == 422
     assert ("location_search_name", "Berlin") in storage.client.calls
     assert ("location_search", 1.0, 2.0) in storage.client.calls
-    assert ("hashtag_related_hashtags", "python") in storage.client.calls
     assert ("hashtag_medias_reels_v1", "python", 2) in storage.client.calls
     assert ("location_guides_v1", 1) in storage.client.calls
     assert ("user_friendships_v1", ["1", "2"]) in storage.client.calls

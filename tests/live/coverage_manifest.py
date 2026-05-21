@@ -39,6 +39,8 @@ REVERSIBLE_MUTATIONS = {
     ("DELETE", "/media/comment/like"): "GET /media/comment/likers",
     ("POST", "/media/save"): "DELETE /media/save",
     ("DELETE", "/media/save"): "GET /account/liked/media",
+    ("POST", "/media/note"): "GET /media",
+    ("DELETE", "/media/note"): "GET /media",
     ("POST", "/note"): "GET /notes",
     ("DELETE", "/note"): "GET /notes",
     ("POST", "/note/music"): "GET /notes",
@@ -103,7 +105,9 @@ GUARDED_PREFIX_REASONS = {
     ("/notifications", "account settings"): "changes notification settings on the authenticated account",
 }
 
-GUARDED_EXACT_REASONS: dict[tuple[str, str], str] = {}
+GUARDED_EXACT_REASONS: dict[tuple[str, str], str] = {
+    ("POST", "/music/bookmark"): "changes saved music and aiograpi does not expose an unbookmark helper",
+}
 
 
 def operation_policy(method: str, path: str) -> LivePolicy:

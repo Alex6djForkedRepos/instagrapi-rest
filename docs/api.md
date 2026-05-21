@@ -104,8 +104,11 @@ User relationship routes use `POST` to create or enable a relationship state and
   `DELETE /account/bio-links`.
 - `DELETE /account/bio-links` removes one or more bio links by `link_ids`.
 - `PATCH /account/password` changes the authenticated account password.
-- `POST /account/password/reset` sends a password reset flow for a username.
-- `POST /account/email/confirm` sends an email confirmation code.
+- `POST /account/password/reset` requests a password reset link or code by
+  username, email, or phone `identifier`.
+- `POST /account/email/confirmation` sends an email confirmation code.
+- `POST /account/email/confirm` confirms a pending email change with `email`
+  and `code`.
 - `POST /account/phone/confirm` sends a phone confirmation code.
 
 ## Notification Settings
@@ -293,6 +296,14 @@ workflows.
 - `GET /track/stream` returns streamed media for a track `id`.
 - `GET /track/download/by/url` downloads track audio from a URL.
 - `GET /music/feed/browser` returns music candidates for feed posts.
+- `GET /music/search` searches the current app music catalog.
+- `GET /music/keywords` searches music typeahead keywords.
+- `GET /music/trending` returns trending music candidates.
+- `GET /music/trends/top` returns top music trends.
+- `GET /music/clips/browser` returns music candidates for Reels.
+- `POST /music/bookmark` bookmarks original audio.
+- `GET /music/original-audio/title/availability` checks whether an original
+  audio title is valid.
 
 ## Livestreams
 
@@ -307,6 +318,8 @@ action paths:
   `ended`.
 - `GET /media/livestream/comments` lists live comments for a `broadcast_id`.
 - `GET /media/livestream/viewers` lists live viewers for a `broadcast_id`.
+- `POST /media/note` creates a note attached to a media item.
+- `DELETE /media/note` deletes a media-attached note by `note_id`.
 
 ## Notes
 
@@ -342,6 +355,15 @@ belong to a media object.
 
 ## Direct
 
+- `GET /direct/channels` lists Direct channels, optionally filtered by
+  `user_id` and repeated `thread_subtypes`.
+- `GET /direct/interop/upgraded` reports whether the account has upgraded
+  interop messaging.
+- `GET /direct/requests/preview` returns a lightweight pending requests
+  preview.
+- `GET /direct/genai/bots` lists generated AI bot suggestions for Direct.
+- `PATCH /direct/e2ee/eligibility` updates the account's Direct E2EE
+  eligibility state.
 - `GET /direct/pending/inbox` lists pending direct request threads up to
   `amount`.
 - `GET /direct/spam/inbox` lists spam direct request threads up to `amount`.
@@ -388,7 +410,6 @@ user PKs or `username` for usernames. If a legacy client passes a username in
 Additional discovery collection routes return plain arrays when `aiograpi` does
 not expose a cursor for the underlying method:
 
-- `GET /hashtag/related`
 - `GET /hashtag/reels`
 - `GET /location/guides`
 - `GET /user/guides`
@@ -416,6 +437,11 @@ optional configure data. This applies to:
 - `POST /photo/upload/with/music`
 - `POST /clip/upload/with/music`
 - `POST /album/upload/with/music`
+
+Media notes use the same JSON field style for optional `extra_data`:
+
+- `POST /media/note`
+- `DELETE /media/note`
 
 `device_status` is an optional JSON object for
 `GET /clip/share/facebook/config`.

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Form, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse
 
@@ -86,3 +86,110 @@ async def music_feed_browser(
     """
     cl = await clients.get(sessionid)
     return await cl.music_in_feed_audio_browser(browse_session_id)
+
+
+@music_router.get("/search", response_model=Dict[str, Any])
+async def music_search(
+    sessionid: str = Depends(get_sessionid),
+    query: str = Query(...),
+    product: str = Query("music_in_feed"),
+    from_typeahead: bool = Query(False),
+    search_session_id: Optional[str] = Query(None),
+    browse_session_id: Optional[str] = Query(None),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Search current music catalog
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_search_v2(
+        query,
+        product=product,
+        from_typeahead=from_typeahead,
+        search_session_id=search_session_id,
+        browse_session_id=browse_session_id,
+    )
+
+
+@music_router.get("/keywords", response_model=Dict[str, Any])
+async def music_keywords(
+    sessionid: str = Depends(get_sessionid),
+    query: str = Query(...),
+    product: str = Query("music_in_feed"),
+    num_keywords: int = Query(3, ge=1, le=20),
+    search_session_id: str = Query(""),
+    browse_session_id: Optional[str] = Query(None),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Search music keywords
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_keyword_search(
+        query,
+        product=product,
+        num_keywords=num_keywords,
+        search_session_id=search_session_id,
+        browse_session_id=browse_session_id,
+    )
+
+
+@music_router.get("/trending", response_model=Dict[str, Any])
+async def music_trending(
+    sessionid: str = Depends(get_sessionid),
+    product: str = Query("feed_post"),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get trending music
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_trending(product)
+
+
+@music_router.get("/trends/top", response_model=Dict[str, Any])
+async def music_trends_top(
+    sessionid: str = Depends(get_sessionid),
+    product: str = Query("music_in_feed"),
+    page_size: int = Query(15, ge=1, le=100),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get top music trends
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_top_trends(product, page_size)
+
+
+@music_router.get("/clips/browser", response_model=Dict[str, Any])
+async def music_clips_browser(
+    sessionid: str = Depends(get_sessionid),
+    product: str = Query("story_camera_clips_v2"),
+    browse_session_id: Optional[str] = Query(None),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Browse Reel music
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_clips_audio_browser(product, browse_session_id)
+
+
+@music_router.post("/bookmark", response_model=bool)
+async def music_bookmark(
+    sessionid: str = Depends(get_sessionid),
+    original_audio_id: str = Form(...),
+    surface_requested_from: str = Form("audio_aggregation_page"),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Bookmark music
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_bookmark(original_audio_id, surface_requested_from)
+
+
+@music_router.get("/original-audio/title/availability", response_model=bool)
+async def music_original_audio_title_availability(
+    sessionid: str = Depends(get_sessionid),
+    name: str = Query(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Check original audio title availability
+    """
+    cl = await clients.get(sessionid)
+    return await cl.music_verify_original_audio_title(name)

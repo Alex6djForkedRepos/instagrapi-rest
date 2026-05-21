@@ -225,6 +225,7 @@ async def test_openapi_uses_rest_http_methods():
         "/account/collection/media": {"get"},
         "/account/collections": {"get"},
         "/account/email/confirm": {"post"},
+        "/account/email/confirmation": {"post"},
         "/account/external-url": {"delete", "patch"},
         "/account/feed/timeline": {"get"},
         "/account/feed/new": {"get"},
@@ -264,9 +265,13 @@ async def test_openapi_uses_rest_http_methods():
         "/clip/upload/by/url": {"post"},
         "/clip/upload/with/music": {"post"},
         "/deps": {"get"},
+        "/direct/channels": {"get"},
+        "/direct/e2ee/eligibility": {"patch"},
         "/direct/file": {"post"},
         "/direct/inbox": {"get"},
         "/direct/cutout/sticker": {"post"},
+        "/direct/genai/bots": {"get"},
+        "/direct/interop/upgraded": {"get"},
         "/direct/media": {"get", "post"},
         "/direct/message": {"delete", "get", "post"},
         "/direct/message/like": {"delete", "post"},
@@ -281,6 +286,7 @@ async def test_openapi_uses_rest_http_methods():
         "/direct/profile": {"post"},
         "/direct/request/approve": {"post"},
         "/direct/requests": {"get"},
+        "/direct/requests/preview": {"get"},
         "/direct/search": {"get"},
         "/direct/spam": {"get"},
         "/direct/spam/inbox": {"get"},
@@ -302,7 +308,6 @@ async def test_openapi_uses_rest_http_methods():
         "/hashtag/follow": {"delete", "post"},
         "/hashtag/media/recent": {"get"},
         "/hashtag/media/top": {"get"},
-        "/hashtag/related": {"get"},
         "/hashtag/reels": {"get"},
         "/highlight": {"delete", "get", "patch", "post"},
         "/highlight/story": {"delete", "post"},
@@ -336,12 +341,20 @@ async def test_openapi_uses_rest_http_methods():
         "/media/livestream": {"get", "patch", "post"},
         "/media/livestream/comments": {"get"},
         "/media/livestream/viewers": {"get"},
+        "/media/note": {"delete", "post"},
         "/media/oembed": {"get"},
         "/media/pin": {"delete", "post"},
         "/media/save": {"delete", "post"},
         "/media/seen": {"patch"},
         "/media/author": {"get"},
+        "/music/bookmark": {"post"},
+        "/music/clips/browser": {"get"},
         "/music/feed/browser": {"get"},
+        "/music/keywords": {"get"},
+        "/music/original-audio/title/availability": {"get"},
+        "/music/search": {"get"},
+        "/music/trending": {"get"},
+        "/music/trends/top": {"get"},
         "/note": {"delete", "get", "post"},
         "/note/music": {"post"},
         "/note/text": {"get"},
@@ -489,6 +502,7 @@ async def test_openapi_removes_undo_style_paths():
         "/hashtag/info",
         "/hashtag/medias/recent",
         "/hashtag/medias/top",
+        "/hashtag/related",
         "/highlight/info",
         "/highlight/stories",
         "/location/info",
@@ -653,8 +667,9 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/account/external-url"]["delete"]["summary"] == "Clear authenticated account external URL"
     assert paths["/account/bio-links"]["delete"]["summary"] == "Remove authenticated account bio links"
     assert paths["/account/password"]["patch"]["summary"] == "Change authenticated account password"
-    assert paths["/account/password/reset"]["post"]["summary"] == "Send account password reset"
-    assert paths["/account/email/confirm"]["post"]["summary"] == "Send account email confirmation"
+    assert paths["/account/password/reset"]["post"]["summary"] == "Request account password reset"
+    assert paths["/account/email/confirm"]["post"]["summary"] == "Confirm authenticated account email"
+    assert paths["/account/email/confirmation"]["post"]["summary"] == "Send authenticated account email confirmation"
     assert paths["/account/phone/confirm"]["post"]["summary"] == "Send account phone confirmation"
     assert paths["/direct/thread"]["patch"]["summary"] == "Update direct thread state"
     assert paths["/direct/thread/user"]["post"]["summary"] == "Add users to a direct thread"
@@ -671,8 +686,13 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/direct/request/approve"]["post"]["summary"] == "Approve a direct message request"
     assert paths["/direct/pending/inbox"]["get"]["summary"] == "List direct pending inbox threads"
     assert paths["/direct/requests"]["get"]["summary"] == "List direct message requests"
+    assert paths["/direct/requests/preview"]["get"]["summary"] == "Get Direct requests preview"
     assert paths["/direct/spam"]["get"]["summary"] == "List paginated direct spam threads"
     assert paths["/direct/spam/inbox"]["get"]["summary"] == "List direct spam inbox threads"
+    assert paths["/direct/channels"]["get"]["summary"] == "List Direct channels"
+    assert paths["/direct/interop/upgraded"]["get"]["summary"] == "Check Direct interop upgrade"
+    assert paths["/direct/genai/bots"]["get"]["summary"] == "Search Direct GenAI bot suggestions"
+    assert paths["/direct/e2ee/eligibility"]["patch"]["summary"] == "Set Direct E2EE eligibility"
     assert paths["/direct/presence"]["get"]["summary"] == "Get direct presence"
     assert paths["/direct/media"]["get"]["summary"] == "List direct thread media"
     assert paths["/direct/media"]["post"]["summary"] == "Share media to direct users"
@@ -689,7 +709,6 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/explore/media"]["get"]["summary"] == "Get Explore media details"
     assert paths["/hashtag"]["get"]["summary"] == "Get hashtag details"
     assert paths["/hashtag/media/top"]["get"]["summary"] == "List paginated top hashtag media"
-    assert paths["/hashtag/related"]["get"]["summary"] == "List related hashtags"
     assert paths["/hashtag/reels"]["get"]["summary"] == "List hashtag Reels"
     assert paths["/highlight"]["get"]["summary"] == "Get highlight details"
     assert paths["/highlight/story"]["post"]["summary"] == "Add stories to a highlight"
@@ -712,6 +731,8 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/media/livestream"]["patch"]["summary"] == "Update livestream state"
     assert paths["/media/livestream/comments"]["get"]["summary"] == "List livestream comments"
     assert paths["/media/livestream/viewers"]["get"]["summary"] == "List livestream viewers"
+    assert paths["/media/note"]["post"]["summary"] == "Create media note"
+    assert paths["/media/note"]["delete"]["summary"] == "Delete media note"
     assert paths["/clip/creation/info"]["get"]["summary"] == "Get Reel creation info"
     assert paths["/clip/trial-eligibility"]["get"]["summary"] == "Check Trial Reels eligibility"
     assert paths["/clip/share/facebook/config"]["get"]["summary"] == "Get Reel Facebook sharing config"
@@ -719,7 +740,14 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/clip/pin"]["post"]["summary"] == "Pin a Reel"
     assert paths["/clip/pin"]["delete"]["summary"] == "Unpin a Reel"
     assert paths["/clip/upload/with/music"]["post"]["summary"] == "Upload a Reel with music"
+    assert paths["/music/bookmark"]["post"]["summary"] == "Bookmark music"
+    assert paths["/music/clips/browser"]["get"]["summary"] == "Browse Reel music"
     assert paths["/music/feed/browser"]["get"]["summary"] == "Get feed music browser"
+    assert paths["/music/keywords"]["get"]["summary"] == "Search music keywords"
+    assert paths["/music/original-audio/title/availability"]["get"]["summary"] == "Check original audio title availability"
+    assert paths["/music/search"]["get"]["summary"] == "Search current music catalog"
+    assert paths["/music/trending"]["get"]["summary"] == "Get trending music"
+    assert paths["/music/trends/top"]["get"]["summary"] == "Get top music trends"
     assert paths["/note"]["get"]["summary"] == "Get note by username"
     assert paths["/note/music"]["post"]["summary"] == "Create music note"
     assert paths["/note/text"]["get"]["summary"] == "Get note text by username"

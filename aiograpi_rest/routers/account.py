@@ -337,22 +337,36 @@ async def account_password(
 @router.post("/password/reset", response_model=Dict[str, Any])
 async def account_password_reset(
     sessionid: str = Depends(get_sessionid),
-    username: str = Form(...),
+    identifier: str = Form(...),
+    recaptcha_challenge_field: str = Form(""),
     clients: ClientStorage = Depends(get_clients),
 ) -> Dict[str, Any]:
-    """Send account password reset
+    """Request account password reset
     """
     cl = await clients.get(sessionid)
-    return await cl.reset_password(username)
+    return await cl.send_password_reset(identifier, recaptcha_challenge_field)
 
 
 @router.post("/email/confirm", response_model=Dict[str, Any])
 async def account_email_confirm(
     sessionid: str = Depends(get_sessionid),
     email: str = Form(...),
+    code: str = Form(...),
     clients: ClientStorage = Depends(get_clients),
 ) -> Dict[str, Any]:
-    """Send account email confirmation
+    """Confirm authenticated account email
+    """
+    cl = await clients.get(sessionid)
+    return await cl.confirm_email(email, code)
+
+
+@router.post("/email/confirmation", response_model=Dict[str, Any])
+async def account_email_confirmation(
+    sessionid: str = Depends(get_sessionid),
+    email: str = Form(...),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Send authenticated account email confirmation
     """
     cl = await clients.get(sessionid)
     return await cl.send_confirm_email(email)

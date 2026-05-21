@@ -8,6 +8,7 @@ from aiograpi_rest.dependencies import ClientStorage, get_clients, get_sessionid
 from aiograpi_rest.helpers import (
     LOCATION_FORM_DESCRIPTION,
     USERTAGS_FORM_DESCRIPTION,
+    parse_json_form_dict,
     parse_upload_location,
     parse_upload_usertags,
 )
@@ -333,6 +334,44 @@ async def media_livestream_viewers(
     """
     cl = await clients.get(sessionid)
     return await cl.media_get_livestream_viewers(broadcast_id)
+
+
+@router.post("/note", response_model=Dict[str, Any])
+async def media_note_create(
+    sessionid: str = Depends(get_sessionid),
+    media_id: str = Form(...),
+    text: str = Form(""),
+    audience: int = Form(7),
+    note_style: int = Form(13),
+    extra_data: Optional[str] = Form(None, description="JSON-encoded extra data. Leave empty to omit."),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Create media note
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_note_create(
+        media_id,
+        text=text,
+        audience=audience,
+        note_style=note_style,
+        extra_data=parse_json_form_dict(extra_data, "extra_data", default={}),
+    )
+
+
+@router.delete("/note", response_model=bool)
+async def media_note_delete(
+    sessionid: str = Depends(get_sessionid),
+    note_id: str = Query(...),
+    extra_data: Optional[str] = Query(None, description="JSON-encoded extra data. Leave empty to omit."),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Delete media note
+    """
+    cl = await clients.get(sessionid)
+    return await cl.media_note_delete(
+        note_id,
+        extra_data=parse_json_form_dict(extra_data, "extra_data", default={}),
+    )
 
 
 @router.get("/comments", response_model=CommentPage)

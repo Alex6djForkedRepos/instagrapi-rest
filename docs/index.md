@@ -16,12 +16,12 @@ boundary.
 - User profile, follower, following, follow, mute, block, friendship, pinned
   posts, guides, follow request, highlight, and about endpoints.
 - Search and discovery endpoints for users, accounts, followers/following,
-  hashtags, related hashtags, hashtag Reels, locations, location guides, music,
+  hashtags, hashtag Reels, locations, location guides, music,
   places, top results, Reels, recent searches, and typeahead suggestions.
 - Paginated media, user, hashtag, location, story viewer/archive, and Direct
-  inbox list endpoints.
+  inbox/request/channel endpoints.
 - Media paginated comments, likes, saves, pins, archive, photo, video, Reel,
-  carousel album, story, highlight, note, notification, IGTV, and insights
+  carousel album, story, highlight, note, media note, notification, IGTV, and insights
   routes.
 - OpenAPI documentation at `/docs` and raw schema at `/openapi.json`.
 - Typed client generation guide for Swift, Go, TypeScript, Python, PHP, Rust,

@@ -224,12 +224,12 @@ For typed client generation in C++, C#, F#, D, Erlang, Elixir, Nim, Haskell, Lis
 1. **Authorization** — login, 2FA, TOTP utilities, settings management
 2. **Account** — account info, profile, profile picture, privacy
 3. **Media** — info, paginated comments, likes, saves, pins, archive, edit, delete
-4. **Direct** — inbox, threads, messages, seen state
+4. **Direct** — inbox, threads, messages, seen state, request previews, channels
 5. **Discovery** — user, account, follower, following, hashtag, music, place,
-   top, Reel, recent, and typeahead search; related hashtags, hashtag Reels,
+   top, Reel, recent, and typeahead search; hashtag Reels,
    location guides, pinned posts, friendship, blocks, follow requests
 6. **Video / Photo / IGTV / Reels / Album** — upload to feed and story, download
-7. **Story / Highlights / Notes** — archive, viewers, multi-user stories, sticker tray, highlights, notes
+7. **Story / Highlights / Notes** — archive, viewers, multi-user stories, sticker tray, highlights, notes, media notes
 8. **Notifications / Insights** — inbox, notification settings, media and account insights
 
 ## Installation

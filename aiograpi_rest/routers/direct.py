@@ -66,6 +66,18 @@ async def direct_requests(
     return await cl.direct_requests(amount)
 
 
+@router.get("/requests/preview", response_model=Dict[str, Any])
+async def direct_requests_preview(
+    sessionid: str = Depends(get_sessionid),
+    pending_inbox_filters: List[str] = Query([]),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get Direct requests preview
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_pending_requests_preview(pending_inbox_filters or None)
+
+
 @router.get("/pending/inbox", response_model=List[DirectThread])
 async def direct_pending_inbox(
     sessionid: str = Depends(get_sessionid),
@@ -116,6 +128,55 @@ async def direct_threads(
     """
     cl = await clients.get(sessionid)
     return await cl.direct_threads(amount, selected_filter, box, thread_message_limit)
+
+
+@router.get("/channels", response_model=List[Dict[str, Any]])
+async def direct_channels(
+    sessionid: str = Depends(get_sessionid),
+    user_id: Optional[str] = Query(None),
+    thread_subtypes: List[int] = Query([]),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[Dict[str, Any]]:
+    """List Direct channels
+    """
+    cl = await clients.get(sessionid)
+    parsed_user_id = _direct_user_ids([user_id])[0] if user_id else None
+    return await cl.direct_channels(parsed_user_id, thread_subtypes or None)
+
+
+@router.get("/interop/upgraded", response_model=bool)
+async def direct_interop_upgraded(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Check Direct interop upgrade
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_has_interop_upgraded()
+
+
+@router.get("/genai/bots", response_model=List[UserShort])
+async def direct_genai_bots(
+    sessionid: str = Depends(get_sessionid),
+    amount: int = Query(20, ge=1, le=200),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[UserShort]:
+    """Search Direct GenAI bot suggestions
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_search_gen_ai_bots(amount)
+
+
+@router.patch("/e2ee/eligibility", response_model=bool)
+async def direct_e2ee_eligibility(
+    sessionid: str = Depends(get_sessionid),
+    e2ee_eligibility: int = Form(4),
+    clients: ClientStorage = Depends(get_clients),
+) -> bool:
+    """Set Direct E2EE eligibility
+    """
+    cl = await clients.get(sessionid)
+    return await cl.direct_set_e2ee_eligibility(e2ee_eligibility)
 
 
 @router.get("/thread", response_model=DirectThread)

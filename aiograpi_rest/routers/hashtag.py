@@ -55,18 +55,6 @@ async def hashtag_medias_recent(
     return MediaPage(items=items, next_cursor=next_cursor or "")
 
 
-@router.get("/related", response_model=List[Hashtag])
-async def hashtag_related(
-    sessionid: str = Depends(get_sessionid),
-    name: str = Query(...),
-    clients: ClientStorage = Depends(get_clients),
-) -> List[Hashtag]:
-    """Get related hashtags
-    """
-    cl = await clients.get(sessionid)
-    return await cl.hashtag_related_hashtags(name)
-
-
 @router.get("/reels", response_model=List[Media])
 async def hashtag_reels(
     sessionid: str = Depends(get_sessionid),

@@ -32,7 +32,7 @@ def test_pyproject_replaces_requirements_txt():
     assert not (ROOT / "requirements.txt").exists()
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
     deps = pyproject["project"]["dependencies"]
-    assert "aiograpi==0.9.7" in deps
+    assert "aiograpi==1.0.9" in deps
     assert pyproject["project"]["requires-python"] == ">=3.13"
     assert pyproject["project"]["name"] == "aiograpi-rest"
     assert re.fullmatch(r"\d+\.\d+\.\d+", pyproject["project"]["version"])

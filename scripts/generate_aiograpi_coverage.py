@@ -71,6 +71,8 @@ INTERNAL_EXACT_METHODS = {
     "public_head",
     "report_explore_media",
     "request_log",
+    "clip_music_extra_data",
+    "clip_share_to_fb_extra_data",
     "set_app",
     "set_country",
     "set_country_code",
@@ -83,6 +85,7 @@ INTERNAL_EXACT_METHODS = {
     "with_query_params",
 }
 COVERED_BY_REST_EXACT_METHODS = {
+    "clip_upload_as_reel_with_music": "covered by `POST /clip/upload/with/music` via `clip_upload_with_music`",
     "direct_message_delete": "covered by `DELETE /direct/message` via `direct_message_unsend`",
     "direct_pending_approve": "covered by `POST /direct/request/approve` via `direct_request_approve`",
     "hashtag_medias_recent": "covered by `GET /hashtag/media/recent`",
@@ -117,6 +120,7 @@ COVERED_BY_REST_EXACT_METHODS = {
     "notification_view_count": "covered by generic `PATCH /notifications/settings` with `content_type=view_count`",
     "user_id_from_username": "identifier helper; `GET /user` accepts user_id or username",
     "username_from_user_id": "identifier helper; `GET /user` accepts user_id or username",
+    "reset_password": "covered by `POST /account/password/reset` via `send_password_reset`",
 }
 INTERNAL_PREFIXES = (
     "check_",
