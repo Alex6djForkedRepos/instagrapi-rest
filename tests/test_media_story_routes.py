@@ -116,6 +116,13 @@ class FakeMediaClient:
         self.calls.append(("user_stories", user_id, amount))
         return [_story_payload(pk=1)]
 
+    async def users_stories_gql(self, user_ids, amount=0):
+        self.calls.append(("users_stories_gql", tuple(user_ids), amount))
+        return [
+            {**_user_short(1), "stories": [_story_payload(pk=11)]},
+            {**_user_short(2), "stories": [_story_payload(pk=22)]},
+        ]
+
     async def story_info(self, story_pk, use_cache=True):
         self.calls.append(("story_info", story_pk, use_cache))
         return _story_payload(pk=story_pk)
@@ -542,6 +549,24 @@ async def test_story_stickers_returns_sticker_tray(storage):
     assert response.status_code == 200
     assert response.json()["stickers"][0]["id"] == "sticker1"
     assert ("sticker_tray",) in storage.client.calls
+
+
+@pytest.mark.asyncio
+async def test_story_users_accepts_repeated_user_ids(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get(
+            "/story/users",
+            params=[
+                ("sessionid", "sid"),
+                ("user_ids", "1"),
+                ("user_ids", "2"),
+                ("amount", "3"),
+            ],
+        )
+    assert response.status_code == 200
+    assert [user["pk"] for user in response.json()] == ["1", "2"]
+    assert response.json()[0]["stories"][0]["pk"] == 11
+    assert ("users_stories_gql", ("1", "2"), 3) in storage.client.calls
 
 
 @pytest.mark.asyncio

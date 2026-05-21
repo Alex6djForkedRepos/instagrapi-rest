@@ -214,6 +214,18 @@ async def try_settings_import_paginated_read_lists(account, tmp_path):
         assert stickers_response.status_code == 200, stickers_response.text
         assert isinstance(stickers_response.json(), dict)
 
+        story_users_response = await api.get(
+            "/story/users",
+            params=[
+                ("user_ids", public_user_id),
+                ("user_ids", account_user_id),
+                ("amount", "2"),
+            ],
+            headers=headers,
+        )
+        assert story_users_response.status_code == 200, story_users_response.text
+        assert isinstance(story_users_response.json(), list)
+
         location_pk = _first_location_pk(media_page, hashtag_top_page, hashtag_recent_page)
         if location_pk:
             for path in ("/location/media/top", "/location/media/recent"):

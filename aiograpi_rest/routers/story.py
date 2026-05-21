@@ -11,6 +11,7 @@ from aiograpi.types import (
     StoryLocation,
     StoryMention,
     StorySticker,
+    UserShort,
 )
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
@@ -284,6 +285,19 @@ async def story_stickers(
     """
     cl = await clients.get(sessionid)
     return await cl.sticker_tray()
+
+
+@router.get("/users", response_model=List[UserShort])
+async def story_users(
+    sessionid: str = Depends(get_sessionid),
+    user_ids: List[str] = Query(...),
+    amount: int = Query(0, ge=0),
+    clients: ClientStorage = Depends(get_clients),
+) -> List[UserShort]:
+    """List stories for multiple users
+    """
+    cl = await clients.get(sessionid)
+    return await cl.users_stories_gql(user_ids, amount)
 
 
 @router.get("/download")

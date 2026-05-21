@@ -384,6 +384,7 @@ async def test_openapi_uses_rest_http_methods():
         "/story/like": {"delete", "post"},
         "/story/seen": {"patch"},
         "/story/stickers": {"get"},
+        "/story/users": {"get"},
         "/story/upload": {"post"},
         "/story/upload/by/url": {"post"},
         "/story/viewers": {"get"},
@@ -744,6 +745,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/story"]["get"]["summary"] == "Get story details"
     assert paths["/story/archive/media"]["get"]["summary"] == "List archived story media"
     assert paths["/story/stickers"]["get"]["summary"] == "Get story sticker tray"
+    assert paths["/story/users"]["get"]["summary"] == "List stories for multiple users"
     assert paths["/story/viewers"]["get"]["summary"] == "List paginated story viewers"
     assert paths["/track"]["get"]["summary"] == "Get music track details"
     assert paths["/track/stream"]["get"]["summary"] == "Get track stream media"
