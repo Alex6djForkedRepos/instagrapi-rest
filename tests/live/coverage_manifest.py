@@ -26,6 +26,7 @@ SESSION_MUTATIONS = {
 }
 
 REVERSIBLE_MUTATIONS = {
+    ("PATCH", "/media"): "GET /media",
     ("POST", "/hashtag/follow"): "DELETE /hashtag/follow",
     ("DELETE", "/hashtag/follow"): "GET /hashtag",
     ("POST", "/media/like"): "DELETE /media/like",
@@ -66,6 +67,11 @@ REVERSIBLE_MUTATIONS = {
     ("DELETE", "/user/block"): "GET /user/friendship",
 }
 
+CLEANUP_MUTATIONS = {
+    ("DELETE", "/media"): "GET /media returns 404 or missing media",
+    ("DELETE", "/story"): "GET /story returns 404 or missing story",
+}
+
 UPLOAD_MUTATIONS = {
     ("POST", "/album/upload"): "GET /media",
     ("POST", "/album/upload/with/music"): "GET /media",
@@ -97,10 +103,7 @@ GUARDED_PREFIX_REASONS = {
     ("/notifications", "account settings"): "changes notification settings on the authenticated account",
 }
 
-GUARDED_EXACT_REASONS = {
-    ("DELETE", "/media"): "deletes real media and requires a dedicated upload fixture",
-    ("PATCH", "/media"): "edits real media caption and requires a dedicated upload fixture",
-}
+GUARDED_EXACT_REASONS: dict[tuple[str, str], str] = {}
 
 
 def operation_policy(method: str, path: str) -> LivePolicy:
@@ -121,8 +124,8 @@ def operation_policy(method: str, path: str) -> LivePolicy:
         return LivePolicy("reversible", verify_with=REVERSIBLE_MUTATIONS[(method, path)])
     if (method, path) in UPLOAD_MUTATIONS:
         return LivePolicy("upload", verify_with=UPLOAD_MUTATIONS[(method, path)])
-    if (method, path) == ("DELETE", "/story"):
-        return LivePolicy("cleanup", verify_with="GET /story returns 404 or missing story")
+    if (method, path) in CLEANUP_MUTATIONS:
+        return LivePolicy("cleanup", verify_with=CLEANUP_MUTATIONS[(method, path)])
 
     guarded_reason = GUARDED_EXACT_REASONS.get((method, path))
     if guarded_reason:

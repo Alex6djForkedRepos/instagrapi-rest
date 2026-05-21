@@ -199,6 +199,13 @@ story media collection:
   `user_ids` query parameters, for example
   `user_ids=123&user_ids=456`.
 
+## ID Parameters
+
+Instagram user primary keys are exposed as strings in the REST API. Use
+`user_id=25025320` for a single user and repeat `user_ids` for lists, for
+example `user_ids=123&user_ids=456`. Treat them as opaque IDs in generated
+clients even when they contain only digits.
+
 ## User Discovery
 
 User discovery routes live under the target user context and return raw

@@ -398,7 +398,7 @@ async def test_user_follow_awaits_client_method(storage):
 
     assert response.status_code == 200
     assert response.json() is True
-    assert ("user_follow", 1) in storage.client_instance.calls
+    assert ("user_follow", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -406,7 +406,7 @@ async def test_user_unfollow_awaits_client_method(storage):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.delete("/user/follow", params={"sessionid": "sid", "user_id": "1"})
     assert response.status_code == 200
-    assert ("user_unfollow", 1) in storage.client_instance.calls
+    assert ("user_unfollow", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -417,7 +417,7 @@ async def test_user_remove_follower_returns_true(storage):
             params={"sessionid": "sid", "user_id": "1"},
         )
     assert response.status_code == 200
-    assert ("user_remove_follower", 1) in storage.client_instance.calls
+    assert ("user_remove_follower", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -433,8 +433,8 @@ async def test_mute_and_unmute_posts_from_follow(storage):
         )
     assert mute.status_code == 200 and mute.json() is True
     assert unmute.status_code == 200 and unmute.json() is True
-    assert ("mute_posts_from_follow", 1, True) in storage.client_instance.calls
-    assert ("unmute_posts_from_follow", 1) in storage.client_instance.calls
+    assert ("mute_posts_from_follow", "1", True) in storage.client_instance.calls
+    assert ("unmute_posts_from_follow", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -450,8 +450,8 @@ async def test_mute_and_unmute_stories_from_follow(storage):
         )
     assert mute.status_code == 200 and mute.json() is True
     assert unmute.status_code == 200 and unmute.json() is True
-    assert ("mute_stories_from_follow", 1, False) in storage.client_instance.calls
-    assert ("unmute_stories_from_follow", 1) in storage.client_instance.calls
+    assert ("mute_stories_from_follow", "1", False) in storage.client_instance.calls
+    assert ("unmute_stories_from_follow", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -468,8 +468,8 @@ async def test_account_follow_request_actions(storage):
 
     assert approve.status_code == 200 and approve.json() is True
     assert decline.status_code == 200 and decline.json() is True
-    assert ("user_follow_request_approve", 1) in storage.client_instance.calls
-    assert ("user_follow_request_decline", 1) in storage.client_instance.calls
+    assert ("user_follow_request_approve", "1") in storage.client_instance.calls
+    assert ("user_follow_request_decline", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -555,8 +555,8 @@ async def test_close_friend_routes(storage):
 
     assert add.status_code == 200 and add.json() is True
     assert remove.status_code == 200 and remove.json() is True
-    assert ("close_friend_add", 1) in storage.client_instance.calls
-    assert ("close_friend_remove", 1) in storage.client_instance.calls
+    assert ("close_friend_add", "1") in storage.client_instance.calls
+    assert ("close_friend_remove", "1") in storage.client_instance.calls
 
 
 @pytest.mark.asyncio
@@ -575,11 +575,11 @@ async def test_user_notification_toggle_routes(storage):
     assert stories_on.status_code == 200 and stories_off.status_code == 200
     assert reels_on.status_code == 200 and reels_off.status_code == 200
     assert videos_on.status_code == 200 and videos_off.status_code == 200
-    assert ("enable_posts_notifications", 1) in storage.client_instance.calls
-    assert ("disable_posts_notifications", 1) in storage.client_instance.calls
-    assert ("enable_stories_notifications", 1) in storage.client_instance.calls
-    assert ("disable_stories_notifications", 1) in storage.client_instance.calls
-    assert ("enable_reels_notifications", 1) in storage.client_instance.calls
-    assert ("disable_reels_notifications", 1) in storage.client_instance.calls
-    assert ("enable_videos_notifications", 1) in storage.client_instance.calls
-    assert ("disable_videos_notifications", 1) in storage.client_instance.calls
+    assert ("enable_posts_notifications", "1") in storage.client_instance.calls
+    assert ("disable_posts_notifications", "1") in storage.client_instance.calls
+    assert ("enable_stories_notifications", "1") in storage.client_instance.calls
+    assert ("disable_stories_notifications", "1") in storage.client_instance.calls
+    assert ("enable_reels_notifications", "1") in storage.client_instance.calls
+    assert ("disable_reels_notifications", "1") in storage.client_instance.calls
+    assert ("enable_videos_notifications", "1") in storage.client_instance.calls
+    assert ("disable_videos_notifications", "1") in storage.client_instance.calls

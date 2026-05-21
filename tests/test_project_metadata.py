@@ -596,6 +596,8 @@ def test_live_tests_workflow_runs_nightly_against_real_session_flow():
     assert job["env"]["LIVE_PAGINATION_TIMEOUT"] == "180"
     assert job["env"]["LIVE_STORY_ACCOUNTS_COUNT"] == "5"
     assert job["env"]["LIVE_STORY_TIMEOUT"] == "240"
+    assert job["env"]["LIVE_MEDIA_ACCOUNTS_COUNT"] == "5"
+    assert job["env"]["LIVE_MEDIA_TIMEOUT"] == "300"
     assert job["env"]["LIVE_API_BASE_URL"] == "http://127.0.0.1:8000"
 
     steps = job["steps"]
@@ -644,8 +646,13 @@ def test_live_tests_cover_published_image_and_paginated_read_lists():
         "/story/stickers",
         "/story/users",
         "/story/viewers",
+        "/photo/upload",
     ):
         assert endpoint in live_smoke
+    assert "test_live_media_upload_edit_delete_reads_back_changed_state" in live_smoke
+    assert "api.patch(" in live_smoke
+    assert "api.delete(" in live_smoke
+    assert '"/media"' in live_smoke
 
     for endpoint in (
         "/user/posts",
@@ -664,6 +671,7 @@ def test_live_tests_cover_published_image_and_paginated_read_lists():
     assert "published Docker image" in readme
     assert "Every public OpenAPI operation is classified by the live coverage manifest" in readme
     assert "Non-guarded mutations must name the read-back or cleanup endpoint" in readme
+    assert "uploads a real feed photo" in readme
     assert "paginated read-list routes" in readme
 
 

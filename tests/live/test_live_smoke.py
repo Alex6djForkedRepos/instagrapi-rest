@@ -88,6 +88,13 @@ def _story_jpeg_bytes():
     return output.getvalue()
 
 
+def _feed_jpeg_bytes():
+    image = Image.new("RGB", (1080, 1080), (162, 92, 33))
+    output = BytesIO()
+    image.save(output, format="JPEG", quality=90)
+    return output.getvalue()
+
+
 def _assert_downloaded_image(content):
     assert len(content) > 1024
     image = Image.open(BytesIO(content))
@@ -142,6 +149,42 @@ async def _wait_for_story(api, headers, user_id, story_pk):
                 return story
         await asyncio.sleep(5)
     raise AssertionError(f"Uploaded story {story_pk} was not found in /user/stories")
+
+
+async def _wait_for_media_caption(api, headers, media_pk, caption):
+    last_error = ""
+    for _ in range(12):
+        try:
+            media_response = await api.get(
+                "/media",
+                params={"pk": media_pk, "use_cache": "false"},
+                headers=headers,
+            )
+            last_error = media_response.text
+            if media_response.status_code == 200:
+                media = media_response.json()
+                if media.get("caption_text") == caption:
+                    return media
+        except Exception as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+        await asyncio.sleep(5)
+    raise AssertionError(f"Media {media_pk} caption did not become {caption!r}: {last_error}")
+
+
+async def _wait_for_media_deleted(api, headers, media_pk):
+    for _ in range(12):
+        try:
+            media_response = await api.get(
+                "/media",
+                params={"pk": media_pk, "use_cache": "false"},
+                headers=headers,
+            )
+        except Exception:
+            return
+        if media_response.status_code != 200:
+            return
+        await asyncio.sleep(5)
+    raise AssertionError(f"Deleted media {media_pk} was still readable from /media")
 
 
 async def try_settings_import_paginated_read_lists(account, tmp_path):
@@ -294,6 +337,49 @@ async def try_settings_import_story_upload_image(account, tmp_path):
             assert delete_response.status_code in {200, 404}, delete_response.text
 
 
+async def try_settings_import_media_edit_delete(account, tmp_path):
+    async with rest_api_for_account(account, tmp_path) as api:
+        sessionid = await _import_session_from_account_settings(api, account)
+        headers = {"X-Session-ID": sessionid}
+        initial_caption = "aiograpi-rest live media fixture"
+        edited_caption = "aiograpi-rest live media fixture edited"
+
+        upload_response = await api.post(
+            "/photo/upload",
+            data={"caption": initial_caption},
+            files={"file": ("aiograpi-rest-live-feed.jpg", BytesIO(_feed_jpeg_bytes()), "image/jpeg")},
+            headers=headers,
+        )
+        assert upload_response.status_code == 200, upload_response.text
+        uploaded_media = upload_response.json()
+        media_id = uploaded_media["id"]
+        media_pk = uploaded_media["pk"]
+        assert uploaded_media["pk"]
+        assert uploaded_media["media_type"] == 1
+
+        try:
+            uploaded_info = await _wait_for_media_caption(api, headers, media_pk, initial_caption)
+            assert uploaded_info["id"] == media_id
+
+            edit_response = await api.patch(
+                "/media",
+                data={"media_id": media_id, "caption": edited_caption},
+                headers=headers,
+            )
+            assert edit_response.status_code == 200, edit_response.text
+            edited_info = await _wait_for_media_caption(api, headers, media_pk, edited_caption)
+            assert edited_info["id"] == media_id
+        finally:
+            delete_response = await api.delete(
+                "/media",
+                params={"media_id": media_id},
+                headers=headers,
+            )
+            assert delete_response.status_code in {200, 404}, delete_response.text
+
+        await _wait_for_media_deleted(api, headers, media_pk)
+
+
 @pytest.mark.asyncio
 async def test_live_settings_import_user_about_and_rest_header_session(tmp_path):
     url = os.environ.get("TEST_ACCOUNTS_URL")
@@ -351,3 +437,23 @@ async def test_live_story_upload_creates_visible_downloadable_image_story(tmp_pa
             errors.append(f"{account.get('username', '?')}: {type(exc).__name__}: {exc}")
 
     pytest.fail("No live story upload account succeeded: " + " | ".join(errors[:5]))
+
+
+@pytest.mark.asyncio
+async def test_live_media_upload_edit_delete_reads_back_changed_state(tmp_path):
+    url = os.environ.get("TEST_ACCOUNTS_URL")
+    if not url:
+        pytest.skip("TEST_ACCOUNTS_URL not configured")
+
+    count = int(os.environ.get("LIVE_MEDIA_ACCOUNTS_COUNT", "5"))
+    accounts = fetch_accounts(url, count=count)
+    timeout = int(os.environ.get("LIVE_MEDIA_TIMEOUT", "300"))
+    errors = []
+    for account in accounts:
+        try:
+            await asyncio.wait_for(try_settings_import_media_edit_delete(account, tmp_path), timeout=timeout)
+            return
+        except Exception as exc:
+            errors.append(f"{account.get('username', '?')}: {type(exc).__name__}: {exc}")
+
+    pytest.fail("No live media edit/delete account succeeded: " + " | ".join(errors[:5]))

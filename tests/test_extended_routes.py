@@ -1250,6 +1250,10 @@ async def test_direct_routes(storage):
             "/direct/message",
             data={"sessionid": "sid", "text": "hi", "user_ids": ["1"], "thread_ids": ["100"]},
         )
+        invalid_user_id = await ac.post(
+            "/direct/message",
+            data={"sessionid": "sid", "text": "hi", "user_ids": ["not-a-pk"]},
+        )
         single = await ac.post("/direct/thread", data={"sessionid": "sid", "user_ids": ["1"]})
 
     assert inbox.status_code == 200 and threads.status_code == 200 and thread.status_code == 200
@@ -1294,6 +1298,7 @@ async def test_direct_routes(storage):
     assert invalid_profile_share.status_code == 422
     assert invalid_direct_file_targets.status_code == 422
     assert empty.status_code == 422 and both.status_code == 422
+    assert invalid_user_id.status_code == 422
     assert single.status_code == 422
     assert inbox.json()["next_cursor"] == "next-direct"
     assert ("direct_threads_chunk", "", "", None, "direct-cursor") in storage.client.calls
@@ -1474,8 +1479,8 @@ async def test_discovery_user_routes(storage):
     assert ("user_stream_by_username_flat", "instagram") in storage.client.calls
     assert ("user_stream_by_username_v1", "instagram") in storage.client.calls
     assert ("user_unblock", "1", "profile") in storage.client.calls
-    assert ("user_pinned_medias", 1) in storage.client.calls
-    assert ("user_guides_v1", 1) in storage.client.calls
+    assert ("user_pinned_medias", "1") in storage.client.calls
+    assert ("user_guides_v1", "1") in storage.client.calls
 
 
 @pytest.mark.asyncio

@@ -467,7 +467,10 @@ that proves the Instagram state changed. Both the direct ASGI live smoke and
 the published image HTTP smoke upload a real JPEG to `/story/upload`, verify
 the created story through `/story`, `/user/stories`, and `/story/viewers`,
 download the media through `/story/download`, validate that it is an image, and
-delete the story.
+delete the story. The direct ASGI live smoke also uploads a real feed photo
+through `/photo/upload`, verifies the initial caption through `/media`, edits it
+with `PATCH /media`, reads the changed caption back, deletes it with
+`DELETE /media`, and verifies that the post is no longer readable.
 
 Generate and validate docs:
 

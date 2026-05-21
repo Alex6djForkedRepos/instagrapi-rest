@@ -232,7 +232,7 @@ async def user_creator(sessionid: str = Depends(get_sessionid),
 
 @router.post("/follow", response_model=bool)
 async def user_follow(sessionid: str = Depends(get_sessionid),
-                      user_id: int = Form(...),
+                      user_id: str = Form(...),
                       clients: ClientStorage = Depends(get_clients)) -> bool:
     """Follow a user
     """
@@ -242,7 +242,7 @@ async def user_follow(sessionid: str = Depends(get_sessionid),
 
 @router.delete("/follow", response_model=bool)
 async def user_unfollow(sessionid: str = Depends(get_sessionid),
-                        user_id: int = Query(...),
+                        user_id: str = Query(...),
                         clients: ClientStorage = Depends(get_clients)) -> bool:
     """Unfollow a user
     """
@@ -252,7 +252,7 @@ async def user_unfollow(sessionid: str = Depends(get_sessionid),
 
 @router.delete("/follower", response_model=bool)
 async def user_remove_follower(sessionid: str = Depends(get_sessionid),
-                               user_id: int = Query(...),
+                               user_id: str = Query(...),
                                clients: ClientStorage = Depends(get_clients)) -> bool:
     """Remove a follower
     """
@@ -262,7 +262,7 @@ async def user_remove_follower(sessionid: str = Depends(get_sessionid),
 
 @router.post("/close-friend", response_model=bool)
 async def user_close_friend_add(sessionid: str = Depends(get_sessionid),
-                                user_id: int = Form(...),
+                                user_id: str = Form(...),
                                 clients: ClientStorage = Depends(get_clients)) -> bool:
     """Add a user to close friends
     """
@@ -272,7 +272,7 @@ async def user_close_friend_add(sessionid: str = Depends(get_sessionid),
 
 @router.delete("/close-friend", response_model=bool)
 async def user_close_friend_remove(sessionid: str = Depends(get_sessionid),
-                                   user_id: int = Query(...),
+                                   user_id: str = Query(...),
                                    clients: ClientStorage = Depends(get_clients)) -> bool:
     """Remove a user from close friends
     """
@@ -282,7 +282,7 @@ async def user_close_friend_remove(sessionid: str = Depends(get_sessionid),
 
 @router.post("/mute/posts", response_model=bool)
 async def mute_posts_from_follow(sessionid: str = Depends(get_sessionid),
-                                 user_id: int = Form(...),
+                                 user_id: str = Form(...),
                                  revert: Optional[bool] = Form(False),
                                  clients: ClientStorage = Depends(get_clients)) -> bool:
     """Mute posts from following user
@@ -293,7 +293,7 @@ async def mute_posts_from_follow(sessionid: str = Depends(get_sessionid),
 
 @router.delete("/mute/posts", response_model=bool)
 async def unmute_posts_from_follow(sessionid: str = Depends(get_sessionid),
-                                   user_id: int = Query(...),
+                                   user_id: str = Query(...),
                                    clients: ClientStorage = Depends(get_clients)) -> bool:
     """Unmute posts from following user
     """
@@ -303,7 +303,7 @@ async def unmute_posts_from_follow(sessionid: str = Depends(get_sessionid),
 
 @router.post("/mute/stories", response_model=bool)
 async def mute_stories_from_follow(sessionid: str = Depends(get_sessionid),
-                                   user_id: int = Form(...),
+                                   user_id: str = Form(...),
                                    revert: Optional[bool] = Form(False),
                                    clients: ClientStorage = Depends(get_clients)) -> bool:
     """Mute stories from following user
@@ -314,7 +314,7 @@ async def mute_stories_from_follow(sessionid: str = Depends(get_sessionid),
 
 @router.delete("/mute/stories", response_model=bool)
 async def unmute_stories_from_follow(sessionid: str = Depends(get_sessionid),
-                                     user_id: int = Query(...),
+                                     user_id: str = Query(...),
                                      clients: ClientStorage = Depends(get_clients)) -> bool:
     """Unmute stories from following user
     """
@@ -324,7 +324,7 @@ async def unmute_stories_from_follow(sessionid: str = Depends(get_sessionid),
 
 @router.post("/notifications/posts", response_model=bool)
 async def user_notifications_posts_enable(sessionid: str = Depends(get_sessionid),
-                                          user_id: int = Form(...),
+                                          user_id: str = Form(...),
                                           clients: ClientStorage = Depends(get_clients)) -> bool:
     """Enable post notifications for a user
     """
@@ -334,7 +334,7 @@ async def user_notifications_posts_enable(sessionid: str = Depends(get_sessionid
 
 @router.delete("/notifications/posts", response_model=bool)
 async def user_notifications_posts_disable(sessionid: str = Depends(get_sessionid),
-                                           user_id: int = Query(...),
+                                           user_id: str = Query(...),
                                            clients: ClientStorage = Depends(get_clients)) -> bool:
     """Disable post notifications for a user
     """
@@ -344,7 +344,7 @@ async def user_notifications_posts_disable(sessionid: str = Depends(get_sessioni
 
 @router.post("/notifications/stories", response_model=bool)
 async def user_notifications_stories_enable(sessionid: str = Depends(get_sessionid),
-                                            user_id: int = Form(...),
+                                            user_id: str = Form(...),
                                             clients: ClientStorage = Depends(get_clients)) -> bool:
     """Enable story notifications for a user
     """
@@ -354,7 +354,7 @@ async def user_notifications_stories_enable(sessionid: str = Depends(get_session
 
 @router.delete("/notifications/stories", response_model=bool)
 async def user_notifications_stories_disable(sessionid: str = Depends(get_sessionid),
-                                             user_id: int = Query(...),
+                                             user_id: str = Query(...),
                                              clients: ClientStorage = Depends(get_clients)) -> bool:
     """Disable story notifications for a user
     """
@@ -364,7 +364,7 @@ async def user_notifications_stories_disable(sessionid: str = Depends(get_sessio
 
 @router.post("/notifications/reels", response_model=bool)
 async def user_notifications_reels_enable(sessionid: str = Depends(get_sessionid),
-                                          user_id: int = Form(...),
+                                          user_id: str = Form(...),
                                           clients: ClientStorage = Depends(get_clients)) -> bool:
     """Enable Reel notifications for a user
     """
@@ -374,7 +374,7 @@ async def user_notifications_reels_enable(sessionid: str = Depends(get_sessionid
 
 @router.delete("/notifications/reels", response_model=bool)
 async def user_notifications_reels_disable(sessionid: str = Depends(get_sessionid),
-                                           user_id: int = Query(...),
+                                           user_id: str = Query(...),
                                            clients: ClientStorage = Depends(get_clients)) -> bool:
     """Disable Reel notifications for a user
     """
@@ -384,7 +384,7 @@ async def user_notifications_reels_disable(sessionid: str = Depends(get_sessioni
 
 @router.post("/notifications/videos", response_model=bool)
 async def user_notifications_videos_enable(sessionid: str = Depends(get_sessionid),
-                                           user_id: int = Form(...),
+                                           user_id: str = Form(...),
                                            clients: ClientStorage = Depends(get_clients)) -> bool:
     """Enable video notifications for a user
     """
@@ -394,7 +394,7 @@ async def user_notifications_videos_enable(sessionid: str = Depends(get_sessioni
 
 @router.delete("/notifications/videos", response_model=bool)
 async def user_notifications_videos_disable(sessionid: str = Depends(get_sessionid),
-                                            user_id: int = Query(...),
+                                            user_id: str = Query(...),
                                             clients: ClientStorage = Depends(get_clients)) -> bool:
     """Disable video notifications for a user
     """
@@ -446,7 +446,7 @@ async def user_unblock(sessionid: str = Depends(get_sessionid),
 
 @router.get("/pinned/posts", response_model=List[Media])
 async def user_pinned_posts(sessionid: str = Depends(get_sessionid),
-                            user_id: int = Query(...),
+                            user_id: str = Query(...),
                             clients: ClientStorage = Depends(get_clients)) -> List[Media]:
     """Get user pinned posts
     """
@@ -456,7 +456,7 @@ async def user_pinned_posts(sessionid: str = Depends(get_sessionid),
 
 @router.get("/highlights", response_model=List[Highlight])
 async def user_highlights(sessionid: str = Depends(get_sessionid),
-                          user_id: int = Query(...),
+                          user_id: str = Query(...),
                           amount: Optional[int] = Query(0),
                           clients: ClientStorage = Depends(get_clients)) -> List[Highlight]:
     """Get user highlights
@@ -467,7 +467,7 @@ async def user_highlights(sessionid: str = Depends(get_sessionid),
 
 @router.get("/guides", response_model=List[Guide])
 async def user_guides(sessionid: str = Depends(get_sessionid),
-                      user_id: int = Query(...),
+                      user_id: str = Query(...),
                       clients: ClientStorage = Depends(get_clients)) -> List[Guide]:
     """Get user guides
     """

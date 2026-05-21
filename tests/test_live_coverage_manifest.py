@@ -37,3 +37,10 @@ def test_live_coverage_manifest_documents_guarded_operations():
     assert ("PATCH", "/account/password") in guarded
     assert ("POST", "/auth/challenge/resolve") in guarded
     assert all(policy.reason for policy in guarded.values())
+
+
+def test_live_coverage_manifest_covers_uploaded_media_edit_and_delete():
+    assert operation_policy("PATCH", "/media").kind != "guarded"
+    assert operation_policy("PATCH", "/media").verify_with == "GET /media"
+    assert operation_policy("DELETE", "/media").kind != "guarded"
+    assert operation_policy("DELETE", "/media").verify_with == "GET /media returns 404 or missing media"
