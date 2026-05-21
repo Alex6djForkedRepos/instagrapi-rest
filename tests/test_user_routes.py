@@ -110,6 +110,10 @@ class FakeClient:
         self.calls.append(("new_feed_exist",))
         return True
 
+    async def get_account_family_v1(self):
+        self.calls.append(("get_account_family_v1",))
+        return {"accounts": [{"pk": "1", "username": "account"}], "status": "ok"}
+
     async def chaining(self, user_id):
         self.calls.append(("chaining", user_id))
         return {"users": [_user_short(2)], "status": "ok"}
@@ -121,6 +125,14 @@ class FakeClient:
     async def discover_recommended_accounts_for_category_v1(self, user_id):
         self.calls.append(("discover_recommended_accounts_for_category_v1", user_id))
         return {"users": [_user_short(4)], "status": "ok"}
+
+    async def featured_accounts_v1(self, target_user_id):
+        self.calls.append(("featured_accounts_v1", target_user_id))
+        return {"users": [_user_short(6)], "status": "ok"}
+
+    async def standalone_fundraiser_info_v1(self, user_id):
+        self.calls.append(("standalone_fundraiser_info_v1", user_id))
+        return {"user_id": user_id, "fundraiser": {"id": "fundraiser1"}}
 
     async def creator_info(self, user_id, entry_point="direct_thread"):
         self.calls.append(("creator_info", user_id, entry_point))
@@ -489,6 +501,16 @@ async def test_account_feed_new_returns_bool(storage):
 
 
 @pytest.mark.asyncio
+async def test_account_family_returns_linked_account_payload(storage):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/account/family", params={"sessionid": "sid"})
+
+    assert response.status_code == 200
+    assert response.json()["accounts"][0]["username"] == "account"
+    assert ("get_account_family_v1",) in storage.client_instance.calls
+
+
+@pytest.mark.asyncio
 async def test_user_discovery_routes_call_aiograpi_methods(storage):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         suggestions = await ac.get("/user/suggestions", params={"sessionid": "sid", "user_id": "1"})
@@ -497,6 +519,8 @@ async def test_user_discovery_routes_call_aiograpi_methods(storage):
             params=[("sessionid", "sid"), ("user_id", "1"), ("chained_ids", "2"), ("chained_ids", "3")],
         )
         recommendations = await ac.get("/user/recommendations", params={"sessionid": "sid", "user_id": "1"})
+        featured = await ac.get("/user/featured/accounts", params={"sessionid": "sid", "user_id": "1"})
+        fundraiser = await ac.get("/user/fundraiser", params={"sessionid": "sid", "user_id": "1"})
         creator = await ac.get(
             "/user/creator",
             params={"sessionid": "sid", "user_id": "1", "entry_point": "profile"},
@@ -508,12 +532,18 @@ async def test_user_discovery_routes_call_aiograpi_methods(storage):
     assert details.json()["users"][0]["social_context"] == "followed by test"
     assert recommendations.status_code == 200
     assert recommendations.json()["users"][0]["pk"] == "4"
+    assert featured.status_code == 200
+    assert featured.json()["users"][0]["pk"] == "6"
+    assert fundraiser.status_code == 200
+    assert fundraiser.json()["fundraiser"]["id"] == "fundraiser1"
     assert creator.status_code == 200
     assert creator.json()["user"]["pk"] == "5"
     assert creator.json()["info"]["category"] == "Digital creator"
     assert ("chaining", "1") in storage.client_instance.calls
     assert ("fetch_suggestion_details", "1", ["2", "3"]) in storage.client_instance.calls
     assert ("discover_recommended_accounts_for_category_v1", "1") in storage.client_instance.calls
+    assert ("featured_accounts_v1", "1") in storage.client_instance.calls
+    assert ("standalone_fundraiser_info_v1", "1") in storage.client_instance.calls
     assert ("creator_info", "1", "profile") in storage.client_instance.calls
 
 

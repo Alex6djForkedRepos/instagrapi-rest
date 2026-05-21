@@ -233,6 +233,7 @@ async def test_openapi_uses_rest_http_methods():
         "/account/follow/request/approve": {"post"},
         "/account/follow/requests/approve": {"post"},
         "/account/follow/requests": {"delete", "get"},
+        "/account/family": {"get"},
         "/account/password": {"patch"},
         "/account/password/reset": {"post"},
         "/account/phone/confirm": {"post"},
@@ -399,11 +400,13 @@ async def test_openapi_uses_rest_http_methods():
         "/user/block": {"delete", "post"},
         "/user/close-friend": {"delete", "post"},
         "/user/creator": {"get"},
+        "/user/featured/accounts": {"get"},
         "/user/follower": {"delete"},
         "/user/followers": {"get"},
         "/user/following": {"get"},
         "/user/friendship": {"get"},
         "/user/friendships": {"get"},
+        "/user/fundraiser": {"get"},
         "/user/guides": {"get"},
         "/user/highlights": {"get"},
         "/user/profile/web": {"get"},
@@ -638,6 +641,7 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/account/collection/media"]["get"]["summary"] == "List saved collection media"
     assert paths["/account/feed/new"]["get"]["summary"] == "Check whether the account has new feed items"
     assert paths["/account/feed/user/stream-item"]["get"]["summary"] == "Get user feed stream item"
+    assert paths["/account/family"]["get"]["summary"] == "Get authenticated account family"
     assert paths["/account/follow/requests"]["get"]["summary"] == "List paginated pending follow requests"
     assert paths["/account/follow/request/approve"]["post"]["summary"] == "Approve a pending follow request"
     assert paths["/account/follow/request"]["delete"]["summary"] == "Decline a pending follow request"
@@ -760,6 +764,8 @@ async def test_openapi_uses_human_friendly_operation_summaries():
     assert paths["/user/close-friend"]["post"]["summary"] == "Add a user to close friends"
     assert paths["/user/close-friend"]["delete"]["summary"] == "Remove a user from close friends"
     assert paths["/user/creator"]["get"]["summary"] == "Get creator info for a user"
+    assert paths["/user/featured/accounts"]["get"]["summary"] == "Get featured accounts for a user"
+    assert paths["/user/fundraiser"]["get"]["summary"] == "Get fundraiser info for a user"
     assert paths["/user/guides"]["get"]["summary"] == "List user guides"
     assert paths["/user/highlights"]["get"]["summary"] == "List user highlights"
     assert paths["/user/notifications/posts"]["post"]["summary"] == "Enable post notifications for a user"

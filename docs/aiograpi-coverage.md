@@ -9,18 +9,18 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 ## Summary
 
 - Public `aiograpi.Client` methods: **500**
-- Methods reached by REST routes: **271**
-- Methods not exposed as REST routes: **229**
-- Candidate REST backlog: **4**
+- Methods reached by REST routes: **274**
+- Methods not exposed as REST routes: **226**
+- Candidate REST backlog: **0**
 
 ## REST Relevance
 
 | Status | Methods | Meaning |
 |---|---:|---|
-| `exposed` | 271 | Already used by public REST routes. |
-| `candidate` | 4 | Likely useful as a future user-facing REST endpoint. |
+| `exposed` | 274 | Already used by public REST routes. |
+| `candidate` | 0 | Likely useful as a future user-facing REST endpoint. |
 | `duplicate` | 123 | Variant of an already exposed method, such as `_v1`, `_gql`, `_a1`, chunk, or origin helpers. |
-| `internal` | 102 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
+| `internal` | 103 | Low-level auth/request/configuration/signup/challenge helpers that should not be mirrored blindly. |
 
 ## Coverage By Area
 
@@ -36,9 +36,9 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `collection` | 7 | 0 | 2 | 0 | 9 |
 | `comment` | 12 | 0 | 10 | 0 | 22 |
 | `direct` | 43 | 0 | 2 | 0 | 45 |
-| `explore` | 2 | 1 | 0 | 0 | 3 |
+| `explore` | 2 | 0 | 0 | 1 | 3 |
 | `fbsearch` | 16 | 0 | 0 | 0 | 16 |
-| `fundraiser` | 0 | 1 | 0 | 0 | 1 |
+| `fundraiser` | 1 | 0 | 0 | 0 | 1 |
 | `graphql` | 0 | 0 | 0 | 8 | 8 |
 | `hashtag` | 6 | 0 | 12 | 0 | 18 |
 | `highlight` | 10 | 0 | 2 | 0 | 12 |
@@ -46,7 +46,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `insights` | 3 | 0 | 0 | 0 | 3 |
 | `location` | 5 | 0 | 11 | 4 | 20 |
 | `media` | 29 | 0 | 29 | 1 | 59 |
-| `multiple_accounts` | 0 | 2 | 0 | 0 | 2 |
+| `multiple_accounts` | 2 | 0 | 0 | 0 | 2 |
 | `note` | 8 | 0 | 0 | 0 | 8 |
 | `notification` | 3 | 0 | 24 | 0 | 27 |
 | `password` | 0 | 0 | 0 | 2 | 2 |
@@ -66,9 +66,6 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 
 | Area | Candidate methods |
 |---|---|
-| `explore` | `report_explore_media` |
-| `fundraiser` | `standalone_fundraiser_info_v1` |
-| `multiple_accounts` | `featured_accounts_v1`, `get_account_family_v1` |
 
 ## REST Routes To aiograpi Methods
 
@@ -85,6 +82,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `POST /account/email/confirm` | `send_confirm_email` |
 | `DELETE /account/external-url` | `set_external_url` |
 | `PATCH /account/external-url` | `set_external_url` |
+| `GET /account/family` | `get_account_family_v1` |
 | `GET /account/feed/new` | `new_feed_exist` |
 | `GET /account/feed/timeline` | `get_timeline_feed` |
 | `GET /account/feed/user/stream-item` | `feed_user_stream_item` |
@@ -291,6 +289,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `DELETE /user/close-friend` | `close_friend_remove` |
 | `POST /user/close-friend` | `close_friend_add` |
 | `GET /user/creator` | `creator_info` |
+| `GET /user/featured/accounts` | `featured_accounts_v1` |
 | `DELETE /user/follow` | `user_unfollow` |
 | `POST /user/follow` | `user_follow` |
 | `DELETE /user/follower` | `user_remove_follower` |
@@ -298,6 +297,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `GET /user/following` | `user_following_v1_chunk` |
 | `GET /user/friendship` | `user_friendship_v1` |
 | `GET /user/friendships` | `user_friendships_v1` |
+| `GET /user/fundraiser` | `standalone_fundraiser_info_v1` |
 | `GET /user/guides` | `user_guides_v1` |
 | `GET /user/highlights` | `user_highlights` |
 | `DELETE /user/mute/posts` | `unmute_posts_from_follow` |
@@ -475,7 +475,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `fbsearch_topsearch_v2(self, query: str, next_max_id: Optional[str] = None, reels_max_id: Optional[str] = None, rank_token: Optional[str] = None) -> dict` | `fbsearch` | `GET /search/top` | `exposed` | used by at least one public REST route |
 | `fbsearch_typeahead_stream(self, query: str, timezone_offset: int = 0, count: int = 30) -> dict` | `fbsearch` | `GET /search/typeahead/stream` | `exposed` | used by at least one public REST route |
 | `fbsearch_typehead(self, query: str) -> List[dict]` | `fbsearch` | `GET /search/typeahead/users` | `exposed` | used by at least one public REST route |
-| `featured_accounts_v1(self, target_user_id: str) -> dict` | `multiple_accounts` | - | `candidate` | potential user-facing REST endpoint |
+| `featured_accounts_v1(self, target_user_id: str) -> dict` | `multiple_accounts` | `GET /user/featured/accounts` | `exposed` | used by at least one public REST route |
 | `feed_user_stream_item(self, item_id: str, is_pull_to_refresh: bool = False) -> dict` | `user` | `GET /account/feed/user/stream-item` | `exposed` | used by at least one public REST route |
 | `fetch_fb_dtsg(self)` | `graphql` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `fetch_suggestion_details(self, user_id: str, chained_ids: Union[str, List[Union[str, int]]]) -> dict` | `user` | `GET /user/suggestions/details` | `exposed` | used by at least one public REST route |
@@ -484,7 +484,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `generate_android_device_id(self) -> str` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `generate_mutation_token(self) -> str` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `generate_uuid(self, prefix: str = '', suffix: str = '') -> str` | `auth` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `get_account_family_v1(self) -> dict` | `multiple_accounts` | - | `candidate` | potential user-facing REST endpoint |
+| `get_account_family_v1(self) -> dict` | `multiple_accounts` | `GET /account/family` | `exposed` | used by at least one public REST route |
 | `get_note_by_user(self, notes: List[aiograpi.types.Note], username: str) -> Optional[aiograpi.types.Note]` | `note` | `GET /note` | `exposed` | used by at least one public REST route |
 | `get_note_text_by_user(self, notes: List[aiograpi.types.Note], username: str) -> Optional[str]` | `note` | `GET /note/text` | `exposed` | used by at least one public REST route |
 | `get_notes(self) -> List[aiograpi.types.Note]` | `note` | `GET /note`<br>`GET /note/text`<br>`GET /notes` | `exposed` | used by at least one public REST route |
@@ -679,7 +679,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `reels_timeline_media(self, collection_pk: str, amount: int = 10, last_media_pk: int = 0) -> List[aiograpi.types.Media]` | `timeline` | `GET /reels/timeline` | `exposed` | used by at least one public REST route |
 | `relogin(self) -> bool` | `auth` | `PATCH /auth/relogin` | `exposed` | used by at least one public REST route |
 | `remove_bio_links(self, link_ids: list) -> dict` | `account` | `DELETE /account/bio-links` | `exposed` | used by at least one public REST route |
-| `report_explore_media(self, media_pk: int)` | `explore` | - | `candidate` | potential user-facing REST endpoint |
+| `report_explore_media(self, media_pk: int)` | `explore` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `request_log(self, response)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `reset_password(self, username: str) -> Dict` | `account` | `POST /account/password/reset` | `exposed` | used by at least one public REST route |
 | `search_followers(self, user_id: str, query: str) -> List[aiograpi.types.UserShort]` | `user` | - | `duplicate` | variant of already exposed `search_followers` route family |
@@ -714,7 +714,7 @@ the installed `aiograpi.Client` class and the local FastAPI router implementatio
 | `share_info_by_url(self, url: str) -> aiograpi.types.Share` | `share` | `GET /share` | `exposed` | used by at least one public REST route |
 | `signup(self, username: str, password: str, email: str = '', phone_number: str = '', full_name: str = '', year: int = None, month: int = None, day: int = None) -> aiograpi.types.UserShort` | `signup` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
 | `small_delay(self)` | `private` | - | `internal` | low-level aiograpi helper or unsafe generic surface |
-| `standalone_fundraiser_info_v1(self, user_id: str)` | `fundraiser` | - | `candidate` | potential user-facing REST endpoint |
+| `standalone_fundraiser_info_v1(self, user_id: str)` | `fundraiser` | `GET /user/fundraiser` | `exposed` | used by at least one public REST route |
 | `sticker_tray(self) -> dict` | `story` | `GET /story/stickers` | `exposed` | used by at least one public REST route |
 | `story_delete(self, story_pk: str) -> bool` | `story` | `DELETE /story` | `exposed` | used by at least one public REST route |
 | `story_download(self, story_pk: str, filename: str = '', folder: pathlib._local.Path = '') -> pathlib._local.Path` | `story` | `GET /story/download` | `exposed` | used by at least one public REST route |

@@ -100,6 +100,17 @@ async def account_security(
     return await cl.account_security_info()
 
 
+@router.get("/family", response_model=Dict[str, Any])
+async def account_family(
+    sessionid: str = Depends(get_sessionid),
+    clients: ClientStorage = Depends(get_clients),
+) -> Dict[str, Any]:
+    """Get authenticated account family
+    """
+    cl = await clients.get(sessionid)
+    return await cl.get_account_family_v1()
+
+
 @router.get("/follow/requests", response_model=UserShortPage)
 async def account_follow_requests(
     sessionid: str = Depends(get_sessionid),

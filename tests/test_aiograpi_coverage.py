@@ -78,7 +78,7 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["explore_reels"], covered).status == "exposed"
     assert classify_method(methods["explore_page"], covered).status == "exposed"
     assert classify_method(methods["explore_page_media_info"], covered).status == "exposed"
-    assert classify_method(methods["report_explore_media"], covered).status == "candidate"
+    assert classify_method(methods["report_explore_media"], covered).status == "internal"
     assert classify_method(methods["reels_timeline_media"], covered).status == "exposed"
     assert classify_method(methods["track_info_by_id"], covered).status == "exposed"
     assert classify_method(methods["track_info_by_canonical_id"], covered).status == "exposed"
@@ -200,6 +200,9 @@ def test_aiograpi_coverage_classifies_methods_by_rest_relevance():
     assert classify_method(methods["user_stream_by_id_v1"], covered).status == "exposed"
     assert classify_method(methods["user_stream_by_username_flat"], covered).status == "exposed"
     assert classify_method(methods["user_stream_by_username_v1"], covered).status == "exposed"
+    assert classify_method(methods["featured_accounts_v1"], covered).status == "exposed"
+    assert classify_method(methods["get_account_family_v1"], covered).status == "exposed"
+    assert classify_method(methods["standalone_fundraiser_info_v1"], covered).status == "exposed"
     assert classify_method(methods["create_music_note"], covered).status == "exposed"
     assert classify_method(methods["get_note_by_user"], covered).status == "exposed"
     assert classify_method(methods["get_note_text_by_user"], covered).status == "exposed"
@@ -257,7 +260,15 @@ def test_aiograpi_coverage_markdown_summarizes_candidate_backlog():
 
     assert "## REST Relevance" in markdown
     assert "## Candidate Backlog By Area" in markdown
-    assert "| `explore` | `report_explore_media` |" in markdown
+    assert "- Candidate REST backlog: **0**" in markdown
+    candidate_section = markdown.split("## Candidate Backlog By Area", 1)[1].split(
+        "## REST Routes To aiograpi Methods",
+        1,
+    )[0]
+    assert "report_explore_media" not in candidate_section
+    assert "featured_accounts_v1" not in candidate_section
+    assert "get_account_family_v1" not in candidate_section
+    assert "standalone_fundraiser_info_v1" not in candidate_section
     assert "| `track` |" in markdown
     assert "`track_info_by_id`" in markdown
     assert "`fbsearch_topsearch_flat`" in markdown
@@ -272,6 +283,23 @@ def test_aiograpi_coverage_markdown_summarizes_candidate_backlog():
     assert "| `media_info_gql" in markdown
     assert "`duplicate`" in markdown
     assert "`internal`" in markdown
+
+
+def test_aiograpi_coverage_markdown_renders_candidate_rows(monkeypatch):
+    monkeypatch.setattr(
+        coverage_script,
+        "client_methods",
+        lambda: {
+            "future_route": ClientMethod("future_route", "aiograpi.mixins.demo", "(self)"),
+        },
+    )
+    monkeypatch.setattr(coverage_script, "route_coverage", lambda: [])
+    monkeypatch.setattr(coverage_script, "package_version", lambda _: "0.test")
+
+    markdown = build_markdown()
+
+    assert "- Candidate REST backlog: **1**" in markdown
+    assert "| `demo` | `future_route` |" in markdown
 
 
 def test_source_analyzer_ignores_non_route_decorators():

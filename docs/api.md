@@ -209,6 +209,10 @@ Instagram-shaped objects where `aiograpi` exposes variable discovery payloads:
   suggestion IDs from `/user/suggestions`.
 - `GET /user/recommendations` returns category-based recommended accounts for a
   target profile.
+- `GET /user/featured/accounts` returns Instagram's featured-account
+  suggestions for a target profile.
+- `GET /user/fundraiser` returns standalone fundraiser info for a target
+  profile.
 - `GET /user/creator` returns creator metadata for a target profile as
   `{ "user": ..., "info": ... }`.
 - `GET /user/profile/web` returns Instagram's web-profile payload for a
@@ -222,6 +226,8 @@ Instagram-shaped objects where `aiograpi` exposes variable discovery payloads:
 `GET /account/feed/new` belongs to the authenticated account context and returns
 whether Instagram says new timeline feed items are available.
 `GET /account/feed/user/stream-item` returns a feed stream item for the
+authenticated account.
+`GET /account/family` returns Instagram's account-family payload for the
 authenticated account.
 
 ## Reels

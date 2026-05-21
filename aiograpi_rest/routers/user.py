@@ -198,6 +198,26 @@ async def user_recommendations(sessionid: str = Depends(get_sessionid),
     return await cl.discover_recommended_accounts_for_category_v1(user_id)
 
 
+@router.get("/featured/accounts", response_model=Dict[str, Any])
+async def user_featured_accounts(sessionid: str = Depends(get_sessionid),
+                                 user_id: str = Query(...),
+                                 clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get featured accounts for a target user
+    """
+    cl = await clients.get(sessionid)
+    return await cl.featured_accounts_v1(user_id)
+
+
+@router.get("/fundraiser", response_model=Dict[str, Any])
+async def user_fundraiser(sessionid: str = Depends(get_sessionid),
+                          user_id: str = Query(...),
+                          clients: ClientStorage = Depends(get_clients)) -> Dict[str, Any]:
+    """Get fundraiser info for a target user
+    """
+    cl = await clients.get(sessionid)
+    return await cl.standalone_fundraiser_info_v1(user_id)
+
+
 @router.get("/creator", response_model=CreatorInfoResponse)
 async def user_creator(sessionid: str = Depends(get_sessionid),
                        user_id: str = Query(...),

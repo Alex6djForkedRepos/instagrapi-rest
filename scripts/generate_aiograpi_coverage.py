@@ -69,6 +69,7 @@ INTERNAL_EXACT_METHODS = {
     "parse_authorization",
     "pre_login_flow",
     "public_head",
+    "report_explore_media",
     "request_log",
     "set_app",
     "set_country",
