@@ -42,3 +42,6 @@ The service intentionally exposes a focused subset of `aiograpi.Client`. The
 generated [aiograpi coverage report](aiograpi-coverage.md) lists every public
 client method, whether it is reachable through a REST route, and whether an
 uncovered method is a duplicate implementation variant or an internal helper.
+
+Current stable release: `v6.0.0`, wrapping `aiograpi==1.0.9`. See the
+[changelog](changelog.md) for release notes and verification evidence.

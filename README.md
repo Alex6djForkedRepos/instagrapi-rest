@@ -46,6 +46,10 @@ such as `/media/unlike`, `/user/unfollow`, and `/media/unarchive` were removed
 before the public API became widely used; use `DELETE /media/like`,
 `DELETE /user/follow`, and `DELETE /media/archive`.
 
+Current stable release: [`v6.0.0`](CHANGELOG.md), wrapping `aiograpi==1.0.9`.
+Use `subzeroid/aiograpi-rest:6.0.0` when you want a pinned Docker runtime, or
+`subzeroid/aiograpi-rest:latest` when you intentionally want the newest release.
+
 ```bash
 docker run --rm -p 8000:8000 subzeroid/aiograpi-rest
 ```
@@ -258,6 +262,7 @@ Docker Hub and GitHub Packages. An `X.Y.Z` tag publishes
 
 PyPI and GitHub Release artifacts are published from the same tag workflow,
 including the built wheel, source distribution, and `openapi.json`.
+See the [changelog](CHANGELOG.md) for release notes and verification evidence.
 
 GitHub Packages image:
 

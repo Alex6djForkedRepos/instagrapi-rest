@@ -1,5 +1,8 @@
 # API Guide
 
+This guide is current for `aiograpi-rest v6.0.0`, which wraps
+`aiograpi==1.0.9`.
+
 ## Authentication
 
 Protected routes accept the saved session ID through the `X-Session-ID` header.

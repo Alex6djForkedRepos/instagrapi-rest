@@ -10,6 +10,7 @@ nav:
   - API Guide: api.md
   - Client Generation: client-generation.md
   - aiograpi Coverage: aiograpi-coverage.md
+  - Changelog: changelog.md
 theme:
   name: material
 markdown_extensions:
