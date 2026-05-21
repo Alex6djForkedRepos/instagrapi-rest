@@ -650,6 +650,9 @@ def test_live_tests_cover_published_image_and_paginated_read_lists():
     for endpoint in (
         "/user/posts",
         "/media/comments",
+        "/account/family",
+        "/user/featured/accounts",
+        "/user/fundraiser",
         "/hashtag/media/top",
         "/direct/inbox",
         "/story/upload",
@@ -659,6 +662,8 @@ def test_live_tests_cover_published_image_and_paginated_read_lists():
         assert endpoint in http_smoke
 
     assert "published Docker image" in readme
+    assert "Every public OpenAPI operation is classified by the live coverage manifest" in readme
+    assert "Non-guarded mutations must name the read-back or cleanup endpoint" in readme
     assert "paginated read-list routes" in readme
 
 

@@ -3,6 +3,7 @@ import json
 import os
 import ssl
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from io import BytesIO
@@ -42,6 +43,18 @@ def _request_json(base_url, method, path, *, headers=None, data=None):
     with urllib.request.urlopen(req, timeout=60) as response:
         payload = response.read()
     return json.loads(payload)
+
+
+def _request_json_result(base_url, method, path, *, headers=None, data=None):
+    try:
+        return 200, _request_json(base_url, method, path, headers=headers, data=data)
+    except urllib.error.HTTPError as exc:
+        payload = exc.read()
+        try:
+            body = json.loads(payload)
+        except json.JSONDecodeError:
+            body = payload.decode(errors="replace")
+        return exc.code, body
 
 
 def _request_bytes(base_url, method, path, *, headers=None):
@@ -183,6 +196,28 @@ def _assert_published_http_pagination(base_url, headers, public_user_id):
         )
 
 
+def _assert_published_http_v515_discovery(base_url, headers, public_user_id):
+    family = _request_json(base_url, "GET", "/account/family", headers=headers)
+    assert isinstance(family, dict), f"Unexpected /account/family response: {family!r}"
+
+    featured = _request_json(
+        base_url,
+        "GET",
+        f"/user/featured/accounts?user_id={public_user_id}",
+        headers=headers,
+    )
+    assert isinstance(featured, dict), f"Unexpected /user/featured/accounts response: {featured!r}"
+
+    status, fundraiser = _request_json_result(
+        base_url,
+        "GET",
+        f"/user/fundraiser?user_id={public_user_id}",
+        headers=headers,
+    )
+    assert status in {200, 400, 404}, f"Unexpected /user/fundraiser status {status}: {fundraiser!r}"
+    assert isinstance(fundraiser, dict), f"Unexpected /user/fundraiser response: {fundraiser!r}"
+
+
 def test_live_http_login_authorize_and_user_about_flow():
     accounts_url = os.environ.get("TEST_ACCOUNTS_URL")
     if not accounts_url:
@@ -221,6 +256,7 @@ def test_live_http_login_authorize_and_user_about_flow():
             assert "is_verified" in about
             assert isinstance(about["former_usernames"], str)
             _assert_published_http_pagination(base_url, headers, user["pk"])
+            _assert_published_http_v515_discovery(base_url, headers, user["pk"])
             return
         except Exception as exc:
             errors.append(f"{account.get('username', '?')}: {type(exc).__name__}: {exc}")
